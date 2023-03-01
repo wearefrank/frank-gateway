@@ -59,7 +59,7 @@ kubectl apply -f upstream-apis.yaml
 ```
 
 ### Apply the APISIX ingress routing rules
-The APISIX routing rules are path based `/foo/*` will route to the `foo` service. `/bar/*` will route to the `bar` service.
+The APISIX routing rules are Host based `'Host: foo.org'` will route to the `foo` service. `'Host: bar.org'` will route to the `bar` service.
 
 ```shell
 kubectl apply -f http-route.yaml
