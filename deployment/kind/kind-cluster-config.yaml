@@ -1,0 +1,12 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  # port forward 80 on the host to 30965 on this node
+  extraPortMappings:
+  - containerPort: 30080 #APISIX dashboard port
+    hostPort: 80
+  - containerPort: 32180 #APISIX admin API port
+    hostPort: 9180
+  - containerPort: 32080 #APISIX gateway port
+    hostPort: 8080
