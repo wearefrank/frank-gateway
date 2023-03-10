@@ -29,4 +29,8 @@ In order to get a functioning NLX Inway the following features must be implement
 - Validate if an Access Grant exists for the Outway making the call. 
 - Register itself and its services to the Directory API. -> GRPC call `RegisterInway` https://gitlab.com/commonground/nlx/nlx/-/blob/master/directory-api/api/directoryapi.proto#L16
 
+this could roughly look like:
+![nlx phase 1 integration with APISIX](../diagrams/nlx-phase1.png)
 
+curl grpc server with grpcurl:
+grpcurl -proto=management.proto -import-path=/home/pimg/klanten/we-are-frank/nlx-try-me -key=./pki/internal/certs/internal-cert-key.pem -cert=./pki/internal/certs/internal-cert.pem -cacert=./pki/internal/ca/intermediate_ca.pem -H 'Authorization: Basic YWRtaW5Abmx4LmxvY2FsOmRldmVsb3BtZW50' localhost:9443 nlx.management.ManagementService/ListInways
