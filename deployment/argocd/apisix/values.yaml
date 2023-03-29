@@ -1,0 +1,8 @@
+gateway:
+  type: LoadBalancer
+
+ingress-controller:
+  enabled: true
+  config:
+    apisix:
+      serviceNamespace: ingress-apisix
