@@ -39,3 +39,16 @@ In order to get a functioning NLX Inway the following features must be implement
 this could roughly look like:
 ![nlx phase 1 integration with APISIX](../diagrams/nlx-phase1v2.png)
 
+A first draft of the technical setup of the NLX/FSC plugin in APISIX can be depicted as follows:
+![APISIX NLX/FSX plugin](../diagrams/APISIX_NLX-FSC_Plugin.png)
+
+Open points:
+- FSC does not provide a standard mechanism of obtaining the public key from the manager in order to validate the access token
+    - Can the GET /certificates endpoint of the manager also be used to retrieve the public key of the manager that can be used for validating access tokens? If so how can this key be obtained from the map?
+- the inway needs the grant (ServiceConnectionGrant) from the manager in order to perform additional validation of the access token. However obtaining these grants is awkward at best, three possible solutions can be created for this:
+    - "invert" the data structure and store all grants based on peer_id
+        - this results in a datatransformation and storage of lot of duplicate data
+    - re-calculate the granthash and use this as a key for storing the hash
+        - the calculation of the hash is prone to implementation differences (e.g. encoding scheme)
+    - the GET /contracts returns per grant the grant hash in the response
+        - this is the preferred solution, however this does require the FSC/NLX endpoint to be changed. 
