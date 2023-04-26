@@ -25,9 +25,6 @@ In order for APISIX to handle traffic according to the NLX/FSC specification as 
 ## NLX registration
 `In the FSC standard it is no longer required to register the Inway with the directory. However, the manager does need to know the address of the Inway and the services exposed with that partticular service. How this is achieved will be part of the reference implementation but not the FSC standard.` 
 
-this could roughly look like:
-![nlx phase 1 integration with APISIX](../diagrams/nlx-phase1v2.png)
-
 A draft of the technical setup of the NLX/FSC plugin in APISIX can be depicted as follows:
 ![APISIX NLX/FSX plugin](../diagrams/APISIX_NLX-FSC_Pluginv2.png)
 
