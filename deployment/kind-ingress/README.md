@@ -1,8 +1,6 @@
 # APISIX Ingress using Kind
 Setup a minimal local kubernetes cluster using [kind](https://kind.sigs.k8s.io/) and deploy the APISIX ingress controller. 
 
-This is a slight variation to https://apisix.apache.org/docs/ingress-controller/deployments/kind/ 
-
 ## Prerequisites
 - Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
 - Install [Helm](https://helm.sh/)
@@ -20,6 +18,7 @@ kind create cluster --name apisix-ingress --config=kind-cluster-config.yaml
 ```shell
 helm repo add apisix https://charts.apiseven.com
 helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 ```
 
@@ -29,11 +28,21 @@ Create a namespace for the APISIX Ingress
 kubectl create ns ingress-apisix
 ```
 
+Install Prometheus
+```shell
+helm install -n monitoring prometheus prometheus-community/kube-prometheus-stack \
+  --create-namespace \
+  --set 'prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false'
+```
+
+After Prometheus is installed we can install APISIX.
+
 Install APISIX Ingress
 ```shell
 helm install apisix apisix/apisix \
   --set gateway.type=NodePort \
   --set ingress-controller.enabled=true \
+  --set serviceMonitor.enabled=true \
   --namespace ingress-apisix \
   --set ingress-controller.config.apisix.serviceNamespace=ingress-apisix
 ```
@@ -50,6 +59,17 @@ Since we made a kind `extraPortMapping` rule forwarding port `80` to `30965` we 
 
 ```shell
 kubectl patch svc apisix-gateway -n ingress-apisix --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"},{"op":"replace","path":"/spec/ports/0/nodePort","value":30965}]'
+```
+
+In order to access the Grafana dashboard from the localhost we need to change the port from ClusterIP to Nodeport for the prometheus-grafana service:
+```shell
+kubectl patch svc prometheus-grafana -n monitoring --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}'
+```
+
+With the service now exposed via a nodeport we can assign the correct nodeport to correspond with our Kind extraportmapping
+
+```shell
+kubectl patch svc prometheus-grafana -n monitoring --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"},{"op":"replace","path":"/spec/ports/0/nodePort","value":30300}]'
 ```
 
 ### Install Upstream API's
@@ -79,3 +99,17 @@ curl -v localhost/hostname -H 'Host: bar.org'
 ```
 If everything is setup correctly the output should be:
 bar-app
+
+## Configure Grafana to view the APISIX dashboard
+With Prometheus and Grafana installed the APISIX dashboard can be imported.
+In order to login to Grafana visit: http://localhost:3000
+Since we did not change the default password for this local install login with:
+username: admin
+password: prom-operator
+
+when logged in import the APISIX dashboard ID: `11719`
+
+To visit the APISIX dashboard select the dashboard: `Apache APISIX`
+
+This should look like this:
+![APISIX Grafana dashboard](../../docs/diagrams/grafana-apisix-dashboard.png)
