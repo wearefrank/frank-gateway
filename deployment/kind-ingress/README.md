@@ -1,6 +1,12 @@
 # APISIX Ingress using Kind
 Setup a minimal local kubernetes cluster using [kind](https://kind.sigs.k8s.io/) and deploy the APISIX ingress controller. 
 
+#TODO add keycloak install
+#TODO patch service to nodeport and patch to correct port for portmapping
+#TODO document import realm and required tweaks
+#TODO document hostname setting
+#TODO document different OAuth flows to gain access to the foo and bar api's 
+#TODO change documentation for invoking foo and bar endpoints
 ## Prerequisites
 - Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
 - Install [Helm](https://helm.sh/)
@@ -28,6 +34,11 @@ Create a namespace for the APISIX Ingress
 kubectl create ns ingress-apisix
 ```
 
+Create a namespace for Keycloak
+```shell
+kubectl create ns iam
+```
+
 Install Prometheus
 ```shell
 helm install -n monitoring prometheus prometheus-community/kube-prometheus-stack \
@@ -52,6 +63,11 @@ Verify the service is created
 kubectl get service --namespace ingress-apisix
 ```
 
+Install Keycloak
+```shell
+kubectl create -f https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/latest/kubernetes-examples/keycloak.yaml -n iam
+```
+
 Patch the nodeport for the service
 Kubernetes by default assigns a nodeport in the range of 30000-32767
 
@@ -63,7 +79,7 @@ kubectl patch svc apisix-gateway -n ingress-apisix --type='json' -p '[{"op":"rep
 
 In order to access the Grafana dashboard from the localhost we need to change the port from ClusterIP to Nodeport for the prometheus-grafana service:
 ```shell
-kubectl patch svc prometheus-grafana -n monitoring --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}'
+kubectl patch svc prometheus-grafana -n monitoring --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
 ```
 
 With the service now exposed via a nodeport we can assign the correct nodeport to correspond with our Kind extraportmapping
@@ -71,6 +87,29 @@ With the service now exposed via a nodeport we can assign the correct nodeport t
 ```shell
 kubectl patch svc prometheus-grafana -n monitoring --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"},{"op":"replace","path":"/spec/ports/0/nodePort","value":30300}]'
 ```
+
+In order to access Keycloak from the localhost we need to change the port from ClusterIP to NodePort for the keycloak service:
+```shell
+kubectl patch svc keycloak -n iam --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
+```
+With the service exposed via a Nodeport we can  assign the correct nodeport to correspond with our Kind extraPortMapping
+```shell
+
+kubectl patch svc keycloak -n iam --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"},{"op":"replace","path":"/spec/ports/0/nodePort","value":30880}]'
+```
+
+## Configuring keycloak
+For local testing purposes a ephemeral keycloak with the default settings has been installed. This does result in some manual configuration.
+This configuration is done via the Keycloak web console, which can be accessed via http://localhost:8080 with the following credentials:
+username: admin
+password: admin
+
+### Import the exported realm & Create the apisix client
+Create new realm and upload the json file: `apisix_test_realm.json`
+
+Next import the apisix client. In the `apisix_test_realm` click -> Clients -> Import Client -> Upload the file: `apisix_client.json`
+
+Next create one or more users: click: Users -> Create New User -> add username -> click Create -> click Credentials -> create password + disable temporary -> click save 
 
 ### Install Upstream API's
 Installs two upstream (backend) API's `Foo` and `Bar`
@@ -86,16 +125,29 @@ kubectl apply -f http-route.yaml
 ```
 
 ### Verify the APISIX routes
-Invoke the foo service via APISIX
-```shell
-curl -v localhost/hostname -H 'Host: foo.org'
-```
+
+## Test the foo route
+The foo route configured using APISIX as a OIDC relying party. In order to test this flow perform the following:
+- In a browser visit: `http://localhost/foo/hostname`
+- you are redirected to the Keycloak login screen. Login with the credentials of the user you created earlier
+- you should be redirected to the backend API
+
 If everything is setup correctly the output should be:
 foo-app
 
+## Test the bar route
+
+`prerequisite` since this relies on token introspection the token must be obtained via the same url as the client performing the introspection. Since APISIX is using the Kubernetes service address for introspection a custom host entry is needed on the local system for testing purposes. 
+Create the following host file entry:
+127.0.0.1	keycloak.iam.svc.cluster.local
+
+In order to test this flow a access token needs to be obtained via the Client Credentials flow using the APISIX client and it's secret.
+
+With the access token perform the following request:
+
 Invoke the bar service via APISIX
 ```shell
-curl -v localhost/hostname -H 'Host: bar.org'
+curl -v localhost/bar/hostname -H 'Authorization: Bearer [YOUR TOKEN]'
 ```
 If everything is setup correctly the output should be:
 bar-app
