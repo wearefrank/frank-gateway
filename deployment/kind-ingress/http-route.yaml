@@ -14,6 +14,11 @@ spec:
     backends:
        - serviceName: foo-service
          servicePort: 8080
+    plugins:
+      - name: prometheus
+        enable: true
+        config:
+          prefer_name: true
   - name: barRule
     match: 
       hosts:
@@ -23,3 +28,8 @@ spec:
     backends: 
       - serviceName: bar-service
         servicePort: 8080
+    plugins:
+      - name: prometheus
+        enable: true
+        config:
+          prefer_name: true
