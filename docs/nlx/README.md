@@ -2,7 +2,7 @@
 
 There are two aspects in order for APISIX (or any other gateway) to function as an NLX Inway:
 1) handling traffic conformant to the NLX/FSC specification
-2) handle registration of the Inway and it's services in the registry and the NLX management
+2) ~~handle registration of the Inway and it's services in the registry and the NLX management~~
 
 Note, this would still require the NLX Management API and optionally the NLX Management UI. 
 

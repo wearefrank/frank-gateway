@@ -1,12 +1,6 @@
 # APISIX Ingress using Kind
 Setup a minimal local kubernetes cluster using [kind](https://kind.sigs.k8s.io/) and deploy the APISIX ingress controller. 
 
-#TODO add keycloak install
-#TODO patch service to nodeport and patch to correct port for portmapping
-#TODO document import realm and required tweaks
-#TODO document hostname setting
-#TODO document different OAuth flows to gain access to the foo and bar api's 
-#TODO change documentation for invoking foo and bar endpoints
 ## Prerequisites
 - Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
 - Install [Helm](https://helm.sh/)
