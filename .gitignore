@@ -1,1 +1,7 @@
 charts/
+
+# exclude everything
+logs/*
+
+# exception to the rule
+!logs/.gitkeep 

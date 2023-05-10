@@ -1,0 +1,11 @@
+routes:
+  -
+    uri: /hello
+    upstream:
+      nodes:
+        "echo-api.3scale.net:80": 1
+      type: roundrobin
+    plugins:
+      fsc:
+        jwks_url: "http://host.docker.internal:8080/realms/apisix_test_realm/protocol/openid-connect/certs"
+#END
