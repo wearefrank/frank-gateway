@@ -3,5 +3,7 @@ charts/
 # exclude everything
 logs/*
 
+keycloak/
+
 # exception to the rule
 !logs/.gitkeep 
