@@ -59,38 +59,66 @@ make dev-startup
 The container exposes port `9080` as the traffic port of APISIX.
 
 ### Testing the FSC Plugin
-In order to test the plugin a OAuth2 authentication server setup for the client credentials flow and offering a JWKS endpoint is needed. This is to mimic the behavior of the FSC Manager. It is possible to use the keycloak configuration detailed [here](deployment/kind-ingress/README.md) or you can provide your own.
 
 The FSC plugin does need to know the location of the authentication server and more specifically the JWKS URL of the authentication server. This is configured as a parameter of the plugin in the file `apisix.yaml`.
 
-When configured correctly the API can be invoked. Obtain a JWT Access token and issue the following request:
+`Note, unfortunately Postman does not support mTLS for requesting Access tokens via the Authorization functionality. Access tokens must be retrieved via another method e.g. curl` 
+
+### Testing via Keycloak for mTLS
+The FSC plugin can also be tested with Keycloak as Authorization server. 
+
+In order to start Keycloak run from the root directory of the project the following command to run Keycloak in Docker using the test keys and certificates for the mTLS configuration.
 ```shell
-curl --location 'http://localhost:9080/hello' \
---header 'Fsc-Authorization: Bearer [YOUR JWT ACCESS TOKEN]' 
+docker run -p 8080:8080 -p 8443:8443 --name keycloak-standalone \
+-e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \
+-e KC_HTTPS_PORT=8443 \
+-e KC_HTTPS_CERTIFICATE_FILE=/opt/keycloak/ssl/server/server.crt \
+-e KC_HTTPS_CERTIFICATE_KEY_FILE=/opt/keycloak/ssl/server/server.key \
+-e KC_HTTPS_TRUST_STORE_FILE=/opt/keycloak/ssl/CA/keyStore.p12 \
+-e KC_HTTPS_TRUST_STORE_PASSWORD=test \
+-e KC_HTTPS_CLIENT_AUTH=request \
+-v $(pwd)/test-certs/keycloak/data:/opt/keycloak/data/import \
+-v $(pwd)/keycloak/ssl:/opt/keycloak/ssl \
+quay.io/keycloak/keycloak:21.0.2 start-dev --import-realm
 ```
+
+Keycloak needs to be configured with:
+- mTLS token endpoint
+- client with Oauth 2.0 Mutual TLS enabled. (to implement RFC 8705)
+
+Unfortunately the latter cannot be ex-/imported with the realm import and need to be configured via the admin console:
+- login the admin console: http://localhost:8080/ with admin/admin
+- go to: http://localhost:8080/admin/master/console/#/apisix_test_realm/clients/9c98f7c9-8baf-4b4b-b01f-fa2040bb1230/advanced
+- toggle the "OAuth 2.0 Mutual TLS Certificate Bound Access Tokens Enabled" to true and save
+[Certificate bound tokens](docs/diagrams/Oauth2_mutual_tls_certificate_bound_tokens.png)
+
+### Testing with cURL
+With both Keycloak and APISIX running the plugin can be tested. With the mTLS configured the easiers way is to test via cURL:
+
+```shell
+curl -kv -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=client_credentials&client_id=apisix&client_secret=crTxqWBACD2cnFXn72HUIHmYxrCd7tkz" https://localhost:8443/realms/apisix_test_realm/protocol/openid-connect/token --cert test-certs/client.cer --key test-certs/client.key
+
+ACCESS_TOKEN=$(curl -kv -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=client_credentials&client_id=apisix&client_secret=crTxqWBACD2cnFXn72HUIHmYxrCd7tkz" https://localhost:8443/realms/apisix_test_realm/protocol/openid-connect/token --cert test-certs/client.cer --key test-certs/client.key | jq -j '.access_token')
+```
+
+With the access token in the response the API can be invoked:
+```shell
+curl -kv \
+-H "Fsc-Authorization: Bearer $ACCESS_TOKEN" \
+https://localhost:9443/hello \
+--cert test-certs/client.cer --key test-certs/client.key
+
+```
+
 If everything works as expected a 200 is returned with your requested "echoed" back.
-
-**Helper pre-request script for Postman**
-Since FSC does not use the default `Authorization` header but rather the `Fsc-Authorization` header the out of the box functionality from Postman for requesting and using an Access token does not work. In order to automatically change the `Authorization` header to the `Fsc-Authorization` header add the following snippet as `pre-request script`:
-
-```javascript
-let accessToken = pm.request.auth.parameters().get("accessToken");
-
-pm.request.headers.add({
-    key: "Fsc-Authorization",
-    value: "Bearer " + accessToken
-});
-
-pm.request.auth.parameters().clear();
-```
 
 ### Current status
 Both The FSC standard as well the plugin is currently work in progress:
-- [ ] Perform mTLS (this is not a feature of the plugin but rather a feature of APISIX that needs to be configured)
+- [x] Perform mTLS (this is not a feature of the plugin but rather a feature of APISIX that needs to be configured)
 - [ ] Extract the Peer_ID (Organization number) from the TLS client certificate
 - [x] retrieve the public certificate from a JWKS endpoint
 - [x] Validate the JWT in the `Fsc-Authorization` header
-- [x] Perform `certificate bound token validation` according to: [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705#name-jwt-certificate-thumbprint-)
+- [ ] Perform `certificate bound token validation` according to: [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705#name-jwt-certificate-thumbprint-)
 - [ ] Respond with FSC error codes
 - [x] Enable caching for JWKS keys 
 - [ ] Tests
