@@ -118,7 +118,7 @@ Both The FSC standard as well the plugin is currently work in progress:
 - [ ] Extract the Peer_ID (Organization number) from the TLS client certificate
 - [x] retrieve the public certificate from a JWKS endpoint
 - [x] Validate the JWT in the `Fsc-Authorization` header
-- [ ] Perform `certificate bound token validation` according to: [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705#name-jwt-certificate-thumbprint-)
+- [x] Perform `certificate bound token validation` according to: [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705#name-jwt-certificate-thumbprint-)
 - [ ] Respond with FSC error codes
 - [x] Enable caching for JWKS keys 
 - [ ] Tests
