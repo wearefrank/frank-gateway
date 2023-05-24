@@ -115,7 +115,7 @@ If everything works as expected a 200 is returned with your requested "echoed" b
 ### Current status
 Both The FSC standard as well the plugin is currently work in progress:
 - [x] Perform mTLS (this is not a feature of the plugin but rather a feature of APISIX that needs to be configured)
-- [ ] Extract the Peer_ID (Organization number) from the TLS client certificate
+- [x] Extract the Peer_ID (Organization number) from the TLS client certificate
 - [x] retrieve the public certificate from a JWKS endpoint
 - [x] Validate the JWT in the `Fsc-Authorization` header
 - [x] Perform `certificate bound token validation` according to: [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705#name-jwt-certificate-thumbprint-)
