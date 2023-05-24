@@ -11,7 +11,7 @@ openssl genrsa -out server.key 2048
 openssl req -new -sha256 -key server.key -out server.csr -subj "/CN=localhost"
 openssl x509 -req -days 36500 -sha256 -extensions v3_req  -CA  ca.cer -CAkey ca.key  -CAserial ca.srl  -CAcreateserial -in server.csr -out server.cer
 openssl genrsa -out client.key 2048
-openssl req -new -sha256 -key client.key  -out client.csr -subj "/CN=CLIENT"
+openssl req -new -sha256 -key client.key  -out client.csr -subj "/CN=CLIENT/serialNumber=012345678901234567890"
 openssl x509 -req -days 36500 -sha256 -extensions v3_req  -CA  ca.cer -CAkey ca.key  -CAserial ca.srl  -CAcreateserial -in client.csr -out client.cer
 
 

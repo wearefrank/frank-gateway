@@ -1,10 +1,10 @@
-local core = require("apisix.core")
-local http     = require("resty.http")
-local jwt = require("resty.jwt")
-local openidc = require("resty.openidc")
-local ssl = require("ngx.ssl")
-local resty_sha256 = require("resty.sha256")
-local base64 = require("ngx.base64")
+local core          = require("apisix.core")
+local http          = require("resty.http")
+local jwt           = require("resty.jwt")
+local openidc       = require("resty.openidc")
+local ssl           = require("ngx.ssl")
+local resty_sha256  = require("resty.sha256")
+local base64        = require("ngx.base64")
 
 local plugin_name = "fsc"
 
@@ -102,6 +102,22 @@ local function token_x5t_s256(token)
     return encoded_digest
 end
 
+local function set_requester_header()
+
+    local client_dn = ngx.var.ssl_client_s_dn
+    core.log.debug("client DN: " .. client_dn)
+    local from, to, err = ngx.re.find(client_dn, "(serialNumber=)(.{20})", "jo", nil, 2)
+
+    if err then
+        core.log.warn("PEER_ID not found: " .. err)
+    elseif from then
+        local serialNumber = string.sub(client_dn, from, to)
+        core.log.debug("serialNumber: " .. serialNumber)
+        ngx.req.set_header("X-NLX-Requester-Organization", serialNumber)
+    end
+
+end
+
 function _M.access(conf, ctx) 
 
     -- for FSC token validation
@@ -124,11 +140,14 @@ function _M.access(conf, ctx)
     core.log.debug("client x5t#s256: " .. client_x5t_s256)
     core.log.debug("access token x5t#s256" .. token_x5t_s256)
 
-    if not client_x5t_s256 == token_x5t_s256 then
+    if client_x5t_s256 ~= token_x5t_s256 then
         core.log.error("token not bound to this client")
         ngx.say("Token not bound to this client") -- TODO return FSC error
         return
     end
+
+    -- Add X-NLX-Requester-Organization header (not sure if this is still needed in FSC)
+    set_requester_header()
 
 end
 
