@@ -5,6 +5,7 @@ local openidc       = require("resty.openidc")
 local ssl           = require("ngx.ssl")
 local resty_sha256  = require("resty.sha256")
 local base64        = require("ngx.base64")
+local os            = os
 
 local plugin_name = "fsc"
 
@@ -118,6 +119,37 @@ local function set_requester_header()
 
 end
 
+local function format_log_entry(token)
+
+    core.ctx.register_var("direction", function() 
+        return "DIRECTION_INCOMING" 
+    end)
+
+    core.ctx.register_var("created_at", function() 
+        return os.time()
+    end)
+
+    core.ctx.register_var("transaction_id", function()
+       return core.id.gen_uuid_v4() 
+    end)
+    
+    core.ctx.register_var("source", function(ctx)
+        return {outway_peer_id = token.sub}
+    end)
+    
+    core.ctx.register_var("destination", function(ctx)
+        return {service_peer_id = "unknown"} -- TODO service_peer_id is not known to inway
+    end)
+
+    core.ctx.register_var("service_name", function(ctx)
+        return token.svc
+    end)
+    
+    core.ctx.register_var("grant_hash", function(ctx)
+        return token.gth
+    end)
+end
+
 function _M.access(conf, ctx) 
 
     -- for FSC token validation
@@ -146,9 +178,10 @@ function _M.access(conf, ctx)
         return
     end
 
-    -- Add X-NLX-Requester-Organization header (not sure if this is still needed in FSC)
+    -- Add X-NLX-Requester-Organization header (confirmed by FSC team this is no longer needed, kept for now since we might need the client cert serial number)
     set_requester_header()
-
+    format_log_entry(validated_token)
+    
 end
 
 return _M

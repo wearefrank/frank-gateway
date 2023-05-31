@@ -122,3 +122,6 @@ Both The FSC standard as well the plugin is currently work in progress:
 - [ ] Respond with FSC error codes
 - [x] Enable caching for JWKS keys 
 - [ ] Tests
+- [ ] FSC logging
+- [ ] Optional routing based on JWT claim servicename (APISIX can likely handle all routing requirements out of the box. If FSC token based routing needs to be implemented see: https://api7.ai/blog/dynamic-routing-based-on-user-credentials)
+- [ ] Optional get JWKS via mTLS endpoint
