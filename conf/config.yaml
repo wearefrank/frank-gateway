@@ -7,6 +7,7 @@ apisix:
   extra_lua_cpath: "/usr/local/apisix/custom-plugin-libs/?.so"
 plugins: 
   - fsc
+  - file-logger
 nginx_config:
   error_log_level: debug
   http_configuration_snippet: |

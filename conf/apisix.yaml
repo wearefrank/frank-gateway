@@ -69,7 +69,7 @@ ssls:
       4g1M5lokiyOCNYd/R4GP
       -----END CERTIFICATE-----
 routes:
-  -
+  - name: hello-route
     uri: /hello
     upstream:
       nodes:
@@ -78,4 +78,7 @@ routes:
     plugins:
       fsc:
         jwks_url: "http://host.docker.internal:8080/realms/apisix_test_realm/protocol/openid-connect/certs"
+      file-logger:
+        path: logs/fsc-transaction.log
+        log_format: {"transaction_id": "$transaction_id", "created_at": "$created_at", "direction": "$direction", "source": "$source", "grant_hash": "$grant_hash", "destination": "$destination", "service_name": "$service_name"}
 #END
