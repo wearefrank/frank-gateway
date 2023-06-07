@@ -6,6 +6,7 @@ local ssl           = require("ngx.ssl")
 local resty_sha256  = require("resty.sha256")
 local base64        = require("ngx.base64")
 local os            = os
+local new_tab       = require "table.new"
 
 local plugin_name = "fsc"
 
@@ -36,6 +37,17 @@ function _M.check_schema(conf, schema_type)
     return core.schema.check(schema, conf)
 end
 
+local function format_error(error_message, error_code)
+    local error = new_tab(3, 0)
+
+    error.message = error_message
+    error.domain = "ERROR_DOMAIN_INWAY"
+    error.code = error_code
+    core.response.add_header("Fsc-Error-Code", error_code)
+    core.response.add_header("Content-Type", "application/json")
+    return error
+end
+
 local function validate_token(jwks_url)
 
     local opts = {
@@ -58,7 +70,8 @@ local function client_x5t_s256()
 
     if err then
         core.log.error("Could not convert PEM certificate to DER")
-        ngx.say("Could not convert PEM certificate to DER") -- TODO return FSC error
+        local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
+        return 401, error_msg 
     end
 
     -- Nginx only has the sha1 fingerprint, RFC8705 needs the sha256 fingerprint
@@ -69,7 +82,8 @@ local function client_x5t_s256()
 
         if digest == nil then
             ngx.core.error("Could not calculate sha256 fingerprint from certficate") 
-            ngx.say("Could not calculate sha256 fingerprint from certficate") -- TODO return FSC error
+            local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
+            return 401, error_msg 
         end
 
         return digest
@@ -82,7 +96,8 @@ local function client_x5t_s256()
         local encoded_digest = base64.encode_base64url(digest)
         if encoded_digest == nil then
             core.log.error("Could not base64url encode the digest")
-            ngx.say("Could not base64url encode the digest") -- TODO return FSC error
+            local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
+            return 401, error_msg 
         end
 
         return encoded_digest
@@ -98,7 +113,8 @@ local function token_x5t_s256(token)
 
     if encoded_digest == nil then
         core.log.error("Access token does not contain x5t#S256")
-        ngx.say("Access Token does not contain x5t#S256") -- TODO return FSC error
+        local error_msg = format_error("Invalid Access token", "ERROR_CODE_ACCESS_DENIED")
+        return 401, error_msg 
     end
     return encoded_digest
 end
@@ -155,11 +171,17 @@ function _M.access(conf, ctx)
     -- for FSC token validation
     local jwks_url = conf.jwks_url
     local validated_token, err = validate_token(jwks_url)
-    
+   
+    if err == "no Authorization header found" then
+        core.log.error("Fsc-Authorization header is missing: ", err)
+        local error_msg = format_error("Access token is missing", "ERROR_CODE_ACCESS_TOKEN_MISSING")
+        return 401, error_msg 
+    end
+
     if err then
-        core.log.error("JWT not verified: " .. err)
-        ngx.say("JWT not verified: " .. err) -- TODO return FSC error
-        return
+        core.log.error("JWT not verified: " .. err) 
+        local error_msg = format_error("Invalid Access token", "ERROR_CODE_ACCESS_DENIED")
+        return 401, error_msg
     end
 
     local inspect = require('inspect') -- TODO this should eventually be removed, kept for now for easier troubleshooting
@@ -174,14 +196,37 @@ function _M.access(conf, ctx)
 
     if client_x5t_s256 ~= token_x5t_s256 then
         core.log.error("token not bound to this client")
-        ngx.say("Token not bound to this client") -- TODO return FSC error
-        return
+        local error_msg = format_error("Invalid Access token", "ERROR_CODE_ACCESS_DENIED")
+        return 401, error_msg 
     end
 
     -- Add X-NLX-Requester-Organization header (confirmed by FSC team this is no longer needed, kept for now since we might need the client cert serial number)
     set_requester_header()
     format_log_entry(validated_token)
     
+end
+
+function _M.body_filter(conf, ctx)
+    
+    local res_status_code = ngx.status
+    if res_status_code == 404 or res_status_code == 503 then
+        local error_response = core.json.encode(ctx.error_message)
+        ngx.arg[1] = error_response 
+        ngx.arg[2] = true 
+    end
+
+end
+
+function _M.header_filter(conf, ctx)
+    local res_status_code = ngx.status
+    if res_status_code == 503 then
+        core.response.clear_header_as_body_modified()
+        ctx.error_message = format_error("Service unavailable", "ERROR_CODE_SERVICE_UNREACHABLE")
+    
+    elseif res_status_code == 404 then
+        core.response.clear_header_as_body_modified()
+        ctx.error_message = format_error("Not found", "ERROR_CODE_SERVICE_NOT_FOUND")
+    end
 end
 
 return _M
