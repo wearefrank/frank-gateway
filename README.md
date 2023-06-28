@@ -119,9 +119,10 @@ Both The FSC standard as well the plugin is currently work in progress:
 - [x] retrieve the public certificate from a JWKS endpoint
 - [x] Validate the JWT in the `Fsc-Authorization` header
 - [x] Perform `certificate bound token validation` according to: [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705#name-jwt-certificate-thumbprint-)
-- [ ] Respond with FSC error codes
+- [x] Respond with FSC error codes
 - [x] Enable caching for JWKS keys 
 - [ ] Tests
 - [ ] FSC logging
 - [ ] Optional routing based on JWT claim servicename (APISIX can likely handle all routing requirements out of the box. If FSC token based routing needs to be implemented see: https://api7.ai/blog/dynamic-routing-based-on-user-credentials)
-- [ ] Optional get JWKS via mTLS endpoint
+- [ ] Optional get JWKS via mTLS endpoint (not needed to use APISIX inway with reference implementation manager)
+- [ ] Optional gRPC call to manager of reference implementation to register Inway (not part of FSC standard, but required in reference imlementation, workaround is manual or scripted registration)
