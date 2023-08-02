@@ -4,9 +4,10 @@
 
 ## Layout & Structure
 
-This repository contains two components:
+This repository contains three components:
 1) deployment configurations
 2) source code for FSC plugin
+3) PoC for generating Apisix configurations for multiple deployment architectures
 
 ### Deployment configurations
 The directory `deployment` contains three deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
@@ -126,3 +127,40 @@ Both The FSC standard as well the plugin is currently work in progress:
 - [ ] Optional routing based on JWT claim servicename (APISIX can likely handle all routing requirements out of the box. If FSC token based routing needs to be implemented see: https://api7.ai/blog/dynamic-routing-based-on-user-credentials)
 - [ ] Optional get JWKS via mTLS endpoint (not needed to use APISIX inway with reference implementation manager)
 - [ ] Optional gRPC call to manager of reference implementation to register Inway (not part of FSC standard, but required in reference imlementation, workaround is manual or scripted registration)
+
+### APISIX config generation
+Integration with `Frank Framework` is defined as the ability to configure APISIX for specific API's from the Frank Framework. This enables te creation of API's and their respective configuration needed in APISIX to be managed from a single place, the Frank Framework.
+
+Key aspect of this integration is the ability of generating APISIX configurations.
+
+There are several challenges with generating APISIX configuration:
+- APISIX configuration differs between deployment architectures (Kubernetes ingress, Standalone and Traditional)
+- APISIX configurations can become large and complex especially when plugins are involved which have specific configuration
+
+The various deployment architectures from APISIX have the following characteristics:
+- Kubernets Ingress 
+    - configured using Kubernetes CRD's (yaml manifests)
+        - can be managed via git
+        - can be kept in sync with ArgoCD
+        - declarative configuration
+- Standalone
+    - configured using a single yaml configuration file
+        - can be managed via git
+        - declarative configuration
+- Traditional
+    - configured using the admin API (JSON)
+    - can be configured using the dashboard (grafical user interface)
+
+`It is important to note that the various configuration models have syntax differences. For example simly converting the json document to yaml does not yield a valid apisix configuration for standalon or ingress setups`.
+
+It is however possible to use one base configuration and generate the required config files for a specific architecture. 
+This "SPI like" approach can be outlined as followed:
+!["APISIX configuration generation"](docs/diagrams/spi_FF_integration.png)
+
+Regading the complexity and size of the APISIX configuration. There are several different configuration objects. However the core functionality of APSIX is available is the following configuration objects:
+- Routes - defines the various rules on which incoming requests are matched and dispatched to services and upstreams. For example path or header based routing rules [more info](https://apisix.apache.org/docs/apisix/terminology/route/)
+- Service - defines an abstraction of a backend service that can be exposed via one or multiple routes [more info](https://apisix.apache.org/docs/apisix/terminology/service/)
+- Upstream - defines the configuration (eg. host, port) of the backend API [more info](https://apisix.apache.org/docs/apisix/terminology/upstream/)
+
+Detailed information about the different configuration parameters can be found [here](https://apisix.apache.org/docs/apisix/admin-api/)
+
