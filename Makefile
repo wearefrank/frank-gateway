@@ -2,6 +2,7 @@ dev-startup:
 	docker run -d --name apache-apisix-standalone \
   	-p 9080:9080 \
   	-p 9443:9443 \
+  	-p 9090:9090 \
 	-v $(shell pwd)/conf/config.yaml:/usr/local/apisix/conf/config.yaml \
 	-v $(shell pwd)/conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml \
 	-v $(shell pwd)/logs:/usr/local/apisix/logs \
