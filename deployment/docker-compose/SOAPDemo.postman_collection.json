@@ -1,0 +1,756 @@
+{
+	"info": {
+		"_postman_id": "5b051bb8-f3da-4b2c-9f16-ceca7f1a83c8",
+		"name": "SOAPDemo",
+		"description": "\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22796678"
+	},
+	"item": [
+		{
+			"name": "AddInteger",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "http://tempuri.org/SOAP.Demo.AddInteger"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <AddInteger xmlns=\"http://tempuri.org\">\n      <Arg1>100</Arg1>\n      <Arg2>100</Arg2>\n    </AddInteger>\n  </soap:Body>\n</soap:Envelope>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SOAPDemoSoapBaseUrl}}/csp/samples/SOAP.Demo.cls",
+					"host": [
+						"{{SOAPDemoSoapBaseUrl}}"
+					],
+					"path": [
+						"csp",
+						"samples",
+						"SOAP.Demo.cls"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "AddInteger response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml; charset=utf-8"
+							},
+							{
+								"key": "SOAPAction",
+								"value": "http://tempuri.org/SOAP.Demo.AddInteger"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:AddInteger xmlns=\"http://tempuri.org\">\n      <s0:Arg1>100</s0:Arg1>\n      <s0:Arg2>100</s0:Arg2>\n    </s0:AddInteger>\n  </soap:Body>\n</soap:Envelope>\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.crcind.com:443/csp/samples/SOAP.Demo.cls",
+							"protocol": "https",
+							"host": [
+								"www",
+								"crcind",
+								"com"
+							],
+							"port": "443",
+							"path": [
+								"csp",
+								"samples",
+								"SOAP.Demo.cls"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "xml",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/xml; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:AddIntegerResponse xmlns=\"http://tempuri.org\">\n      <s0:AddIntegerResult>100</s0:AddIntegerResult>\n    </s0:AddIntegerResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+				}
+			]
+		},
+		{
+			"name": "DivideInteger",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "http://tempuri.org/SOAP.Demo.DivideInteger"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <DivideInteger xmlns=\"http://tempuri.org\">\n      <Arg1>100</Arg1>\n      <Arg2>100</Arg2>\n    </DivideInteger>\n  </soap:Body>\n</soap:Envelope>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SOAPDemoSoapBaseUrl}}/csp/samples/SOAP.Demo.cls",
+					"host": [
+						"{{SOAPDemoSoapBaseUrl}}"
+					],
+					"path": [
+						"csp",
+						"samples",
+						"SOAP.Demo.cls"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "DivideInteger response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml; charset=utf-8"
+							},
+							{
+								"key": "SOAPAction",
+								"value": "http://tempuri.org/SOAP.Demo.DivideInteger"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:DivideInteger xmlns=\"http://tempuri.org\">\n      <s0:Arg1>100</s0:Arg1>\n      <s0:Arg2>100</s0:Arg2>\n    </s0:DivideInteger>\n  </soap:Body>\n</soap:Envelope>\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.crcind.com:443/csp/samples/SOAP.Demo.cls",
+							"protocol": "https",
+							"host": [
+								"www",
+								"crcind",
+								"com"
+							],
+							"port": "443",
+							"path": [
+								"csp",
+								"samples",
+								"SOAP.Demo.cls"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "xml",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/xml; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:DivideIntegerResponse xmlns=\"http://tempuri.org\">\n      <s0:DivideIntegerResult>100</s0:DivideIntegerResult>\n    </s0:DivideIntegerResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+				}
+			]
+		},
+		{
+			"name": "FindPerson",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "http://tempuri.org/SOAP.Demo.FindPerson"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:FindPerson xmlns:s0=\"http://tempuri.org\">\n      <s0:id>string</s0:id>\n    </s0:FindPerson>\n  </soap:Body>\n</soap:Envelope>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SOAPDemoSoapBaseUrl}}/csp/samples/SOAP.Demo.cls",
+					"host": [
+						"{{SOAPDemoSoapBaseUrl}}"
+					],
+					"path": [
+						"csp",
+						"samples",
+						"SOAP.Demo.cls"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "FindPerson response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml; charset=utf-8"
+							},
+							{
+								"key": "SOAPAction",
+								"value": "http://tempuri.org/SOAP.Demo.FindPerson"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:FindPerson xmlns=\"http://tempuri.org\">\n      <s0:id>string</s0:id>\n    </s0:FindPerson>\n  </soap:Body>\n</soap:Envelope>\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.crcind.com:443/csp/samples/SOAP.Demo.cls",
+							"protocol": "https",
+							"host": [
+								"www",
+								"crcind",
+								"com"
+							],
+							"port": "443",
+							"path": [
+								"csp",
+								"samples",
+								"SOAP.Demo.cls"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "xml",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/xml; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:FindPersonResponse xmlns=\"http://tempuri.org\">\n      <s0:FindPersonResult>\n        <s0:Name>string</s0:Name>\n        <s0:SSN>string</s0:SSN>\n        <s0:DOB>2023-08-23Z</s0:DOB>\n        <s0:Home/>\n        <s0:Office/>\n        <s0:Spouse/>\n        <s0:FavoriteColors/>\n        <s0:Age>100</s0:Age>\n      </s0:FindPersonResult>\n    </s0:FindPersonResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+				}
+			]
+		},
+		{
+			"name": "GetByName",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "http://tempuri.org/SOAP.Demo.GetByName"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetByName xmlns:s0=\"http://tempuri.org\">\n      <s0:name>string</s0:name>\n    </s0:GetByName>\n  </soap:Body>\n</soap:Envelope>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SOAPDemoSoapBaseUrl}}/csp/samples/SOAP.Demo.cls",
+					"host": [
+						"{{SOAPDemoSoapBaseUrl}}"
+					],
+					"path": [
+						"csp",
+						"samples",
+						"SOAP.Demo.cls"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "GetByName response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml; charset=utf-8"
+							},
+							{
+								"key": "SOAPAction",
+								"value": "http://tempuri.org/SOAP.Demo.GetByName"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetByName xmlns=\"http://tempuri.org\">\n      <s0:name>string</s0:name>\n    </s0:GetByName>\n  </soap:Body>\n</soap:Envelope>\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.crcind.com:443/csp/samples/SOAP.Demo.cls",
+							"protocol": "https",
+							"host": [
+								"www",
+								"crcind",
+								"com"
+							],
+							"port": "443",
+							"path": [
+								"csp",
+								"samples",
+								"SOAP.Demo.cls"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "xml",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/xml; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetByNameResponse xmlns=\"http://tempuri.org\">\n      <s0:GetByNameResult>\n        <s0:s:schema/>\n      </s0:GetByNameResult>\n    </s0:GetByNameResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+				}
+			]
+		},
+		{
+			"name": "GetDataSetByName",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "http://tempuri.org/SOAP.Demo.GetDataSetByName"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetDataSetByName xmlns:s0=\"http://tempuri.org\">\n      <s0:name>string</s0:name>\n    </s0:GetDataSetByName>\n  </soap:Body>\n</soap:Envelope>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SOAPDemoSoapBaseUrl}}/csp/samples/SOAP.Demo.cls",
+					"host": [
+						"{{SOAPDemoSoapBaseUrl}}"
+					],
+					"path": [
+						"csp",
+						"samples",
+						"SOAP.Demo.cls"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "GetDataSetByName response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml; charset=utf-8"
+							},
+							{
+								"key": "SOAPAction",
+								"value": "http://tempuri.org/SOAP.Demo.GetDataSetByName"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetDataSetByName xmlns=\"http://tempuri.org\">\n      <s0:name>string</s0:name>\n    </s0:GetDataSetByName>\n  </soap:Body>\n</soap:Envelope>\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.crcind.com:443/csp/samples/SOAP.Demo.cls",
+							"protocol": "https",
+							"host": [
+								"www",
+								"crcind",
+								"com"
+							],
+							"port": "443",
+							"path": [
+								"csp",
+								"samples",
+								"SOAP.Demo.cls"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "xml",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/xml; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetDataSetByNameResponse xmlns=\"http://tempuri.org\">\n      <s0:GetDataSetByNameResult/>\n    </s0:GetDataSetByNameResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+				}
+			]
+		},
+		{
+			"name": "GetListByName",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "http://tempuri.org/SOAP.Demo.GetListByName"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetListByName xmlns:s0=\"http://tempuri.org\">\n      <s0:name>string</s0:name>\n    </s0:GetListByName>\n  </soap:Body>\n</soap:Envelope>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SOAPDemoSoapBaseUrl}}/csp/samples/SOAP.Demo.cls",
+					"host": [
+						"{{SOAPDemoSoapBaseUrl}}"
+					],
+					"path": [
+						"csp",
+						"samples",
+						"SOAP.Demo.cls"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "GetListByName response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml; charset=utf-8"
+							},
+							{
+								"key": "SOAPAction",
+								"value": "http://tempuri.org/SOAP.Demo.GetListByName"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetListByName xmlns=\"http://tempuri.org\">\n      <s0:name>string</s0:name>\n    </s0:GetListByName>\n  </soap:Body>\n</soap:Envelope>\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.crcind.com:443/csp/samples/SOAP.Demo.cls",
+							"protocol": "https",
+							"host": [
+								"www",
+								"crcind",
+								"com"
+							],
+							"port": "443",
+							"path": [
+								"csp",
+								"samples",
+								"SOAP.Demo.cls"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "xml",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/xml; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:GetListByNameResponse xmlns=\"http://tempuri.org\">\n      <s0:GetListByNameResult>\n        <s0:PersonIdentification>\n          <s0:ID>string</s0:ID>\n          <s0:Name>string</s0:Name>\n          <s0:SSN>string</s0:SSN>\n          <s0:DOB>2023-08-23Z</s0:DOB>\n        </s0:PersonIdentification>\n      </s0:GetListByNameResult>\n    </s0:GetListByNameResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+				}
+			]
+		},
+		{
+			"name": "Mission",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "http://tempuri.org/SOAP.Demo.Mission"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:Mission xmlns:s0=\"http://tempuri.org\"/>\n  </soap:Body>\n</soap:Envelope>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SOAPDemoSoapBaseUrl}}/csp/samples/SOAP.Demo.cls",
+					"host": [
+						"{{SOAPDemoSoapBaseUrl}}"
+					],
+					"path": [
+						"csp",
+						"samples",
+						"SOAP.Demo.cls"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Mission response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml; charset=utf-8"
+							},
+							{
+								"key": "SOAPAction",
+								"value": "http://tempuri.org/SOAP.Demo.Mission"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:Mission xmlns=\"http://tempuri.org\"/>\n  </soap:Body>\n</soap:Envelope>\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.crcind.com:443/csp/samples/SOAP.Demo.cls",
+							"protocol": "https",
+							"host": [
+								"www",
+								"crcind",
+								"com"
+							],
+							"port": "443",
+							"path": [
+								"csp",
+								"samples",
+								"SOAP.Demo.cls"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "xml",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/xml; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:MissionResponse xmlns=\"http://tempuri.org\">\n      <s0:MissionResult>string</s0:MissionResult>\n    </s0:MissionResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+				}
+			]
+		},
+		{
+			"name": "QueryByName",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "http://tempuri.org/SOAP.Demo.QueryByName"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:QueryByName xmlns:s0=\"http://tempuri.org\">\n      <s0:name>string</s0:name>\n    </s0:QueryByName>\n  </soap:Body>\n</soap:Envelope>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SOAPDemoSoapBaseUrl}}/csp/samples/SOAP.Demo.cls",
+					"host": [
+						"{{SOAPDemoSoapBaseUrl}}"
+					],
+					"path": [
+						"csp",
+						"samples",
+						"SOAP.Demo.cls"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "QueryByName response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml; charset=utf-8"
+							},
+							{
+								"key": "SOAPAction",
+								"value": "http://tempuri.org/SOAP.Demo.QueryByName"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:QueryByName xmlns=\"http://tempuri.org\">\n      <s0:name>string</s0:name>\n    </s0:QueryByName>\n  </soap:Body>\n</soap:Envelope>\n",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.crcind.com:443/csp/samples/SOAP.Demo.cls",
+							"protocol": "https",
+							"host": [
+								"www",
+								"crcind",
+								"com"
+							],
+							"port": "443",
+							"path": [
+								"csp",
+								"samples",
+								"SOAP.Demo.cls"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "xml",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/xml; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <s0:QueryByNameResponse xmlns=\"http://tempuri.org\">\n      <s0:QueryByNameResult/>\n    </s0:QueryByNameResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "SOAPDemoSoapBaseUrl",
+			"value": "https://www.crcind.com:443",
+			"type": "any"
+		}
+	]
+}
