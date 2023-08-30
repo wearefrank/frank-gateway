@@ -5,6 +5,10 @@ deployment:
 apisix:
   extra_lua_path: "/usr/local/apisix/custom-plugins/?.lua"
   extra_lua_cpath: "/usr/local/apisix/custom-plugin-libs/?.so"
+  enable_control: true
+  control:
+    ip: "127.0.0.1"
+    port: 9090
 plugins: 
   - fsc
   - file-logger
