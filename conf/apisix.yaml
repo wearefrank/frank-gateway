@@ -1,6 +1,6 @@
 ssls:
   -
-  cert: |
+    cert: |
       -----BEGIN CERTIFICATE-----
       MIICrjCCAZYCFEOshxhf5s8B6spC0YY/nOBgsHoLMA0GCSqGSIb3DQEBCwUAMBEx
       DzANBgNVBAMMBlJPT1RDQTAgFw0yMzA1MTcwODQzMDFaGA8yMTIzMDQyMzA4NDMw
@@ -17,8 +17,8 @@ ssls:
       b9NM2Yr/aus8GKaVDusRWDzGuO05dMGOccHCe0dbUxkv5brkjuQwM9aaZxftQH3p
       AVZmD8iZcMG9O1bL5fKVOgCyr+SWskLKqxjzbWW3w8KyguAAdvHPmFrUWHngiOH2
       gytVYAaaDpo786ZXumRxaVvB
-      -----END CERTIFICATE----- 
-  key: |
+      -----END CERTIFICATE-----
+    key: |
       -----BEGIN PRIVATE KEY-----
       MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCnxtVv3Yyv9og0
       ds2LwW/mq2FbEsviTmSNtIdUyoWpEXr7RAP3YjatAwj2m8SDkZoUxDrk8DNBJtth
@@ -46,10 +46,10 @@ ssls:
       BkOKhEyUykgomU6UKYwItcu3qzBX35YYIJADzns80+Vi11wMXVei3c4elHQTjqe8
       P/NqLsRKvuwMWZPH07uCIVIme986U79NK3Ecp0qWC2GvYn4VW1yPJgr9LoQFuaog
       sQk7I97N8lCOtCMdFcFF6eQ3
-      -----END PRIVATE KEY----- 
-  snis:
+      -----END PRIVATE KEY-----
+    snis:
     - "localhost"
-  client:
+client:
     ca: |
       -----BEGIN CERTIFICATE-----
       MIICqzCCAZMCFG8ViO5+/dDxiF6mh3ORk4pn2aZ7MA0GCSqGSIb3DQEBCwUAMBEx
