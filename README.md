@@ -113,6 +113,23 @@ https://localhost:9443/hello \
 
 If everything works as expected a 200 is returned with your requested "echoed" back.
 
+
+### Testing with a local NLX/FSC cluster
+In order to test the FSC plugin with a local FSC cluster first make sure a local FSC cluster is installed and running locally using the instructions [here](https://gitlab.com/commonground/nlx/fsc-nlx)
+
+With all FSC components running the next step is to register the APISIX gateway including the FSC plugin as a FSC Inway. This can be done with a gRPC request using grpcurl:
+```shell
+grpcurl -d '{"name":"frank-api-gateway","address":"localhost:9443"}' -proto=controller.proto -import-path=/home/pimg/klanten/we-are-frank/fsc-nlx/controller/ports/internalgrpc/api -key=./pki/internal/organization-a/certs/manager/key.pem -cert=./pki/internal/organization-a/certs/manager/cert.pem -cacert=./pki/internal/organization-a/ca/root.pem -H 'Authorization: Basic YWRtaW5Abmx4LmxvY2FsOmRldmVsb3BtZW50' controller-api.organization-a.nlx.local:443 nlx.controller_internal.ControllerService/RegisterInway
+```
+
+APISIX uses SNI to match an incoming request with the correct keypair to establish the TLS connection. In order for this to work locally add the following entry to your `hosts` file:
+`127.0.0.1 frank-api-gateway.organization-a.nlx.local`
+
+with custom frank-api-gateway certificates:
+```shell
+grpcurl -d '{"name":"frank-api-gateway","address":"https://frank-api-gateway.organization-a.nlx.local:9443"}' -proto=controller.proto -import-path=/home/pimg/klanten/we-are-frank/fsc-nlx/controller/ports/internalgrpc/api -key=./pki/internal/organization-a/certs/manager/key.pem -cert=./pki/internal/organization-a/certs/manager/cert.pem -cacert=./pki/internal/organization-a/ca/root.pem -H 'Authorization: Basic YWRtaW5Abmx4LmxvY2FsOmRldmVsb3BtZW50' controller-api.organization-a.nlx.local:443 nlx.controller_internal.ControllerService/RegisterInway
+```
+
 ### Current status
 Both The FSC standard as well the plugin is currently work in progress:
 - [x] Perform mTLS (this is not a feature of the plugin but rather a feature of APISIX that needs to be configured)
@@ -123,10 +140,10 @@ Both The FSC standard as well the plugin is currently work in progress:
 - [x] Respond with FSC error codes
 - [x] Enable caching for JWKS keys 
 - [ ] Tests
-- [ ] FSC logging
+- [ ] FSC logging (waiting for FSC-NLX issue: https://gitlab.com/commonground/nlx/fsc-nlx/-/issues/41)
 - [ ] Optional routing based on JWT claim servicename (APISIX can likely handle all routing requirements out of the box. If FSC token based routing needs to be implemented see: https://api7.ai/blog/dynamic-routing-based-on-user-credentials)
-- [ ] Optional get JWKS via mTLS endpoint (not needed to use APISIX inway with reference implementation manager)
-- [ ] Optional gRPC call to manager of reference implementation to register Inway (not part of FSC standard, but required in reference imlementation, workaround is manual or scripted registration)
+- [ ] Optional get JWKS via endpoint (waiting for FSC-NLX issue: https://gitlab.com/commonground/nlx/fsc-nlx/-/issues/42)
+- [ ] Optional register Inway automatically by the manager of the organization (waiting for FSC-NLX issue: https://gitlab.com/commonground/nlx/fsc-nlx/-/issues/41)
 
 ### APISIX config generation
 Integration with `Frank Framework` is defined as the ability to configure APISIX for specific API's from the Frank Framework. This enables te creation of API's and their respective configuration needed in APISIX to be managed from a single place, the Frank Framework.
