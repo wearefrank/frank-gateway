@@ -45,6 +45,17 @@ curl --location 'http://localhost:9000/apisix/admin/migrate/import' \
 --form 'file=@"./apisix-config.bak"'
 ```
 
+### Routing on SOAP Action
+This configuration configures multiple routes all pointing to the same SOAP service, the routes use the `SOAPAction` header to route to a specific SOAP operation. This enables more fine grained control per SOAP operation. In this example the following two SOAP operations are configured:
+- DivideInteger
+- Mission
+
+For demonstration purposes a rate limit plugin is enabled on the `DivideInteger` route demonstrating the ability to enable different policies per SOAP operation.
+
+Routing per SOAPAction can be enabled via the dashboard using the `Advanced routing` option with the following configuration:
+![SOAPAction routing](../../docs/diagrams/apisix-soap-action-routing.png)
+
+### Testing 
 With the configuration created issue request using the provided Postman collection: `SOAPDemo.postman_collection.json`
 
 Finally observe the custom labelled metrics in [Prometheus](http://localhost:9090/graph?g0.expr=apisix_http_status%7Bsoap_action%3D~%22http.*%22%7D&g0.tab=1&g0.stacked=0&g0.range_input=1h)
