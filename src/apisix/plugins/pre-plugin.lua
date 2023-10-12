@@ -1,4 +1,5 @@
 return function(conf, ctx) 
+    local ngx = require("ngx")
     local soap_action = ngx.req.get_headers()['SOAPAction']
     local core = require('apisix.core')
     if soap_action ~= nil then

@@ -6,6 +6,7 @@ local base64        = require("ngx.base64")
 local os            = os
 local new_tab       = require "table.new"
 local errlog        = require "ngx.errlog"
+local ngx           = require("ngx")
 
 local plugin_name = "fsc"
 
@@ -60,14 +61,14 @@ local function validate_token(manager_public_key)
 end
 
 local function client_x5t_s256()
-    
+
     local raw_client_cert = ngx.var.ssl_client_raw_cert
     local der_cert_chain, err = ssl.cert_pem_to_der(raw_client_cert)
 
     if err then
         core.log.error("Could not convert PEM certificate to DER")
         local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-        return 401, error_msg 
+        return 401, error_msg
     end
 
     -- Nginx only has the sha1 fingerprint, RFC8705 needs the sha256 fingerprint
@@ -77,9 +78,9 @@ local function client_x5t_s256()
         local digest = sha256_client_cert:final()
 
         if digest == nil then
-            ngx.core.error("Could not calculate sha256 fingerprint from certficate") 
+            ngx.core.error("Could not calculate sha256 fingerprint from certficate")
             local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-            return 401, error_msg 
+            return 401, error_msg
         end
 
         return digest
@@ -93,7 +94,7 @@ local function client_x5t_s256()
         if encoded_digest == nil then
             core.log.error("Could not base64url encode the digest")
             local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-            return 401, error_msg 
+            return 401, error_msg
         end
 
         return encoded_digest
@@ -110,25 +111,25 @@ local function token_x5t_s256(token)
     if encoded_digest == nil then
         core.log.error("Access token does not contain x5t#S256")
         local error_msg = format_error("Invalid Access token", "ERROR_CODE_ACCESS_DENIED")
-        return 401, error_msg 
+        return 401, error_msg
     end
     return encoded_digest
 end
 
 local function format_log_entry(token)
 
-    core.ctx.register_var("direction", function() 
-        return "DIRECTION_INCOMING" 
+    core.ctx.register_var("direction", function()
+        return "DIRECTION_INCOMING"
     end)
 
-    core.ctx.register_var("created_at", function() 
+    core.ctx.register_var("created_at", function()
         return os.time()
     end)
 
     core.ctx.register_var("transaction_id", function()
         return ngx.req.get_headers()["Fsc-Transaction-Id"]
     end)
-    
+
     core.ctx.register_var("source", function(ctx)
         return {outway_peer_id = token.sub}
     end)
@@ -136,13 +137,13 @@ local function format_log_entry(token)
     core.ctx.register_var("service_name", function(ctx)
         return token.svc
     end)
-    
+
     core.ctx.register_var("grant_hash", function(ctx)
         return token.gth
     end)
 end
 
-function _M.access(conf, ctx) 
+function _M.access(conf, ctx)
 
     local headers = ngx.req.get_headers()["Fsc-Authorization"]
     ngx.req.set_header("Fsc-Authorization", "Bearer " .. headers) -- need  to prepend Authorization header with Bearer so OIDC library works.
@@ -150,25 +151,25 @@ function _M.access(conf, ctx)
     -- for FSC token validation
     local manager_public_key = conf.manager_public_key
     local validated_token, err = validate_token(manager_public_key)
-   
+
     if err == "no Authorization header found" then
         core.log.error("Fsc-Authorization header is missing: ", err)
         local error_msg = format_error("Access token is missing", "ERROR_CODE_ACCESS_TOKEN_MISSING")
-        return 401, error_msg 
+        return 401, error_msg
     end
 
     if err then
-        core.log.error("JWT not verified: " .. err) 
+        core.log.error("JWT not verified: " .. err)
         local error_msg = format_error("Invalid Access token", "ERROR_CODE_ACCESS_DENIED")
         return 401, error_msg
     end
 
     local log_level = errlog.get_sys_filter_level()
     if log_level == ngx.DEBUG then
-        local inspect = require('inspect') 
+        local inspect = require('inspect')
         core.log.debug("jws verified: " .. inspect(validated_token))
     end
-    
+
     -- RFC 8705 Certificate bound tokens check
     local client_x5t_s256 = client_x5t_s256()
     local token_x5t_s256 = token_x5t_s256(validated_token)
@@ -179,20 +180,20 @@ function _M.access(conf, ctx)
     if client_x5t_s256 ~= token_x5t_s256 then
         core.log.error("token not bound to this client")
         local error_msg = format_error("Invalid Access token", "ERROR_CODE_ACCESS_DENIED")
-        return 401, error_msg 
+        return 401, error_msg
     end
 
     format_log_entry(validated_token)
-    
+
 end
 
 function _M.body_filter(conf, ctx)
-    
+
     local res_status_code = ngx.status
     if res_status_code == 404 or res_status_code == 503 then
         local error_response = core.json.encode(ctx.error_message)
-        ngx.arg[1] = error_response 
-        ngx.arg[2] = true 
+        ngx.arg[1] = error_response
+        ngx.arg[2] = true
     end
 
 end
@@ -202,7 +203,7 @@ function _M.header_filter(conf, ctx)
     if res_status_code == 503 then
         core.response.clear_header_as_body_modified()
         ctx.error_message = format_error("Service unavailable", "ERROR_CODE_SERVICE_UNREACHABLE")
-    
+
     elseif res_status_code == 404 then
         core.response.clear_header_as_body_modified()
         ctx.error_message = format_error("Not found", "ERROR_CODE_SERVICE_NOT_FOUND")
