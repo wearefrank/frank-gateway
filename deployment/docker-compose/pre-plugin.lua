@@ -1,4 +1,5 @@
 return function(conf, ctx) 
+    local ngx = require("ngx")
     local soap_action = ngx.req.get_headers()['SOAPAction']
     local core = require('apisix.core')
     if soap_action ~= nil then
@@ -18,7 +19,7 @@ return function(conf, ctx)
             local soap_body = handler.root['soap:Envelope']['soap:Body']
 
             for key, value in pairs(soap_body) do
-                ngx.log(ngx.ERR, 'soap_body ', key, vaSlue)
+                ngx.log(ngx.ERR, 'soap_body ', key, value)
             end
 
         end
