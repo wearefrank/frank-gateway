@@ -9,6 +9,7 @@ dev-startup:
 	-v $(shell pwd)/src:/usr/local/apisix/custom-plugins \
 	-v $(shell pwd)/lib:/usr/local/apisix/custom-plugin-libs \
 	--add-host=host.docker.internal:host-gateway \
+	--add-host=manager.organization-a.nlx.local:host-gateway \
   	apache/apisix:latest
 
 dev-start:

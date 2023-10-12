@@ -1,23 +1,22 @@
 local core          = require("apisix.core")
-local http          = require("resty.http")
-local jwt           = require("resty.jwt")
 local openidc       = require("resty.openidc")
 local ssl           = require("ngx.ssl")
 local resty_sha256  = require("resty.sha256")
 local base64        = require("ngx.base64")
 local os            = os
 local new_tab       = require "table.new"
+local errlog        = require "ngx.errlog"
 
 local plugin_name = "fsc"
 
 local schema = {
     type = "object",
     properties = {
-        jwks_url = {
+        manager_public_key = {
             type = "string"
         },
     },
-    required = {"jwks_url"}
+    required = {"manager_public_key"}
 }
 
 local metadata_schema = {}
@@ -48,15 +47,12 @@ local function format_error(error_message, error_code)
     return error
 end
 
-local function validate_token(jwks_url)
+local function validate_token(manager_public_key)
 
     local opts = {
-        discovery = {
-            jwks_uri = jwks_url,
-        },
-        auth_accept_token_as_header_name = "Fsc-Authorization"
+        public_key = manager_public_key,
+        auth_accept_token_as_header_name = "Fsc-Authorization",
     }
-    core.log.debug("discovery jwks endpoint is: " .. opts.discovery.jwks_uri)
 
     local res, err = openidc.bearer_jwt_verify(opts)
     return res, err
@@ -119,22 +115,6 @@ local function token_x5t_s256(token)
     return encoded_digest
 end
 
-local function set_requester_header()
-
-    local client_dn = ngx.var.ssl_client_s_dn
-    core.log.debug("client DN: " .. client_dn)
-    local from, to, err = ngx.re.find(client_dn, "(serialNumber=)(.{20})", "jo", nil, 2)
-
-    if err then
-        core.log.warn("PEER_ID not found: " .. err)
-    elseif from then
-        local serialNumber = string.sub(client_dn, from, to)
-        core.log.debug("serialNumber: " .. serialNumber)
-        ngx.req.set_header("X-NLX-Requester-Organization", serialNumber)
-    end
-
-end
-
 local function format_log_entry(token)
 
     core.ctx.register_var("direction", function() 
@@ -146,15 +126,11 @@ local function format_log_entry(token)
     end)
 
     core.ctx.register_var("transaction_id", function()
-       return core.id.gen_uuid_v4() 
+        return ngx.req.get_headers()["Fsc-Transaction-Id"]
     end)
     
     core.ctx.register_var("source", function(ctx)
         return {outway_peer_id = token.sub}
-    end)
-    
-    core.ctx.register_var("destination", function(ctx)
-        return {service_peer_id = "unknown"} -- TODO service_peer_id is not known to inway
     end)
 
     core.ctx.register_var("service_name", function(ctx)
@@ -168,9 +144,12 @@ end
 
 function _M.access(conf, ctx) 
 
+    local headers = ngx.req.get_headers()["Fsc-Authorization"]
+    ngx.req.set_header("Fsc-Authorization", "Bearer " .. headers) -- need  to prepend Authorization header with Bearer so OIDC library works.
+
     -- for FSC token validation
-    local jwks_url = conf.jwks_url
-    local validated_token, err = validate_token(jwks_url)
+    local manager_public_key = conf.manager_public_key
+    local validated_token, err = validate_token(manager_public_key)
    
     if err == "no Authorization header found" then
         core.log.error("Fsc-Authorization header is missing: ", err)
@@ -184,8 +163,11 @@ function _M.access(conf, ctx)
         return 401, error_msg
     end
 
-    local inspect = require('inspect') -- TODO this should eventually be removed, kept for now for easier troubleshooting
-    core.log.debug("jws verified: " .. inspect(validated_token))
+    local log_level = errlog.get_sys_filter_level()
+    if log_level == ngx.DEBUG then
+        local inspect = require('inspect') 
+        core.log.debug("jws verified: " .. inspect(validated_token))
+    end
     
     -- RFC 8705 Certificate bound tokens check
     local client_x5t_s256 = client_x5t_s256()
@@ -200,8 +182,6 @@ function _M.access(conf, ctx)
         return 401, error_msg 
     end
 
-    -- Add X-NLX-Requester-Organization header (confirmed by FSC team this is no longer needed, kept for now since we might need the client cert serial number)
-    set_requester_header()
     format_log_entry(validated_token)
     
 end
