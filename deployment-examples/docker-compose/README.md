@@ -11,6 +11,14 @@ This setup contains:
 
 `Note` although very convenient for testing out of the box features from APISIX, some things are more difficult to achieve using this out of the box setup. Most notalbly adding and using custom plugins. 
 
+## Prerequisites
+In order to run this example you need the following prerequisites:
+- Docker (essential) for running Apache APISIX locally on different operating systems [installation guide](https://docs.docker.com/engine/install/)
+- Docker compose (essential) for running the various Docker components together [installation guide](https://docs.docker.com/compose/install/)
+- cURL (optional) cURL is used to issue test requests to the container, any http client can be used as an alternative 
+- jq (optional) jq is used to parse the json response of api calls [documentation](https://jqlang.github.io/jq/). As an alternative you can extract the information from json payloads yourself.
+- Postman (optional) is used to execute the SOAP requests, any other SOAP client can be used as an alternative. [installation guide](https://www.postman.com/downloads/)
+
 ## Getting started
 The first step is to build the docker images for the `Frank API gateway` and the `Frank API dashboard`. 
 
