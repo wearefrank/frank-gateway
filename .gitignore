@@ -4,6 +4,6 @@ charts/
 logs/*
 
 keycloak/
-
+.idea
 # exception to the rule
 !logs/.gitkeep 

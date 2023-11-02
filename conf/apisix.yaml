@@ -193,6 +193,7 @@ routes:
     plugins:
       fsc:
         # jwks_url: "http://host.docker.internal:8080/realms/apisix_test_realm/protocol/openid-connect/certs"
+        fsc_group_id: "fsc-local"
         manager_public_key: |
           -----BEGIN CERTIFICATE-----
           MIIF6DCCA9CgAwIBAgIUPwQoazDKxueG069jrnLLWGepiI8wDQYJKoZIhvcNAQEN

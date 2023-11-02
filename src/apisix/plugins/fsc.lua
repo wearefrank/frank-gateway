@@ -7,6 +7,7 @@ local os            = os
 local new_tab       = require "table.new"
 local errlog        = require "ngx.errlog"
 local ngx           = require("ngx")
+local string        = string
 
 local plugin_name = "fsc"
 
@@ -16,8 +17,11 @@ local schema = {
         manager_public_key = {
             type = "string"
         },
+        fsc_group_id = {
+            type = "string"
+        },
     },
-    required = {"manager_public_key"}
+    required = {"manager_public_key", "fsc_group_id"}
 }
 
 local metadata_schema = {}
@@ -68,7 +72,7 @@ local function client_x5t_s256()
     if err then
         core.log.error("Could not convert PEM certificate to DER")
         local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-        return 401, error_msg
+        return 540, error_msg
     end
 
     -- Nginx only has the sha1 fingerprint, RFC8705 needs the sha256 fingerprint
@@ -80,7 +84,7 @@ local function client_x5t_s256()
         if digest == nil then
             ngx.core.error("Could not calculate sha256 fingerprint from certficate")
             local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-            return 401, error_msg
+            return 540, error_msg
         end
 
         return digest
@@ -94,7 +98,7 @@ local function client_x5t_s256()
         if encoded_digest == nil then
             core.log.error("Could not base64url encode the digest")
             local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-            return 401, error_msg
+            return 540, error_msg
         end
 
         return encoded_digest
@@ -114,6 +118,11 @@ local function token_x5t_s256(token)
         return 401, error_msg
     end
     return encoded_digest
+end
+
+local function is_valid_group_id(validated_token, group_id)
+    local jwt_gid = validated_token.gid
+    return jwt_gid == group_id
 end
 
 local function format_log_entry(token)
@@ -183,6 +192,15 @@ function _M.access(conf, ctx)
         return 401, error_msg
     end
 
+    -- FSC Group ID check 
+    local valid_group_id = is_valid_group_id(validated_token, conf.fsc_group_id)
+    if not valid_group_id then
+        local error = string.format("wrong group ID in token: %s: want group ID %s", conf.fsc_group_id, validated_token.gid)
+        core.log.error(error)
+        local error_msg = format_error(error, "WRONG_GROUP_ID_IN_TOKEN")
+        return 403, error_msg
+    end
+
     format_log_entry(validated_token)
 
 end
@@ -190,7 +208,7 @@ end
 function _M.body_filter(conf, ctx)
 
     local res_status_code = ngx.status
-    if res_status_code == 404 or res_status_code == 503 then
+    if res_status_code == 404 or res_status_code == 503 or res_status_code == 502 then
         local error_response = core.json.encode(ctx.error_message)
         ngx.arg[1] = error_response
         ngx.arg[2] = true
@@ -201,6 +219,7 @@ end
 function _M.header_filter(conf, ctx)
     local res_status_code = ngx.status
     if res_status_code == 503 then
+        ngx.status = 502
         core.response.clear_header_as_body_modified()
         ctx.error_message = format_error("Service unavailable", "ERROR_CODE_SERVICE_UNREACHABLE")
 
