@@ -16,10 +16,6 @@ apisix:
 plugins: 
   - fsc
   - file-logger
+  - openid-connect
 nginx_config:
   error_log_level: debug
-  http_configuration_snippet: |
-      # TODO this is used for both the FSC plugin as well as the openid-connect plugin, need to test if this causes conflicts
-      lua_shared_dict discovery             1m; # cache for discovery metadata documents
-      lua_shared_dict jwks                  1m; # cache for JWKs
-      lua_shared_dict introspection        10m; # cache for JWT verification results

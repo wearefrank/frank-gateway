@@ -11,3 +11,4 @@ LABEL org.opencontainers.image.authors="https://github.com/pimg, https://github.
 LABEL based-on="Apache APISIX 3.6"
 
 COPY src /usr/local/apisix/custom-plugins
+COPY conf/config-default.yaml /usr/local/apisix/conf/config-default.yaml
