@@ -42,6 +42,11 @@ helm install -n monitoring prometheus prometheus-community/kube-prometheus-stack
 
 After Prometheus is installed we can install APISIX.
 
+Load the Frank-API-Gateway image in kind:
+```shell
+kind load docker-image frank-api-gateway --name apisix-ingress
+```
+
 Install APISIX Ingress
 ```shell
 helm install apisix apisix/apisix \
@@ -49,7 +54,9 @@ helm install apisix apisix/apisix \
   --set ingress-controller.enabled=true \
   --set serviceMonitor.enabled=true \
   --namespace ingress-apisix \
-  --set ingress-controller.config.apisix.serviceNamespace=ingress-apisix
+  --set ingress-controller.config.apisix.serviceNamespace=ingress-apisix \
+  --set apisix.image.repository=frank-api-gateway \
+  --set apisix.image.tag=latest
 ```
 
 Verify the service is created
