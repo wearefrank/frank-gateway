@@ -8,6 +8,7 @@ local new_tab       = require "table.new"
 local errlog        = require "ngx.errlog"
 local ngx           = require("ngx")
 local string        = string
+local router        = require("apisix.router")
 
 local plugin_name = "fsc"
 
@@ -155,6 +156,12 @@ end
 function _M.access(conf, ctx)
 
     local headers = ngx.req.get_headers()["Fsc-Authorization"]
+    if headers == nil then
+        core.log.error("Fsc-Authorization header is missing: ", err)
+        local error_msg = format_error("Access token is missing", "ERROR_CODE_ACCESS_TOKEN_MISSING")
+        return 401, error_msg
+    end
+
     ngx.req.set_header("Fsc-Authorization", "Bearer " .. headers) -- need  to prepend Authorization header with Bearer so OIDC library works.
 
     -- for FSC token validation
@@ -176,7 +183,9 @@ function _M.access(conf, ctx)
     local log_level = errlog.get_sys_filter_level()
     if log_level == ngx.DEBUG then
         local inspect = require('inspect')
+        local routes = router.router_http.routes() -- TODO consider strict routing matching svc claim with route
         core.log.debug("jws verified: " .. inspect(validated_token))
+        core.log.debug("found routes in config: " .. inspect(routes))
     end
 
     -- RFC 8705 Certificate bound tokens check
