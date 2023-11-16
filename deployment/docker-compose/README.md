@@ -2,8 +2,8 @@
 This uses the example Docker-compose provided by Apacke APISIX to deploy APISIX traditional locally. This is especially convenient when experimenting with Apache APISIX configuration without needing custom images or a Kubernetes cluster. 
 
 This setup contains:
-- APISIX gateway
-- APISIX dashboard
+- Frank API gateway
+- Frank API dashboard
 - ETCD
 - Prometheus
 - Grafana
@@ -12,16 +12,14 @@ This setup contains:
 `Note` although very convenient for testing out of the box features from APISIX, some things are more difficult to achieve using this out of the box setup. Most notalbly adding and using custom plugins. 
 
 ## Getting started
-This uses the Docker compose provided configuration by Apache APISIX. 
-Clone the following repo: 
-```shell
-git clone https://github.com/apache/apisix-docker.git
-cd apisix-docker/example
+In order to start all the various components run the following command in this directory
 ```
-Before starting the containers overwrite the file `config.yaml` in the `apisix-docker/example/apisix_conf` directory.
-With the correct config file in place start the containers from the `apisix-docker/example` directory using:
+docker-compose -p frank-api-platform up -d
 ```
-docker-compose -p docker-apisix up -d
+
+In order to stop all components run the following command in this directory:
+```
+docker-compose -p frank-api-platform down
 ```
 
 ## Configuring APISIX with a SOAP service 
