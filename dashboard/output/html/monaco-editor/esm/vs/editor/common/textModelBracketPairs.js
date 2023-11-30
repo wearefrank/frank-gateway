@@ -1,0 +1,1 @@
+export class BracketInfo{constructor(t,n,e){this.range=t,this.nestingLevel=n,this.isInvalid=e}}export class BracketPairInfo{constructor(t,n,e,i){this.range=t,this.openingBracketRange=n,this.closingBracketRange=e,this.nestingLevel=i}}export class BracketPairWithMinIndentationInfo extends BracketPairInfo{constructor(t,n,e,i,s){super(t,n,e,i),this.minVisibleColumnIndentation=s}}

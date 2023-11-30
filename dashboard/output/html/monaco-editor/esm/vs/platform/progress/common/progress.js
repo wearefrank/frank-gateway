@@ -1,0 +1,1 @@
+import{createDecorator}from"../../instantiation/common/instantiation.js";export const emptyProgressRunner=Object.freeze({total(){},worked(){},done(){}});export class Progress{constructor(e){this.callback=e}report(e){this._value=e,this.callback(this._value)}}Progress.None=Object.freeze({report(){}});export const IEditorProgressService=createDecorator("editorProgressService");

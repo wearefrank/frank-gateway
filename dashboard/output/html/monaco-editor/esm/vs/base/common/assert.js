@@ -1,0 +1,1 @@
+export function ok(o,r){if(!o)throw new Error(r?`Assertion failed (${r})`:"Assertion Failed")}

@@ -1,0 +1,1 @@
+function _format(n,t){let e;return e=0===t.length?n:n.replace(/\{(\d+)\}/g,(function(n,e){const r=e[0];return"undefined"!==typeof t[r]?t[r]:n})),e}export function localize(n,t,...e){return _format(t,e)}
