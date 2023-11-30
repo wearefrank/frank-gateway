@@ -45,6 +45,7 @@ services:
     networks:
       apisix:
 
+# docker run -d --name etc-server -p 2379:2379 -e ETCD_ENABLE_V2=true -e ALLOW_NONE_AUTHENTICATION=yes -e ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379 -e ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
   etcd:
     image: bitnami/etcd:3.4.15
     restart: always

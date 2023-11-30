@@ -10,5 +10,6 @@ LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.authors="https://github.com/pimg, https://github.com/jjansenvr"
 LABEL based-on="Apache APISIX Dashboard 3.6"
 
-COPY dashboard/schema.json /usr/local/apisix-dashboard/conf/schema.json
-COPY dashboard/conf.yaml /usr/local/apisix-dashboard/conf/conf.yaml
+COPY dashboard/output/conf /usr/local/apisix-dashboard/conf
+COPY dashboard/output/dag-to-lua /usr/local/apisix-dashboard/dag-to-lua
+COPY dashboard/output/html /usr/local/apisix-dashboard/html

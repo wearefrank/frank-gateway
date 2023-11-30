@@ -1,0 +1,1 @@
+import{registerLanguage}from"../_.contribution.js";registerLanguage({id:"st",extensions:[".st",".iecst",".iecplc",".lc3lib"],aliases:["StructuredText","scl","stl"],loader:()=>import("./st.js")});

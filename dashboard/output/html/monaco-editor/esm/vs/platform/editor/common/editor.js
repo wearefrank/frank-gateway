@@ -1,0 +1,1 @@
+export var EditorOpenContext;(function(t){t[t["API"]=0]="API",t[t["USER"]=1]="USER"})(EditorOpenContext||(EditorOpenContext={}));

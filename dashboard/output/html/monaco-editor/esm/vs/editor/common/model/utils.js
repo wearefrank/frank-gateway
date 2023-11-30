@@ -1,0 +1,1 @@
+export function computeIndentLevel(e,t){let n=0,o=0;const c=e.length;while(o<c){const c=e.charCodeAt(o);if(32===c)n++;else{if(9!==c)break;n=n-n%t+t}o++}return o===c?-1:n}

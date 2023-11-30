@@ -1,0 +1,1 @@
+export function createDisposableRef(e,o){return{object:e,dispose:()=>null===o||void 0===o?void 0:o.dispose()}}
