@@ -12,6 +12,21 @@ This setup contains:
 `Note` although very convenient for testing out of the box features from APISIX, some things are more difficult to achieve using this out of the box setup. Most notalbly adding and using custom plugins. 
 
 ## Getting started
+The first step is to build the docker images for the `Frank API gateway` and the `Frank API dashboard`. 
+
+For building the `Frank API gateway` you can use the `Makefile` in the root directory of this repository.
+```shell
+make dev-build -C ../..
+```
+`note, the -C ../.. is only required when issuing the command from the directory where this README resides`
+
+For building the `Frank API Dashboard` you can use the `Makefile` in the root directory of this repository.
+```shell
+make dashboard-build -C ../..
+```
+`note, the -C ../.. is only required when issuing the command from the directory where this README resides`
+
+After the Docker images have been built the components can be started using Docker compose.
 In order to start all the various components run the following command in this directory
 ```
 docker-compose -p frank-api-platform up -d
