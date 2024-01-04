@@ -119,7 +119,14 @@ In order to test the FSC plugin with a local FSC cluster first make sure a local
 
 With all FSC components running the next step is to register the APISIX gateway including the FSC plugin as a FSC Inway. This can be done with a gRPC request using grpcurl:
 ```shell
-grpcurl -d '{"name":"frank-api-gateway","address":"localhost:9443"}' -proto=controller.proto -import-path=/home/pimg/klanten/we-are-frank/fsc-nlx/controller/ports/internalgrpc/api -key=./pki/internal/organization-a/certs/manager/key.pem -cert=./pki/internal/organization-a/certs/manager/cert.pem -cacert=./pki/internal/organization-a/ca/root.pem -H 'Authorization: Basic YWRtaW5Abmx4LmxvY2FsOmRldmVsb3BtZW50' controller-api.organization-a.nlx.local:443 nlx.controller_internal.ControllerService/RegisterInway
+curl -v -X 'PUT' \                                                                                                                                                                  ✔  08:30:49  
+  --key pki/internal/organization-a/certs/controller-api/key.pem \
+  --cert pki/internal/organization-a/certs/controller-api/cert.pem \
+  --cacert pki/internal/organization-a/ca/root.pem \
+  'https://controller-api.organization-a.nlx.local:7600/groups/fsc-local/inways/frank-api-gateway' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{"address": "https://localhost:9443"}'
 ```
 
 APISIX uses SNI to match an incoming request with the correct keypair to establish the TLS connection. In order for this to work locally add the following entry to your `hosts` file:
@@ -127,7 +134,14 @@ APISIX uses SNI to match an incoming request with the correct keypair to establi
 
 with custom frank-api-gateway certificates:
 ```shell
-grpcurl -d '{"name":"frank-api-gateway","address":"https://frank-api-gateway.organization-a.nlx.local:9443"}' -proto=controller.proto -import-path=/home/pimg/klanten/we-are-frank/fsc-nlx/controller/ports/internalgrpc/api -key=./pki/internal/organization-a/certs/manager/key.pem -cert=./pki/internal/organization-a/certs/manager/cert.pem -cacert=./pki/internal/organization-a/ca/root.pem -H 'Authorization: Basic YWRtaW5Abmx4LmxvY2FsOmRldmVsb3BtZW50' controller-api.organization-a.nlx.local:443 nlx.controller_internal.ControllerService/RegisterInway
+curl -v -X 'PUT' \                                                                                                                                                                  ✔  08:30:49  
+  --key pki/internal/organization-a/certs/controller-api/key.pem \
+  --cert pki/internal/organization-a/certs/controller-api/cert.pem \
+  --cacert pki/internal/organization-a/ca/root.pem \
+  'https://controller-api.organization-a.nlx.local:7600/groups/fsc-local/inways/frank-api-gateway' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{"address": "https://frank-api-gateway.organization-a.nlx.local:9443"}'
 ```
 
 ### Current status

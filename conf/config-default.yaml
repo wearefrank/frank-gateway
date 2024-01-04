@@ -239,7 +239,6 @@ nginx_config:                     # Config for render the template to generate n
                                   # connection with the upstream server, allowing the upstream server to
                                   # select the appropriate SSL/TLS certificate and configuration based on
                                   # the requested server name.
-
     upstream:
       keepalive: 320              # Set the maximum time of keep-alive connections to the upstream servers.
                                   # When the value is exceeded, the least recently used connection is closed.

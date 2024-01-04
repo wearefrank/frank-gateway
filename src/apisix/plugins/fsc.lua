@@ -9,6 +9,7 @@ local errlog        = require "ngx.errlog"
 local ngx           = require("ngx")
 local string        = string
 local router        = require("apisix.router")
+local bp_manager    = require("apisix.utils.batch-processor")
 
 local plugin_name = "fsc"
 
@@ -19,6 +20,12 @@ local schema = {
             type = "string"
         },
         fsc_group_id = {
+            type = "string"
+        },
+        internal_cert_chain = {
+            type = "string"
+        },
+        internal_key = {
             type = "string"
         },
     },
@@ -35,10 +42,74 @@ local _M = {
     metadata_schema = metadata_schema
 }
 
+local register_inway_func = function(entries)
+
+    local httpc = assert(require('resty.http').new())
+
+    local ok, err = httpc:connect {
+        scheme = 'http',
+        host = 'unix:/usr/local/apisix/internal.sock',
+    }
+
+    if ok and not err then
+        local res, err = assert(httpc:request {
+            method = 'PUT',
+            path = "/groups/fsc-local/inways/frank-api-gateway",
+            body = '{"address": "https://frank-api-gateway:9443"}',
+            headers = {
+                ['Host'] = 'controller-api.organization-a.nlx.local',
+                ["Content-Type"] = "application/json",
+            },
+        })
+
+        if err ~= nil then
+            core.log.error(err)
+            return false, err, true
+        end
+
+        core.log.debug("FSC Controller register Inway response status: ", res.status)
+    end
+
+    httpc:close()
+
+    return true
+
+end
+
+local config_bat = {
+    name = plugin_name,
+}
+
+
+local batch_processor, err = bp_manager:new(register_inway_func, config_bat)
+if not batch_processor then
+    core.log.warn("error when creating the batch processor: ", err)
+    return
+end
+
 function _M.check_schema(conf, schema_type)
     if schema_type == core.schema.TYPE_METADATA then
         return core.schema.check(metadata_schema, conf)
     end
+
+    local key_file, err = io.open("/usr/local/apisix/conf/cert/cert-key.pem", "w+b")
+    if key_file == nil then
+        core.log.error("Couldn't open key file: " .. err)
+    else
+        key_file:write(conf.internal_key)
+        key_file:close()
+    end
+
+    local cert_file, err = io.open("/usr/local/apisix/conf/cert/cert.pem", "w+b")
+    if cert_file == nil then
+        core.log.error("Could not open cert file: ", err)
+    else
+        cert_file:write(conf.internal_cert_chain)
+        cert_file:close()
+    end
+
+    batch_processor:push({test = 1})
+
     return core.schema.check(schema, conf)
 end
 
@@ -162,8 +233,6 @@ function _M.access(conf, ctx)
         return 401, error_msg
     end
 
-    ngx.req.set_header("Fsc-Authorization", "Bearer " .. headers) -- need  to prepend Authorization header with Bearer so OIDC library works.
-
     -- for FSC token validation
     local manager_public_key = conf.manager_public_key
     local validated_token, err = validate_token(manager_public_key)
@@ -201,7 +270,7 @@ function _M.access(conf, ctx)
         return 401, error_msg
     end
 
-    -- FSC Group ID check 
+    -- FSC Group ID check
     local valid_group_id = is_valid_group_id(validated_token, conf.fsc_group_id)
     if not valid_group_id then
         local error = string.format("wrong group ID in token: %s: want group ID %s", conf.fsc_group_id, validated_token.gid)
