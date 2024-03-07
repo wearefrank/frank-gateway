@@ -10,6 +10,7 @@ local ngx           = require("ngx")
 local string        = string
 local router        = require("apisix.router")
 local bp_manager    = require("apisix.utils.batch-processor")
+local registration_cache = ngx.shared["fsc-registration"]
 
 local plugin_name = "fsc"
 
@@ -39,63 +40,83 @@ local _M = {
     priority = 1,
     name = plugin_name,
     schema = schema,
-    metadata_schema = metadata_schema
+    metadata_schema = metadata_schema,
 }
 
-local function register_inway(conf)
-    return function(entries)
-        local httpc = assert(require('resty.http').new())
+local register_inway = function(entry)
+    local httpc = assert(require('resty.http').new())
+    local ok, err = httpc:connect {
+        scheme = 'https',
+        host = 'controller-api.organization-a.nlx.local',
+        port = '7600',
+        ssl_verify = false,
+        ssl_cert = entry[1].ssl_cert,
+        ssl_key = entry[1].ssl_key,
+    }
 
-        local ok, err = httpc:connect {
-            scheme = 'https',
-            host = 'controller-api.organization-a.nlx.local',
-            port = '7600',
-            ssl_verify = false,
-            ssl_cert = conf.internal_cert_chain,
-            ssl_key = conf.internal_key,
-        }
+    if ok and not err then
+        local res, err = assert(httpc:request {
+            method = 'PUT',
+            path = entry[1].path,
+            body = entry[1].body,
+            headers = {
+                ['Host'] = 'controller-api.organization-a.nlx.local',
+                ["Content-Type"] = "application/json",
+            },
+        })
 
-        if ok and not err then
-            local res, err = assert(httpc:request {
-                method = 'PUT',
-                path = "/groups/fsc-local/inways/frank-api-gateway",
-                body = '{"address": "https://frank-api-gateway:9443"}',
-                headers = {
-                    ['Host'] = 'controller-api.organization-a.nlx.local',
-                    ["Content-Type"] = "application/json",
-                },
-            })
-
-            if err ~= nil then
-                core.log.error(err)
-                return false, err, true
-            end
-
-            core.log.debug("FSC Controller register Inway response status: ", res.status)
+        if err ~= nil then
+            core.log.error(err)
+            return false, err, true
         end
 
-        httpc:close()
-
-        return true
-
+        core.log.debug("FSC Controller register Inway response status: ", res.status)
     end
+
+    httpc:close()
+
+    return true
+
 end
 
 local config_bat = {
     name = plugin_name,
 }
 
+local batch_processor
+function _M.init()
+    local err
+    batch_processor, err = bp_manager:new(register_inway, config_bat)
+    if not batch_processor then
+        core.log.warn("error when creating the batch processor: ", err)
+        return
+    end
+end
+
 function _M.check_schema(conf, schema_type)
     if schema_type == core.schema.TYPE_METADATA then
         return core.schema.check(metadata_schema, conf)
     end
 
-    local batch_processor, err = bp_manager:new(register_inway(conf), config_bat)
     if not batch_processor then
-        core.log.warn("error when creating the batch processor: ", err)
+        core.log.warn("no batch processor present, cannot automatically register inway")
         return
     end
-    batch_processor:push({test = 1})
+
+    local is_registered = registration_cache:get("registered")
+
+    if is_registered == nil then
+        registration_cache:set("registered", true)
+        core.log.debug("Inway not registered, scheduling registration call")
+        local entry = {
+            ssl_cert = conf.internal_cert_chain,
+            ssl_key = conf.internal_key,
+            path = "/groups/fsc-local/inways/frank-api-gateway",
+            body = '{"address": "https://frank-api-gateway:9443"}',
+        }
+        batch_processor:push(entry)
+        core.log.debug("registration call successfully scheduled")
+    end
 
     return core.schema.check(schema, conf)
 end
