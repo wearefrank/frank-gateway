@@ -19,3 +19,6 @@ plugins:
   - openid-connect
 nginx_config:
   error_log_level: debug
+  http:
+    custom_lua_shared_dict:
+      fsc-registration: 1m
