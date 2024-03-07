@@ -42,72 +42,59 @@ local _M = {
     metadata_schema = metadata_schema
 }
 
-local register_inway_func = function(entries)
+local function register_inway(conf)
+    return function(entries)
+        local httpc = assert(require('resty.http').new())
 
-    local httpc = assert(require('resty.http').new())
+        local ok, err = httpc:connect {
+            scheme = 'https',
+            host = 'controller-api.organization-a.nlx.local',
+            port = '7600',
+            ssl_verify = false,
+            ssl_cert = conf.internal_cert_chain,
+            ssl_key = conf.internal_key,
+        }
 
-    local ok, err = httpc:connect {
-        scheme = 'http',
-        host = 'unix:/usr/local/apisix/internal.sock',
-    }
+        if ok and not err then
+            local res, err = assert(httpc:request {
+                method = 'PUT',
+                path = "/groups/fsc-local/inways/frank-api-gateway",
+                body = '{"address": "https://frank-api-gateway:9443"}',
+                headers = {
+                    ['Host'] = 'controller-api.organization-a.nlx.local',
+                    ["Content-Type"] = "application/json",
+                },
+            })
 
-    if ok and not err then
-        local res, err = assert(httpc:request {
-            method = 'PUT',
-            path = "/groups/fsc-local/inways/frank-api-gateway",
-            body = '{"address": "https://frank-api-gateway:9443"}',
-            headers = {
-                ['Host'] = 'controller-api.organization-a.nlx.local',
-                ["Content-Type"] = "application/json",
-            },
-        })
+            if err ~= nil then
+                core.log.error(err)
+                return false, err, true
+            end
 
-        if err ~= nil then
-            core.log.error(err)
-            return false, err, true
+            core.log.debug("FSC Controller register Inway response status: ", res.status)
         end
 
-        core.log.debug("FSC Controller register Inway response status: ", res.status)
+        httpc:close()
+
+        return true
+
     end
-
-    httpc:close()
-
-    return true
-
 end
 
 local config_bat = {
     name = plugin_name,
 }
 
-
-local batch_processor, err = bp_manager:new(register_inway_func, config_bat)
-if not batch_processor then
-    core.log.warn("error when creating the batch processor: ", err)
-    return
-end
-
 function _M.check_schema(conf, schema_type)
     if schema_type == core.schema.TYPE_METADATA then
         return core.schema.check(metadata_schema, conf)
     end
 
-    local key_file, err = io.open("/usr/local/apisix/conf/cert/cert-key.pem", "w+b")
-    if key_file == nil then
-        core.log.error("Couldn't open key file: " .. err)
-    else
-        key_file:write(conf.internal_key)
-        key_file:close()
+    local batch_processor, err = bp_manager:new(register_inway(conf), config_bat)
+    if not batch_processor then
+        core.log.warn("error when creating the batch processor: ", err)
+        return
     end
-
-    local cert_file, err = io.open("/usr/local/apisix/conf/cert/cert.pem", "w+b")
-    if cert_file == nil then
-        core.log.error("Could not open cert file: ", err)
-    else
-        cert_file:write(conf.internal_cert_chain)
-        cert_file:close()
-    end
-
     batch_processor:push({test = 1})
 
     return core.schema.check(schema, conf)
