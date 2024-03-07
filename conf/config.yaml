@@ -19,27 +19,3 @@ plugins:
   - openid-connect
 nginx_config:
   error_log_level: debug
-  http_server_configuration_snippet: |
-    lua_ssl_trusted_certificate /usr/local/apisix/conf/ca.pem;
-    lua_ssl_protocols  TLSv1.2 TLSv1.3;
-    lua_ssl_verify_depth 2;
-  http_configuration_snippet: |
-    server {
-       listen unix:/usr/local/apisix/internal.sock;
-
-       server_tokens          off;
-       server_name            internal.proxy;
-
-       location /groups/fsc-local/inways/frank-api-gateway {
-          proxy_pass_request_headers off;
-          proxy_set_header              Host controller-api.organization-a.nlx.local;
-          proxy_set_header              Content-Type "application/json";
-          proxy_set_header              Accept "application/json";
-          proxy_pass                    https://controller-api.organization-a.nlx.local:7600;
-          proxy_ssl_certificate         cert/cert.pem;
-          proxy_ssl_certificate_key     cert/cert-key.pem;
-          proxy_ssl_verify              on;
-          proxy_ssl_verify_depth        2; #just example
-          proxy_ssl_trusted_certificate /usr/local/apisix/conf/ca.pem; 
-       }
-    }

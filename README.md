@@ -119,7 +119,7 @@ In order to test the FSC plugin with a local FSC cluster first make sure a local
 
 With all FSC components running the next step is to register the APISIX gateway including the FSC plugin as a FSC Inway. This can be done with a gRPC request using grpcurl:
 ```shell
-curl -v -X 'PUT' \                                                                                                                                                                  ✔  08:30:49  
+curl -v -X 'PUT' \                                                                                                                                                                
   --key pki/internal/organization-a/certs/controller-api/key.pem \
   --cert pki/internal/organization-a/certs/controller-api/cert.pem \
   --cacert pki/internal/organization-a/ca/root.pem \
@@ -134,9 +134,9 @@ APISIX uses SNI to match an incoming request with the correct keypair to establi
 
 with custom frank-api-gateway certificates:
 ```shell
-curl -v -X 'PUT' \                                                                                                                                                                  ✔  08:30:49  
-  --key pki/internal/organization-a/certs/controller-api/key.pem \
-  --cert pki/internal/organization-a/certs/controller-api/cert.pem \
+curl -v -X 'PUT' \                                                                                                                                                          
+  --key pki/internal/organization-a/certs/frank-api-gateway/cert-key.pem \
+  --cert pki/internal/organization-a/certs/frank-api-gateway/cert.pem \
   --cacert pki/internal/organization-a/ca/root.pem \
   'https://controller-api.organization-a.nlx.local:7600/groups/fsc-local/inways/frank-api-gateway' \
   -H 'accept: */*' \
