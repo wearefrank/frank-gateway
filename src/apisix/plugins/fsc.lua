@@ -10,9 +10,27 @@ local ngx           = require("ngx")
 local string        = string
 local router        = require("apisix.router")
 local bp_manager    = require("apisix.utils.batch-processor")
+local url           = require("net.url")
+
 local registration_cache = ngx.shared["fsc-registration"]
 
 local plugin_name = "fsc"
+
+local registration_schema = {
+    type = "object",
+    properties = {
+        controller_uri = {
+            type = "string"
+        },
+        inway_address = {
+            type = "string"
+        },
+        inway_name = {
+            type = "string"
+        }
+    },
+    required = {"controller_uri", "inway_address", "inway_name"}
+}
 
 local schema = {
     type = "object",
@@ -29,8 +47,12 @@ local schema = {
         internal_key = {
             type = "string"
         },
+        tx_log_url = {
+            type = "string"
+        },
+        registration = registration_schema,
     },
-    required = {"manager_public_key", "fsc_group_id"}
+    required = {"manager_public_key", "fsc_group_id", "internal_cert_chain", "internal_key", "registration"}
 }
 
 local metadata_schema = {}
@@ -47,8 +69,8 @@ local register_inway = function(entry)
     local httpc = assert(require('resty.http').new())
     local ok, err = httpc:connect {
         scheme = 'https',
-        host = 'controller-api.organization-a.nlx.local',
-        port = '7600',
+        host = entry[1].host,
+        port = entry[1].port,
         ssl_verify = false,
         ssl_cert = entry[1].ssl_cert,
         ssl_key = entry[1].ssl_key,
@@ -60,17 +82,19 @@ local register_inway = function(entry)
             path = entry[1].path,
             body = entry[1].body,
             headers = {
-                ['Host'] = 'controller-api.organization-a.nlx.local',
+                ['Host'] = entry[1].host,
                 ["Content-Type"] = "application/json",
             },
         })
 
-        if err ~= nil then
+        core.log.debug("FSC Controller register Inway response status: ", res.status)
+        if err ~= nil or res.status ~= 204 then
             core.log.error(err)
-            return false, err, true
+
+            registration_cache:set("registered", false)
+            return false, err, 1
         end
 
-        core.log.debug("FSC Controller register Inway response status: ", res.status)
     end
 
     httpc:close()
@@ -98,6 +122,16 @@ function _M.check_schema(conf, schema_type)
         return core.schema.check(metadata_schema, conf)
     end
 
+    if conf.registration then
+        local registration_url = url.parse(conf.registration.controller_uri)
+        conf.registration.host = registration_url.host
+        conf.registration.port = registration_url.port or 443
+        conf.registration.path = "/groups/" .. conf.fsc_group_id .. "/inways/" .. conf.registration.inway_name
+        core.log.debug("host: " .. conf.registration.host)
+        core.log.debug("port: " .. conf.registration.port)
+        core.log.debug("path: " .. conf.registration.path)
+    end
+
     if not batch_processor then
         core.log.warn("no batch processor present, cannot automatically register inway")
         return
@@ -111,11 +145,22 @@ function _M.check_schema(conf, schema_type)
         local entry = {
             ssl_cert = conf.internal_cert_chain,
             ssl_key = conf.internal_key,
-            path = "/groups/fsc-local/inways/frank-api-gateway",
-            body = '{"address": "https://frank-api-gateway:9443"}',
+            host = conf.registration.host,
+            port = conf.registration.port,
+            path = conf.registration.path,
+            body = '{"address": "' .. conf.registration.inway_address .. '"}',
         }
         batch_processor:push(entry)
         core.log.debug("registration call successfully scheduled")
+    end
+
+    if conf.tx_log_url then
+        local tx_log_url = url.parse(conf.tx_log_url)
+        conf.tx_log = {
+            host = tx_log_url.host,
+            port = tx_log_url.port or 443,
+            path = tx_log_url.path,
+        }
     end
 
     return core.schema.check(schema, conf)
@@ -205,31 +250,127 @@ local function is_valid_group_id(validated_token, group_id)
     return jwt_gid == group_id
 end
 
-local function format_log_entry(token)
+local function format_log_entry(token, group_id)
+
+    local group_id = group_id
+    local direction = "DIRECTION_INCOMING"
+    local created_at = os.time()
+    local transaction_id = ngx.req.get_headers()["Fsc-Transaction-Id"]
+
+    if transaction_id == nil then
+        return nil, format_error("The the Fsc-Transaction-Id header is missing", "MISSING_LOG_RECORD_ID")
+    end
+
+    -- check if token contains delegation claims
+    local source = {}
+    if token.act ~= nil  and token.act.sub ~= "" then
+        source.type = "SOURCE_TYPE_DELEGATED_SOURCE"
+        source.outway_peer_id = token.sub
+        source.delegator_peer_id = token.act.sub
+    else
+        source.type = "SOURCE_TYPE_SOURCE"
+        source.outway_peer_id = token.sub
+    end
+
+    local destination = {}
+    if token.pdi ~= nil then
+        destination.type = "DESTINATION_TYPE_DELEGATED_DESTINATION"
+        destination.service_peer_id = token.iss
+        destination.delegator_peer_id = token.pdi
+    else
+        destination.type = "DESTINATION_TYPE_DESTINATION"
+        destination.service_peer_id = token.iss
+    end
+
+    local service_name = token.svc
+    local grant_hash = token.gth
+
+    -- register variables so they can be used in APISIX logging plugins
+    core.ctx.register_var("group_id", function()
+        return group_id
+    end)
 
     core.ctx.register_var("direction", function()
-        return "DIRECTION_INCOMING"
+        return direction
     end)
 
     core.ctx.register_var("created_at", function()
-        return os.time()
+        return created_at
     end)
 
     core.ctx.register_var("transaction_id", function()
-        return ngx.req.get_headers()["Fsc-Transaction-Id"]
+        return transaction_id
     end)
 
     core.ctx.register_var("source", function(ctx)
-        return {outway_peer_id = token.sub}
+        return source
+    end)
+
+    core.ctx.register_var("destination", function(ctx)
+        return destination
     end)
 
     core.ctx.register_var("service_name", function(ctx)
-        return token.svc
+        return service_name
     end)
 
     core.ctx.register_var("grant_hash", function(ctx)
-        return token.gth
+        return grant_hash
     end)
+
+    local records = {
+        records = {}
+    }
+    records.records[1] = {
+        group_id = group_id,
+        direction = direction,
+        transaction_id = transaction_id,
+        grant_hash = grant_hash,
+        service_name = service_name,
+        source = source,
+        destination = destination,
+        created_at = created_at,
+    }
+
+    return records, nil
+end
+
+local function send_tx_log_record(log_record, txLogConf)
+    local httpc = assert(require('resty.http').new())
+    local ok, err = httpc:connect {
+        scheme = 'https',
+        host = txLogConf.host,
+        port = txLogConf.port,
+        ssl_verify = false,
+        ssl_cert = txLogConf.internal_cert_chain,
+        ssl_key = txLogConf.internal_key,
+    }
+
+    core.log.debug("txLog record: ", core.json.encode(log_record))
+
+    if ok and not err then
+        local res, call_err = assert(httpc:request {
+            method = 'POST',
+            path = txLogConf.path,
+            body = core.json.encode(log_record),
+            headers = {
+                ['Host'] = txLogConf.host,
+                ["Content-Type"] = "application/json",
+            },
+        })
+
+        core.log.debug("FSC TxLog API response status: ", res.status)
+        if call_err ~= nil or res.status ~= 204 then
+            err = "tx logging failed"
+        end
+    end
+
+    httpc:close()
+
+    if err then
+        return false, err
+    end
+    return true, nil
 end
 
 function _M.access(conf, ctx)
@@ -260,7 +401,7 @@ function _M.access(conf, ctx)
     local log_level = errlog.get_sys_filter_level()
     if log_level == ngx.DEBUG then
         local inspect = require('inspect')
-        local routes = router.router_http.routes() -- TODO consider strict routing matching svc claim with route
+        local routes = router.router_http.routes()
         core.log.debug("jws verified: " .. inspect(validated_token))
         core.log.debug("found routes in config: " .. inspect(routes))
     end
@@ -287,8 +428,26 @@ function _M.access(conf, ctx)
         return 403, error_msg
     end
 
-    format_log_entry(validated_token)
+    local log_record, err = format_log_entry(validated_token, conf.fsc_group_id)
+    if err then
+        return 400, err
+    end
 
+    if conf.tx_log then
+        local ok, err = send_tx_log_record(log_record, {
+            internal_cert_chain = conf.internal_cert_chain,
+            internal_key = conf.internal_key,
+            host = conf.tx_log.host,
+            port = conf.tx_log.port,
+            path = conf.tx_log.path,
+        })
+
+        if err then
+            core.log.error("could not send log record to Tx log")
+            local error_msg = format_error("The TransactionLog record could not be created", "TRANSACTION_LOG_WRITE_ERROR")
+            return 500, error_msg
+        end
+    end
 end
 
 function _M.body_filter(conf, ctx)

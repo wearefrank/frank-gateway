@@ -347,6 +347,11 @@ routes:
           ex22HerDiPHoHddHA1prvTTCEQh9r8oJb93wY5Eg0anBLCZNimMXqsgMwk5PnZra
           Oxg6IkscSA7NevK+y3GDx1AjY9U6VFSFnGKQ9CgH9XWBwZM6EmTCEIULTnY=
           -----END RSA PRIVATE KEY-----
+        tx_log_url: "https://txlog-api.organization-a.nlx.local:7611/logs"
+        registration:
+          controller_uri: "https://controller-api.organization-a.nlx.local:7600"
+          inway_address: "https://frank-api-gateway.organization-a.nlx.local:9443"
+          inway_name: "frank-api-gateway"
       file-logger:
         path: logs/fsc-transaction.log
         log_format: {"transaction_id": "$transaction_id", "created_at": "$created_at", "direction": "$direction", "source": "$source", "grant_hash": "$grant_hash", "destination": "$destination", "service_name": "$service_name"}

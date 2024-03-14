@@ -14,6 +14,7 @@ dev-startup:
 	--add-host=host.docker.internal:host-gateway \
 	--add-host=manager.organization-a.nlx.local:host-gateway \
 	--add-host=controller-api.organization-a.nlx.local:host-gateway \
+	--add-host=txlog-api.organization-a.nlx.local:host-gateway \
   	apache/apisix:latest
 
 .PHONY: dev-start
