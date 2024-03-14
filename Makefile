@@ -6,9 +6,6 @@ dev-startup:
   	-p 9090:9090 \
 	-v $(shell pwd)/conf/config.yaml:/usr/local/apisix/conf/config.yaml \
 	-v $(shell pwd)/conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml \
-	-v $(shell pwd)/conf/ca.pem:/usr/local/apisix/conf/ca.pem \
-	-v $(shell pwd)/conf/placeholder_client_cert.pem:/usr/local/apisix/conf/cert/cert.pem \
-	-v $(shell pwd)/conf/placeholder_client_key.pem:/usr/local/apisix/conf/cert/cert-key.pem \
 	-v $(shell pwd)/src:/usr/local/apisix/custom-plugins \
 	-v $(shell pwd)/lib:/usr/local/apisix/custom-plugin-libs \
 	--add-host=host.docker.internal:host-gateway \
