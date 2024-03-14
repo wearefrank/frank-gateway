@@ -22,3 +22,5 @@ nginx_config:
   http:
     custom_lua_shared_dict:
       fsc-registration: 1m
+  http_configuration_snippet: |
+    lua_ssl_protocols TLSv1.2 TLSv1.3;
