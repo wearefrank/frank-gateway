@@ -117,20 +117,13 @@ If everything works as expected a 200 is returned with your requested "echoed" b
 ### Testing with a local NLX/FSC cluster
 In order to test the FSC plugin with a local FSC cluster first make sure a local FSC cluster is installed and running locally using the instructions [here](https://gitlab.com/commonground/nlx/fsc-nlx)
 
-With all FSC components running the next step is to register the APISIX gateway including the FSC plugin as a FSC Inway. This can be done with a gRPC request using grpcurl:
-```shell
-curl -v -X 'PUT' \                                                                                                                                                                
-  --key pki/internal/organization-a/certs/controller-api/key.pem \
-  --cert pki/internal/organization-a/certs/controller-api/cert.pem \
-  --cacert pki/internal/organization-a/ca/root.pem \
-  'https://controller-api.organization-a.nlx.local:7600/groups/fsc-local/inways/frank-api-gateway' \
-  -H 'accept: */*' \
-  -H 'Content-Type: application/json' \
-  -d '{"address": "https://localhost:9443"}'
-```
-
 APISIX uses SNI to match an incoming request with the correct keypair to establish the TLS connection. In order for this to work locally add the following entry to your `hosts` file:
 `127.0.0.1 frank-api-gateway.organization-a.nlx.local`
+
+with all FSC components running the next step is to [startup](#running-the-fsc-plugin-locally-) the APISIX Gateway with the FSC plugin configured.
+During startup the APISIX FSC plugin registers itself to the FSC controller. 
+
+If you want to manually register the Inway to the FSC controller:
 
 with custom frank-api-gateway certificates:
 ```shell
@@ -153,11 +146,10 @@ Both The FSC standard as well the plugin is currently work in progress:
 - [x] Perform `certificate bound token validation` according to: [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705#name-jwt-certificate-thumbprint-)
 - [x] Respond with FSC error codes
 - [x] Enable caching for JWKS keys 
-- [ ] Tests
-- [ ] FSC logging (waiting for FSC-NLX issue: https://gitlab.com/commonground/nlx/fsc-nlx/-/issues/41)
+- [x] FSC logging (waiting for FSC-NLX issue: https://gitlab.com/commonground/nlx/fsc-nlx/-/issues/41)
 - [ ] Optional routing based on JWT claim servicename (APISIX can likely handle all routing requirements out of the box. If FSC token based routing needs to be implemented see: https://api7.ai/blog/dynamic-routing-based-on-user-credentials)
-- [ ] Optional get JWKS via endpoint (waiting for FSC-NLX issue: https://gitlab.com/commonground/nlx/fsc-nlx/-/issues/42)
-- [ ] Optional register Inway automatically by the manager of the organization (waiting for FSC-NLX issue: https://gitlab.com/commonground/nlx/fsc-nlx/-/issues/41)
+- [ ] Optional get JWKS via endpoint 
+- [x] Optional register Inway automatically by the manager of the organization (waiting for FSC-NLX issue: https://gitlab.com/commonground/nlx/fsc-nlx/-/issues/41)
 
 ### APISIX config generation
 Integration with `Frank Framework` is defined as the ability to configure APISIX for specific API's from the Frank Framework. This enables te creation of API's and their respective configuration needed in APISIX to be managed from a single place, the Frank Framework.
