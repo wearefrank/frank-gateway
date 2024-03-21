@@ -4,6 +4,7 @@ dev-startup:
   	-p 9080:9080 \
   	-p 9443:9443 \
   	-p 9090:9090 \
+	-v $(shell pwd)/conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml \
 	-v $(shell pwd)/conf/config.yaml:/usr/local/apisix/conf/config.yaml \
 	-v $(shell pwd)/conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml \
 	-v $(shell pwd)/src:/usr/local/apisix/custom-plugins \
@@ -49,6 +50,8 @@ gw-startup:
 	-v $(shell pwd)/conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml \
 	--add-host=host.docker.internal:host-gateway \
 	--add-host=manager.organization-a.nlx.local:host-gateway \
+	--add-host=controller-api.organization-a.nlx.local:host-gateway \
+	--add-host=txlog-api.organization-a.nlx.local:host-gateway \
   	frank-api-gateway:latest
 
 .PHONY: gw-rm
