@@ -121,6 +121,10 @@ apisix:
     # fallback_sni: "my.default.domain"      # Fallback SNI to be used if the client does not send SNI during
     #                                        # the handshake.
 
+  events:                             # Event distribution module configuration
+    module: lua-resty-events          # Sets the name of the events module used.
+    # Supported module: lua-resty-worker-events and lua-resty-events
+
   enable_control: true  # Control API
   # control:
   #  ip: 127.0.0.1
@@ -191,8 +195,7 @@ nginx_config:                     # Config for render the template to generate n
     # Add custom Nginx main configuration to nginx.conf.
     # The configuration should be well indented!
   http_configuration_snippet: |
-    # Add custom Nginx http configuration to nginx.conf.
-    # The configuration should be well indented!
+    lua_ssl_protocols TLSv1.2 TLSv1.3;
   http_server_configuration_snippet: |
     # Add custom Nginx http server configuration to nginx.conf.
     # The configuration should be well indented!
@@ -232,8 +235,8 @@ nginx_config:                     # Config for render the template to generate n
       - 127.0.0.1
       - "unix:"
 
-    # custom_lua_shared_dict:     # Custom Nginx Lua shared memory zone for nginx.conf. Size units are m or k.
-    #  ipc_shared_dict: 100m      # Custom shared cache, format: `cache-key: cache-size`
+    custom_lua_shared_dict:
+      fsc-registration: 1m
 
     proxy_ssl_server_name: true   # Send the server name in the SNI extension when establishing an SSL/TLS
                                   # connection with the upstream server, allowing the upstream server to
@@ -454,6 +457,7 @@ plugins:                           # plugin list (sorted by priority)
   - uri-blocker                    # priority: 2900
   - request-validation             # priority: 2800
   - chaitin-waf                    # priority: 2700
+  - multi-auth                     # priority: 2600
   - openid-connect                 # priority: 2599
   - cas-auth                       # priority: 2597
   - authz-casbin                   # priority: 2560
@@ -463,6 +467,7 @@ plugins:                           # plugin list (sorted by priority)
   - hmac-auth                      # priority: 2530
   - basic-auth                     # priority: 2520
   - jwt-auth                       # priority: 2510
+  - jwe-decrypt                    # priority: 2509
   - key-auth                       # priority: 2500
   - consumer-restriction           # priority: 2400
   - forward-auth                   # priority: 2002
@@ -479,6 +484,7 @@ plugins:                           # plugin list (sorted by priority)
   - limit-count                    # priority: 1002
   - limit-req                      # priority: 1001
   #- node-status                   # priority: 1000
+  #- brotli                        # priority: 996
   - gzip                           # priority: 995
   - server-info                    # priority: 990
   - traffic-split                  # priority: 966

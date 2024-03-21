@@ -3,24 +3,9 @@ deployment:
   role_data_plane:
     config_provider: yaml
 apisix:
-  extra_lua_path: "/usr/local/apisix/custom-plugins/?.lua"
-  extra_lua_cpath: "/usr/local/apisix/custom-plugin-libs/?.so"
   enable_control: true
   control:
-    ip: "127.0.0.1"
+    ip: "0.0.0.0"
     port: 9090
-  ssl:
-    ssl_protocols: TLSv1.2 TLSv1.3
-    ssl_ciphers: DEFAULT
-plugins:
-  - fsc
-  - soap-action-router
-  - file-logger
-  - openid-connect
 nginx_config:
   error_log_level: debug
-  http:
-    custom_lua_shared_dict:
-      fsc-registration: 1m
-  http_configuration_snippet: |
-    lua_ssl_protocols TLSv1.2 TLSv1.3;
