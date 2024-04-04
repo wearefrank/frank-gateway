@@ -172,4 +172,3 @@ plugins:
   - tencent-cloud-cls
   - ai
   - cas-auth
-  - fsc
