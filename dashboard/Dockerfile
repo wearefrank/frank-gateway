@@ -1,4 +1,4 @@
-FROM apache/apisix-dashboard:3.0.1-centos
+FROM apache/apisix-dashboard:3.0.0-centos
 
 LABEL org.opencontainers.image.title="Frank API Dashboard"
 LABEL org.opencontainers.image.description="Open Source API Dashboard by We Are Frank! based on Apache APISIX"

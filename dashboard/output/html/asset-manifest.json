@@ -57,7 +57,7 @@
   "/t__plugin-layout__Layout.css": "/t__plugin-layout__Layout.68bfa84a.chunk.css",
   "/t__plugin-layout__Layout.js": "/t__plugin-layout__Layout.5ee27898.async.js",
   "/umi.css": "/umi.09cf25c5.css",
-  "/umi.js": "/umi.97f1f909.js",
+  "/umi.js": "/umi.22f7fe49.js",
   "/vendors~p__ServerInfo.css": "/vendors~p__ServerInfo.260ec31a.chunk.css",
   "/vendors~p__ServerInfo.js": "/vendors~p__ServerInfo.76aa4ef6.async.js",
   "/33.56004bf7.async.js": "/33.56004bf7.async.js",
@@ -1204,5 +1204,5 @@
   "/monaco-editor/package.json": "/monaco-editor/package.json",
   "/static/codicon.ttf": "/static/codicon.f1fd2824.ttf",
   "/static/default-plugin.png": "/static/default-plugin.png",
-  "/static/logo.svg": "/static/logo.1d72476e.svg"
+  "/static/logo.svg": "/static/logo.bdc2d26a.svg"
 }
