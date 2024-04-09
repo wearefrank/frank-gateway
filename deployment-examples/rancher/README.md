@@ -4,7 +4,8 @@ Deploying the APISIX ingress controller into the We Are Frank Kubernetes cluster
 ## Prerequisites
 In order to deploy the APISIX ingress and hello world API's the following is needed:
 - Access to the Kubernetes cluster
-- Helm installed
+- Install [Helm](https://helm.sh/)
+- Install [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - Helm charts installed 
     - https://charts.bitnami.com/bitnami
     - https://charts.apiseven.com
@@ -24,11 +25,9 @@ helm install apisix apisix/apisix \
   --set ingress-controller.config.apisix.serviceNamespace=ingress-apisix
 ```
 
-
 ```shell
 kubectl port-forward svc/apisix-gateway 8080:80 -n ingress-apisix
 ```
-
 
 ### Install Upstream API's
 Installs two upstream (backend) API's `Foo` and `Bar`

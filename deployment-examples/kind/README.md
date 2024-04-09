@@ -1,4 +1,12 @@
+# APISIX Ingress using Kind
+Setup a minimal local kubernetes cluster using [kind](https://kind.sigs.k8s.io/) and deploy the APISIX ingress controller. 
 
+## Prerequisites
+- Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
+- Install [Helm](https://helm.sh/)
+- Install [kubectl](https://kubernetes.io/docs/tasks/tools/)
+
+### Commands
 
 ```shell
 kind create cluster --name apisix --config=kind-cluster-config.yaml
