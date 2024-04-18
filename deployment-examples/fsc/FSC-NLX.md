@@ -56,14 +56,14 @@ The container exposes port `9080` as the traffic port of APISIX.
 In order to test the FSC plugin a local FSC cluster (also called a `group`) is needed. First make sure a local FSC cluster is installed and running locally using the instructions [here](https://gitlab.com/commonground/nlx/fsc-nlx)
 
 The test setup has the following overview of components:
-![test overview](docs/diagrams/FSC-NLX-demo-setup-Overview.drawio.png)
+![test overview](../../docs/diagrams/FSC-NLX-demo-setup-Overview.drawio.png)
 
 With all FSC components running the next step is to perform some preliminary setup steps. 
 In order to execute API requests to the Frank API Gateway acting as an FSC NLX Inway some preliminary setup steps need to be executed.
 
 #### Preliminary step 1
 The second step is to expose a service via our newly registered Inway. Which in our case is the Frank API Gateway. 
-![step 1](docs/diagrams/FSC-NLX-demo-setup-prerequisites%20-%202.drawio.png)
+![step 1](../../docs/diagrams/FSC-NLX-demo-setup-prerequisites%20-%202.drawio.png)
 
 This is done via the UI of manager which is served by the controller component. Since the Inway is registered in `Gemeente Stijns` we need to go to the manager of `Gemeente Stijns`
 Which can be found [Gemeente Stijns (Organization A) (HTTP: 3011)](http://controller.organization-a.nlx.local:3011/) (credentials: admin@nlx.local / development)
@@ -76,12 +76,12 @@ Fill in the form for creating a new service:
 - endpoint URL: https://echo-api.3scale.net
 - Inway: select the frank api gateway
 
-![new service](docs/diagrams/service-toevoegen.png)
+![new service](../../docs/diagrams/service-toevoegen.png)
 
 #### Preliminary step 2
 The last preliminary step is to issue a service connection request from one organization to another. This is done by creating  a `contract` containing a `service connection grant` from the organizatin `Vergunningsoftware` to the organization `gemeente Stijns` (our service provider)
 
-![step 3](docs/diagrams/FSC-NLX-demo-setup-prerequisites%20-%203.drawio.png)
+![step 3](../../docs/diagrams/FSC-NLX-demo-setup-prerequisites%20-%203.drawio.png)
 
 This is done by performing the following steps:
 - go to the manager UI of `vergunningsoftware` (http://controller.organization-c.nlx.local:3031)
@@ -94,7 +94,7 @@ This is done by performing the following steps:
     - Outway certificate thumbprint: select the only option
 - click `Add contract` at  the bottom of the page
 
-![add contract](docs/diagrams/Add%20service%20connection%20grant.png)
+![add contract](../../docs/diagrams/Add%20service%20connection%20grant.png)
 
 However the contract is not yet valid since it must be accepted by the organization providing the service. In our case this is `Gemeente Stijns`.
 - go to the manager UI of `Gemeente Stijns` (http://controller.organization-a.nlx.local:3011/)
@@ -102,7 +102,7 @@ However the contract is not yet valid since it must be accepted by the organizat
 - click on the `magnifying glass icon` next to the contract
 - click on the `Accept` at the bottom of the modal
 
-![accept contract](docs/diagrams/accept%20contract.png)
+![accept contract](../../docs/diagrams/accept%20contract.png)
 
 
 #### Executing requests
@@ -116,7 +116,7 @@ The request will be send to the `Outway` of `Vergunningsoftware` which invokes t
 In order to have the outway select the correct contract for making the request we need to provide the `grant hash` of the contract in our request.
 
 The `grant hash` can be found in the details of the contract (by selecting the magnifying glass next tot the contract).
-![contract details](docs/diagrams/contract%20details.png)
+![contract details](../../docs/diagrams/contract%20details.png)
 
 Lastly we can issue a curl request to the outway with the `grant hash`. The curl request needs to be issued from the `fsc-nlx` since it uses a certificate and key for establishing the mtls connection.
 `Make sure you replace the Fsc-Grant-Hash header with the grant hash from your contract`.

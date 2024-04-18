@@ -21,10 +21,9 @@ The Frank API Gateway is a superset of Apache APISIX.
     - Can combine the FSC NLX Inway with different APISIX plugins 
 
 ## Layout & Structure
-
 This repository contains two components:
 1) deployment configurations & examples which can be found on the directory `deployment-examples`
-2) source code for FSC plugin
+2) source code for custom plugins
 
 ### Deployment configurations & examples
 The directory `deployment-examples` contains four deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
@@ -39,11 +38,29 @@ The `docker-compose deployment` does contain the `improved SOAP functionality` m
 - kind-ingress -> deploys APISIX as a Kubernetes ingress on a local cluster using Kind [instructions](deployment-examples/kind-ingress/README.md)
 - rancher -> deploys APISIX as a Kubernetes ingress on the WAF rancher cluster [instructions](deployment-examples/rancher/README.md)
 
-### FSC plugin
-All other directories and files are part of the `fsc plugin` created for the Frank API Gateway.
+### Custom plugins
+Custom plugins have been created for the Frank!Gateway enhancing the functionality.
 
+The following plugins have been created:
+1) FSC plugin
+2) SOAP action router
+3) OIDC client
+
+#### FSC plugin
 The FSC plugin:
 - Can act as a Inway in a FSC NLX group
 - Can combine the FSC NLX Inway with different APISIX plugins 
 
-Detailed documentation on the FSC plugin and how to run and test the FSC plugin locally can be found [here](FSC-NLX.md)
+Detailed documentation on the FSC plugin and how to run and test the FSC plugin locally can be found [here](deployment-examples/fsc/FSC-NLX.md)
+
+#### SOAP action router
+APISIX can create routing rules based on HTTP headers. However, within SOAP the specific operation is determined by the SOAP action, this SOAP action can either be in a HTTP header, Content-Type header or body.
+The plugin can extract the SOAP action and trigger the router enabling the possibility to create routes per SOAP action.
+
+Detailed documentation on the SOAP action router can be found [here](deployment-examples/docker-compose/README.md)
+
+#### OIDC client
+APISIX has existing OpenID connect and JWT plugins, but these plugins are for protecting routes. In these plugins the clients of APISIX need to authenticate and APISIX checks the access tokens.
+The OIDC client plugin enables the Frank!Gateway to a OIDC client that can authenticate with a external IDP and use the client_credentials flow to authenticate with a upstream.
+
+Detailed documentation on the OIDC client can be found here [here](deployment-examples/oidc-client/OIDC-client.md)

@@ -1,0 +1,11 @@
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml
+apisix:
+  enable_control: true
+  control:
+    ip: "0.0.0.0"
+    port: 9090
+nginx_config:
+  error_log_level: debug
