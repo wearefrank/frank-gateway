@@ -66,7 +66,7 @@ kubectl get service --namespace ingress-apisix
 
 Install Keycloak
 ```shell
-kubectl create -f https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/latest/kubernetes-examples/keycloak.yaml -n iam
+kubectl create -f https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/latest/kubernetes/keycloak.yaml -n iam
 ```
 
 Patch the nodeport for the service
