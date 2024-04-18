@@ -38,6 +38,16 @@ function _M:match_soap_action(target_action)
 	local soap_action = ngx.req.get_headers()['SOAPAction']
 	if soap_action ~= nil then
 	else
+		local content_type = ngx.req.get_headers()['Content-Type']
+		for k in string.gmatch(content_type, "[^;]+") do
+			local key, value = k:match("([^=]+)=(.*)")
+			if key == "action" then
+				soap_action = value:gsub("^%s*[\"']*(.-)[\"']*%s*$", "%1")
+			end
+		end
+	end
+
+	if soap_action == nil then
 		local body = core.request.get_body()
 		if body ~= nil then
 			local handler = xmlhandler:new()
