@@ -13,7 +13,7 @@ dev-startup:
 	--add-host=manager.organization-a.nlx.local:host-gateway \
 	--add-host=controller-api.organization-a.nlx.local:host-gateway \
 	--add-host=txlog-api.organization-a.nlx.local:host-gateway \
-  	apache/apisix:latest
+  	apache/apisix:3.8.0-debian
 
 .PHONY: dev-start
 dev-start:
