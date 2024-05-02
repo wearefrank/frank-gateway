@@ -73,8 +73,15 @@ This configuration configures multiple routes all pointing to the same SOAP serv
 
 For demonstration purposes a rate limit plugin is enabled on the `DivideInteger` route demonstrating the ability to enable different policies per SOAP operation.
 
-Routing per SOAPAction can be enabled via the dashboard using the `Advanced routing` option with the following configuration:
-![SOAPAction routing](../../docs/diagrams/apisix-soap-action-routing.png)
+Routing per SOAP action can be enabled by patching the `Route` to add a `filter_func`.
+```Shell
+curl "http://127.0.0.1:9180/apisix/admin/routes/475210670606910150" \
+-H "X-API-KEY: edd1c9f034335f136f87ad84b625c8f1" \
+-X PATCH -d '
+{
+  "filter_func": "function(vars) local router = require(\"apisix.plugins.soap-action-router\") return router:match_soap_action(\"http://tempuri.org/SOAP.Demo.DivideInteger\") end" 
+}'
+```
 
 ### Testing 
 With the configuration created issue request using the provided Postman collection: `SOAPDemo.postman_collection.json`
