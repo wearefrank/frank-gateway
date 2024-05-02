@@ -6,13 +6,14 @@ dev-startup:
   	-p 9090:9090 \
 	-v $(shell pwd)/conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml \
 	-v $(shell pwd)/conf/config.yaml:/usr/local/apisix/conf/config.yaml \
-	-v $(shell pwd)/conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml \
+	-v $(shell pwd)/conf/oidc_client_apisix.yaml:/usr/local/apisix/conf/apisix.yaml \
 	-v $(shell pwd)/src:/usr/local/apisix/custom-plugins \
 	-v $(shell pwd)/lib:/usr/local/apisix/custom-plugin-libs \
 	--add-host=host.docker.internal:host-gateway \
 	--add-host=manager.organization-a.nlx.local:host-gateway \
 	--add-host=controller-api.organization-a.nlx.local:host-gateway \
 	--add-host=txlog-api.organization-a.nlx.local:host-gateway \
+	--add-host=keycloak.iam.svc.cluster.local:host-gateway \
   	apache/apisix:3.8.0-debian
 
 .PHONY: dev-start
