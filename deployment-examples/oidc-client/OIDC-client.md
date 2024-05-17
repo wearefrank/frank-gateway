@@ -27,7 +27,6 @@ When the token response does not contain a `expires_in` the value in `default_ex
 
 ## Using the plugin
 This directory provides a demo setup using Keycloak as Authorization server.
-TODO explain the setup
 
 For this demo two different OIDC flows are in play. The client of the Frank!Gateway uses the `Authorization Code flow` to authenticate with the `internal keycloak` represented as a separate keycloak realm: `apisix_test_realm`.
 When authenticated the Frank!Gateway uses the `openid-connect-client` plugin to obtain an access token using the `Client Credentials flow` with the `external keycloak` represented as a separate keycloak realm: `external_test_realm`. 
