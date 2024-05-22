@@ -27,9 +27,9 @@ jobs:
       matrix:
         include:
           - dockerfile: ./Dockerfile
-            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            image: ghcr.io/wearefrank/frank-gateway
           - dockerfile: ./dashboard/Dockerfile
-            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-dashboard
+            image: ghcr.io/wearefrank/frank-gateway-dashboard
             
     permissions:
       contents: read
