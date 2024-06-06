@@ -44,6 +44,7 @@ The Makefile contains the following commands:
 
 When the container is started a container with the name of `apache-apisix-standalone` is run. 
 
+The specific configuration for the FSC plugin can be found in the `conf/fsc` directory. All `Make` commands are executed from this directory.
 To startup the container for the first time:
 ```shell
 make dev-startup
