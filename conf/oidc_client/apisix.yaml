@@ -1,8 +1,6 @@
 routes:
   - name: foo
     uri: /foo/*
-#    methods:
-#      - GET
     service_id: 1
     plugins:
       openid-connect:
