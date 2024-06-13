@@ -522,6 +522,7 @@ plugins:                           # plugin list (sorted by priority)
   - example-plugin                 # priority: 0
   - fsc
   - openid-connect-client
+  - limit-size
   #- gm                            # priority: -43
   - aws-lambda                     # priority: -1899
   - azure-functions                # priority: -1900

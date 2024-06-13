@@ -42,11 +42,12 @@ The `docker-compose deployment` does contain the `improved SOAP functionality` m
 Custom plugins have been created for the Frank!Gateway enhancing the functionality.
 
 The following plugins have been created:
-1) FSC plugin
+1) FSC
 2) SOAP action router
 3) OIDC client
+4) Limit size
 
-#### FSC plugin
+#### FSC 
 The FSC plugin:
 - Can act as a Inway in a FSC NLX group
 - Can combine the FSC NLX Inway with different APISIX plugins 
@@ -64,3 +65,6 @@ APISIX has existing OpenID connect and JWT plugins, but these plugins are for pr
 The OIDC client plugin enables the Frank!Gateway to a OIDC client that can authenticate with a external IDP and use the client_credentials flow to authenticate with a upstream.
 
 Detailed documentation on the OIDC client can be found here [here](deployment-examples/oidc-client/OIDC-client.md)
+
+#### Limit size
+blocks either requests and or responses if the payload or entire request or response is larger than a pre-configured threshold.
