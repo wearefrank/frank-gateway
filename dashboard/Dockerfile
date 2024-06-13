@@ -13,3 +13,4 @@ LABEL based-on="Apache APISIX Dashboard 3.6"
 COPY dashboard/output/conf /usr/local/apisix-dashboard/conf
 COPY dashboard/output/dag-to-lua /usr/local/apisix-dashboard/dag-to-lua
 COPY dashboard/output/html /usr/local/apisix-dashboard/html
+
