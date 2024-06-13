@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-# yamllint disable rule:comments-indentation
 conf:
   listen:
     # host: 127.0.0.1     # the address on which the `Manager API` should listen.
@@ -35,8 +34,8 @@ conf:
     - ::1                 # In this example, access is allowed only for IPv4 network 127.0.0.1, and for IPv6 network ::1.
                           # It also support CIDR like 192.168.1.0/24 and 2001:0db8::/32
   etcd:
-    endpoints:            # supports defining multiple etcd host addresses for an etcd cluster
-      - 127.0.0.1:2379
+    endpoints:          # supports defining multiple etcd host addresses for an etcd cluster
+      - "http://etcd:2379"
                           # yamllint disable rule:comments-indentation
                           # etcd basic auth info
     # username: "root"    # ignore etcd username if not enable etcd auth
@@ -173,3 +172,4 @@ plugins:
   - ai
   - cas-auth
   - fsc
+  - openid-connect-client
