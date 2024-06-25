@@ -60,7 +60,7 @@ services:
     image: prom/prometheus:v2.25.0
     restart: always
     volumes:
-      - conf/prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./conf/prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     networks:
@@ -72,9 +72,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - "conf/grafana_conf/provisioning:/etc/grafana/provisioning"
-      - "conf/grafana_conf/dashboards:/var/lib/grafana/dashboards"
-      - "conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
+      - "./conf/grafana_conf/provisioning:/etc/grafana/provisioning"
+      - "./conf/grafana_conf/dashboards:/var/lib/grafana/dashboards"
+      - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
     networks:
       apisix:
 
