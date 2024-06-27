@@ -23,6 +23,12 @@ local schema = {
 			maximum = 100000,
 			default = 300,
 			description = "default expiration of cached tokens, when expiration is not provided by IDP in token response"
+		},
+		scope = {
+			type = "string"
+		},
+		resource_server = {
+			type = "string"
 		}
 	},
 	required = {"token_endpoint", "client_id", "client_secret"}
@@ -50,6 +56,7 @@ function _M.access(conf, ctx)
 	local client_id = conf.client_id
 	local client_secret = conf.client_secret
 	local token_endpoint = conf.token_endpoint
+	local scope = conf.scope
 
 	local cached_token = token_cache:get(client_id)
 	if cached_token ~= nil then
@@ -67,7 +74,16 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = "grant_type=client_credentials&client_id=" .. client_id .. "&client_secret=" .. client_secret
+	local request_body = "grant_type=client_credentials&client_id=" .. client_id .. "&client_secret=" .. client_secret -- + scope
+-- check if scope is filled, if yes add to request body
+	if scope not nil then
+		request_body = request_body .. "&scope=" .. scope
+	end
+
+	if resource_server not nil then
+		request_body = request_body .. "&resourceServer=" .. resource_server
+	end
+	
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
