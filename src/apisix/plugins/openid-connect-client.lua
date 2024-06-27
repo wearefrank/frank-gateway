@@ -57,6 +57,7 @@ function _M.access(conf, ctx)
 	local client_secret = conf.client_secret
 	local token_endpoint = conf.token_endpoint
 	local scope = conf.scope
+	local resource_server = conf.resource_server
 
 	local cached_token = token_cache:get(client_id)
 	if cached_token ~= nil then
@@ -74,16 +75,16 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = "grant_type=client_credentials&client_id=" .. client_id .. "&client_secret=" .. client_secret -- + scope
--- check if scope is filled, if yes add to request body
-	if scope not nil then
+	local request_body = "grant_type=client_credentials&client_id=" .. client_id .. "&client_secret=" .. client_secret
+	if scope ~= nil then
 		request_body = request_body .. "&scope=" .. scope
 	end
 
-	if resource_server not nil then
+	if resource_server ~= nil then
 		request_body = request_body .. "&resourceServer=" .. resource_server
 	end
-	
+
+	core.log.debug("request body: " .. request_body)
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
