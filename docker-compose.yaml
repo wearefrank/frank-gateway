@@ -18,16 +18,25 @@
 name: frank-api-platform # Name of the parent container
 services:
   apisix-dashboard:
-    image: frank-gateway-dashboard:master
+    image: ghcr.io/wearefrank/frank-gateway-dashboard:master
+    volumes:
+      - ./dashboard/output/conf:/usr/local/apisix-dashboard/conf
+      - ./dashboard/output/dag-to-lua:/usr/local/apisix-dashboard/dag-to-lua
+      - ./dashboard/output/html:/usr/local/apisix-dashboard/html
     restart: always
+    depends_on:
+     - etcd
     ports:
     - "9000:9000"
     networks:
       apisix:
 
   apisix:
-    image: frank-gateway:master
+    image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
+    volumes:
+      - ./src:/usr/local/apisix/custom-plugins:ro
+      - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
     depends_on:
       - etcd
     #network_mode: host
