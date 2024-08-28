@@ -25,6 +25,17 @@ This repository contains two components:
 1) deployment configurations & examples which can be found on the directory `deployment-examples`
 2) source code for custom plugins
 
+### Building the images
+The Frank!Gateway can be built using the following command:
+```shell
+docker build --build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') -t frank-api-gateway .
+```
+
+The accompanying dashboard can be built with the following command:
+```shell
+docker build -f dashboard/Dockerfile --build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') -t frank-api-dashboard .
+``` 
+
 ### Deployment configurations & examples
 The directory `deployment-examples` contains four deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
 The goal of these deployment examples is for experimenting with Apache APISIX in different deployment approaches.
