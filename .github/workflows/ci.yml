@@ -19,32 +19,32 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  version-next:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      version-next: ${{ steps.reference.outputs.next-reference }}
-      version-next-strict: ${{ steps.reference.outputs.next-reference }}
-    steps:
-      - uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
-        with:
-          disable-sudo: true
-          egress-policy: block
-          allowed-endpoints: >
-            github.com:443
+  # version-next:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #   outputs:
+  #     version-next: ${{ steps.reference.outputs.next-reference }}
+  #     version-next-strict: ${{ steps.reference.outputs.next-reference }}
+  #   steps:
+  #     - uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
+  #       with:
+  #         disable-sudo: true
+  #         egress-policy: block
+  #         allowed-endpoints: >
+  #           github.com:443
 
-      - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #4.1.7
+  #     - name: Checkout
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #4.1.7
 
-      - name: Next Reference
-        id: reference
-        uses: wearefrank/ci-cd-templates/next-reference@5ec30763e8d8eeed008edcac3c6a329367e42760 #1.0.4
+  #     - name: Next Reference
+  #       id: reference
+  #       uses: wearefrank/ci-cd-templates/next-reference@5ec30763e8d8eeed008edcac3c6a329367e42760 #1.0.4
  
           
   build-and-push-image:
     runs-on: ubuntu-latest
-    needs: version-next
+  #  needs: version-next
     strategy:
       fail-fast: false
       matrix:
@@ -88,14 +88,14 @@ jobs:
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 #5.5.1
         with:
           images: ${{ matrix.image }}
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version-next.outputs.version-next }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version-next.outputs.version-next }}
-            type=semver,pattern={{major}},value=${{ needs.version-next.outputs.version-next }}
-            type=ref,event=pr
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') }}
-          flavor: |
-            latest=false
+          tags: ${{ github.run_id }}
+          #   type=semver,pattern={{version}},value=${{ needs.version-next.outputs.version-next }}
+          #   type=semver,pattern={{major}}.{{minor}},value=${{ needs.version-next.outputs.version-next }}
+          #   type=semver,pattern={{major}},value=${{ needs.version-next.outputs.version-next }}
+          #   type=ref,event=pr
+          #   type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') }}
+          # flavor: |
+          #   latest=false
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
