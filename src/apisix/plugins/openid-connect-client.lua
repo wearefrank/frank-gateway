@@ -29,9 +29,13 @@ local schema = {
 		},
 		resource_server = {
 			type = "string"
+		},
+		grant_type = {
+			type = "string",
+			default = "client_credentials"
 		}
 	},
-	required = {"token_endpoint", "client_id", "client_secret"}
+	required = {"grant_type", "token_endpoint", "client_id", "client_secret"}
 }
 
 local metadata_schema = {}
@@ -53,6 +57,7 @@ end
 
 function _M.access(conf, ctx)
 
+	local grant_type = conf.grant_type
 	local client_id = conf.client_id
 	local client_secret = conf.client_secret
 	local token_endpoint = conf.token_endpoint
@@ -76,9 +81,13 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = "grant_type=client_credentials&client_id=" .. client_id .. "&client_secret=" .. client_secret
+	local request_body = "client_id=" .. client_id .. "&client_secret=" .. client_secret
 	if scope ~= nil then
 		request_body = request_body .. "&scope=" .. scope
+	end
+
+	if grant_type ~= nil then
+		request_body = request_body .. "&grant_type=" .. grant_type
 	end
 
 	if resource_server ~= nil then
