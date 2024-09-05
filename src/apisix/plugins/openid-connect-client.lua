@@ -8,9 +8,6 @@ local plugin_name = "openid-connect-client"
 local schema = {
 	type = "object",
 	properties = {
-		grant_type = {
-			type = "string"
-		},
 		token_endpoint = {
 			type = "string"
 		},
@@ -27,19 +24,16 @@ local schema = {
 			default = 300,
 			description = "default expiration of cached tokens, when expiration is not provided by IDP in token response"
 		},
-		custom_parameters = {
-            description = "customizable parameters for OAuth request",
-			type = "object",
-			minProperties = 1,
-			patternProperties = {
-				["^[^:]+$"] = {
-					oneOf = {
-						{ type = "string" },
-						{ type = "number" }
-					}
-				}
-			},
-        },
+		scope = {
+			type = "string"
+		},
+		resource_server = {
+			type = "string"
+		},
+		grant_type = {
+			type = "string",
+			default = "client_credentials"
+		}
 	},
 	required = {"grant_type", "token_endpoint", "client_id", "client_secret"}
 }
@@ -67,7 +61,8 @@ function _M.access(conf, ctx)
 	local client_id = conf.client_id
 	local client_secret = conf.client_secret
 	local token_endpoint = conf.token_endpoint
-	local custom_params = conf.custom_parameters
+	local scope = conf.scope
+	local resource_server = conf.resource_server
 
 	local cached_token = token_cache:get(client_id)
 	if cached_token ~= nil then
@@ -80,16 +75,23 @@ function _M.access(conf, ctx)
 
 	local httpc = assert(require('resty.http').new())
 	local ok, err = httpc:connect {
+		ssl_verify = false,
 		scheme = parsed_url.scheme,
 		host = parsed_url.host,
 		port = parsed_url.port,
 	}
 
-	local request_body = "grant_type=" .. grant_type .."&client_id=" .. client_id .. "&client_secret=" .. client_secret
-	if custom_params ~= nil then
-		for param, value in pairs(custom_params) do
-			request_body = request_body .. "&" .. param .. "=" .. value
-		end
+	local request_body = "client_id=" .. client_id .. "&client_secret=" .. client_secret
+	if scope ~= nil then
+		request_body = request_body .. "&scope=" .. scope
+	end
+
+	if grant_type ~= nil then
+		request_body = request_body .. "&grant_type=" .. grant_type
+	end
+
+	if resource_server ~= nil then
+		request_body = request_body .. "&resourceServer=" .. resource_server
 	end
 
 	core.log.debug("request body: " .. request_body)
@@ -116,7 +118,7 @@ function _M.access(conf, ctx)
 		local token_response = core.json.decode(body)
 		local expiration = token_response.expires_in or conf.default_expiration
 
-		token_cache:set(client_id, token_response.access_token, expiration) --either cache entire token or at least add refresh token
+		token_cache:set(client_id, token_response.access_token, expiration)
 		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
 	end
 
