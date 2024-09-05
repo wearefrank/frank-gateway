@@ -70,8 +70,6 @@ jobs:
         include:
           - dockerfile: ./Dockerfile
             image: ghcr.io/wearefrank/frank-gateway
-          - dockerfile: ./dashboard/Dockerfile
-            image: ghcr.io/wearefrank/frank-gateway-dashboard
             
     permissions:
       contents: read
