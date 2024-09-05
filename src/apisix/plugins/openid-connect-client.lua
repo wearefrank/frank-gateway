@@ -19,6 +19,12 @@ local schema = {
 		},
 		client_secret = {
 			type = "string"
+		},		
+		scope = {
+			type = "string"
+		},
+		resource_server = {
+			type = "string"
 		},
 		default_expiration = {
 			type = "integer",
@@ -28,7 +34,7 @@ local schema = {
 			description = "default expiration of cached tokens, when expiration is not provided by IDP in token response"
 		},
 		custom_parameters = {
-            description = "customizable parameters for OAuth request",
+            description = "Set your own parameters for OAuth request",
 			type = "object",
 			minProperties = 1,
 			patternProperties = {
@@ -80,6 +86,7 @@ function _M.access(conf, ctx)
 
 	local httpc = assert(require('resty.http').new())
 	local ok, err = httpc:connect {
+		ssl_verify = false,
 		scheme = parsed_url.scheme,
 		host = parsed_url.host,
 		port = parsed_url.port,
