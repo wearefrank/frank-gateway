@@ -10,32 +10,17 @@ local schema = {
 	properties = {
 		token_endpoint = {
 			type = "string"
-	},
+		},
 		client_id_field_name = {
+			description = "Name for the field equivalent to client_id",
 			type = "string"
 		},
 		client_id_value = {
+			description = "value for the parameter with the name defined in 'client_id_field_name'",
 			type = "string"
 		},
-		-- default_expiration = {
-		-- 	type = "integer",
-		-- 	minimum = 1,
-		-- 	maximum = 100000,
-		-- 	default = 300,
-		-- 	description = "default expiration of cached tokens, when expiration is not provided by IDP in token response"
-		-- },
-		-- scope = {
-		-- 	type = "string"
-		-- },
-		-- resource_server = {
-		-- 	type = "string"
-		-- },
-		-- grant_type = {
-		-- 	type = "string",
-		-- 	default = "client_credentials"
-		-- }
-			custom_parameters = {
-            description = "Set your own parameters for OAuth request",
+		custom_parameters = {
+			description = "Set your own parameters for OAuth request",
 			type = "object",
 			minProperties = 1,
 			patternProperties = {
@@ -45,10 +30,10 @@ local schema = {
 						{ type = "number" }
 					}
 				}
-			},
-        },
-    required = {"grant_type", "token_endpoint"}
-    }
+			}
+		}
+    },
+	required = {"client_id_field_name", "client_id_value", "token_endpoint"}
 }
 
 local metadata_schema = {}
@@ -70,12 +55,10 @@ end
 
 function _M.access(conf, ctx)
 
-	local grant_type = conf.grant_type
-	local client_id = conf.client_id
-	local client_secret = conf.client_secret
+	local client_id_name = conf.client_id_field_name
+	local client_id_value = conf.client_id_value
 	local token_endpoint = conf.token_endpoint
-	local scope = conf.scope
-	local resource_server = conf.resource_server
+	local custom_params = conf.custom_parameters
 
 	local cached_token = token_cache:get(client_id)
 	if cached_token ~= nil then
@@ -94,17 +77,11 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = "client_id=" .. client_id .. "&client_secret=" .. client_secret
-	if scope ~= nil then
-		request_body = request_body .. "&scope=" .. scope
-	end
-
-	if grant_type ~= nil then
-		request_body = request_body .. "&grant_type=" .. grant_type
-	end
-
-	if resource_server ~= nil then
-		request_body = request_body .. "&resourceServer=" .. resource_server
+	local request_body = client_id_name .. "=" .. client_id_value
+	if custom_params ~= nil then
+		for param, value in pairs(custom_params) do
+			request_body = request_body .. "&" .. param .. "=" .. value
+		end
 	end
 
 	core.log.debug("request body: " .. request_body)
@@ -131,7 +108,7 @@ function _M.access(conf, ctx)
 		local token_response = core.json.decode(body)
 		local expiration = token_response.expires_in or conf.default_expiration
 
-		token_cache:set(client_id, token_response.access_token, expiration)
+		token_cache:set(client_id_value, token_response.access_token, expiration)
 		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
 	end
 
