@@ -238,6 +238,7 @@ nginx_config:                     # Config for render the template to generate n
     custom_lua_shared_dict:
       fsc-registration: 1m
       openid-connect-client-cache: 1m
+      generic-oauth-client-cache: 1m
 
     proxy_ssl_server_name: true   # Send the server name in the SNI extension when establishing an SSL/TLS
                                   # connection with the upstream server, allowing the upstream server to
@@ -522,6 +523,7 @@ plugins:                           # plugin list (sorted by priority)
   - example-plugin                 # priority: 0
   - fsc
   - openid-connect-client
+  - generic-oauth-client
   - limit-size
   #- gm                            # priority: -43
   - aws-lambda                     # priority: -1899
