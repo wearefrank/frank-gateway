@@ -655,8 +655,8 @@ deployment:                    # Deployment configurations
         role: viewer
 
     enable_admin_cors: true       # Enable Admin API CORS response header `Access-Control-Allow-Origin`.
-    allow_admin:                  # Limit Admin API access by IP addresses.
-      - 127.0.0.0/24              # If not set, any IP address is allowed.
+    # allow_admin:                  # Limit Admin API access by IP addresses.
+      # - 127.0.0.0/24              # If not set, any IP address is allowed.
       # - "::/64"
     admin_listen:                 # Set the Admin API listening addresses.
       ip: 0.0.0.0                 # Set listening IP.
