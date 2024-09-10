@@ -60,7 +60,7 @@ function _M.access(conf, ctx)
 	local token_endpoint = conf.token_endpoint
 	local custom_params = conf.custom_parameters
 
-	local cached_token = token_cache:get(client_id)
+	local cached_token = token_cache:get(client_id_value)
 	if cached_token ~= nil then
 		core.log.debug("found token in cache, using cached token")
 		core.request.add_header(ctx, "Authorization", "Bearer " .. cached_token)
