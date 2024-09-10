@@ -47,24 +47,30 @@ The following plugins have been created:
 3) OIDC client
 4) Limit size
 
-#### FSC 
+### FSC 
 The FSC plugin:
 - Can act as a Inway in a FSC NLX group
 - Can combine the FSC NLX Inway with different APISIX plugins 
 
 Detailed documentation on the FSC plugin and how to run and test the FSC plugin locally can be found [here](deployment-examples/fsc/FSC-NLX.md)
 
-#### SOAP action router
+### SOAP action router
 APISIX can create routing rules based on HTTP headers. However, within SOAP the specific operation is determined by the SOAP action, this SOAP action can either be in a HTTP header, Content-Type header or body.
 The plugin can extract the SOAP action and trigger the router enabling the possibility to create routes per SOAP action.
 
 Detailed documentation on the SOAP action router can be found [here](deployment-examples/docker-compose/README.md)
 
-#### OIDC client
+### OIDC client
 APISIX has existing OpenID connect and JWT plugins, but these plugins are for protecting routes. In these plugins the clients of APISIX need to authenticate and APISIX checks the access tokens.
 The OIDC client plugin enables the Frank!Gateway to a OIDC client that can authenticate with a external IDP and use the client_credentials flow to authenticate with a upstream.
 
 Detailed documentation on the OIDC client can be found here [here](deployment-examples/oidc-client/OIDC-client.md)
 
-#### Limit size
+### Generic OAuth client
+A flexible and custom version of the OIDC client plugin allowing you to define your own fields. 
+
+Detailed documentation on the Generic OAuth Client plugin can be found here [here](docs/generic-oauth-plugin/readme.md)
+
+
+### Limit size
 blocks either requests and or responses if the payload or entire request or response is larger than a pre-configured threshold.
