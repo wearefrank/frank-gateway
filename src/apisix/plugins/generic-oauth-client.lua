@@ -106,7 +106,7 @@ function _M.access(conf, ctx)
 		end
 
 		local token_response = core.json.decode(body)
-		local expiration = token_response.expires_in or conf.default_expiration
+		local expiration = token_response.expires_in or 300
 
 		token_cache:set(client_id_value, token_response.access_token, expiration)
 		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
