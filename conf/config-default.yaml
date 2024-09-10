@@ -19,6 +19,10 @@
 #
 
 apisix:
+  enable_control: true  # Control API
+  control:
+    ip: "0.0.0.0"
+    port: 9092
   # node_listen: 9080          # APISIX listening port.
   node_listen:                 # APISIX listening ports.
     - 9080
@@ -124,11 +128,6 @@ apisix:
   events:                             # Event distribution module configuration
     module: lua-resty-events          # Sets the name of the events module used.
     # Supported module: lua-resty-worker-events and lua-resty-events
-
-  enable_control: true  # Control API
-  # control:
-  #  ip: 127.0.0.1
-  #  port: 9090
 
   disable_sync_configuration_during_start: false  # Safe exit. TO BE REMOVED.
 
