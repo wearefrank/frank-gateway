@@ -98,7 +98,7 @@ function _M.access(conf, ctx)
 
 		core.log.debug("IDP response status: ", res.status)
 		if call_err ~= nil or res.status ~= 200 then
-			err = "getting access token failed"
+			err = "getting token failed"
 		end
 		local body, err = res:read_body()
 		if err then
@@ -108,8 +108,8 @@ function _M.access(conf, ctx)
 		local token_response = core.json.decode(body)
 		local expiration = token_response.expires_in or 300
 
-		token_cache:set(client_id_value, token_response.access_token, expiration)
-		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
+		token_cache:set(client_id_value, token_response.token, expiration)
+		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.token)
 	end
 
 	if err then
