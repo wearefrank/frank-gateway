@@ -62,7 +62,7 @@ function _M.access(conf, ctx)
 
 	local cached_token = token_cache:get(client_id_value)
 	if cached_token ~= nil then
-		core.log.debug("found token in cache, using cached token")
+		core.log.info("found token in cache, using cached token")
 		core.request.add_header(ctx, "Authorization", "Bearer " .. cached_token)
 		return
 	end
@@ -84,7 +84,7 @@ function _M.access(conf, ctx)
 		end
 	end
 
-	core.log.debug("request body: " .. request_body)
+	core.log.info("Built request: " ..  request_body)
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
@@ -96,7 +96,7 @@ function _M.access(conf, ctx)
 			},
 		})
 
-		core.log.debug("IDP response status: ", res.status)
+		core.log.info("IDP response status: ", res.status)
 		if call_err ~= nil or res.status ~= 200 then
 			err = "getting token failed"
 		end
@@ -108,8 +108,10 @@ function _M.access(conf, ctx)
 		local token_response = core.json.decode(body)
 		local expiration = token_response.expires_in or 300
 
-		token_cache:set(client_id_value, token_response.token, expiration)
-		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.token)
+		token_cache:set(client_id_value, token_response.access_token, expiration)
+		core.log.info("Token Cached: " .. token_response.access_token)
+		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
+		core.log.info("Full request: " .. core.request)
 	end
 
 	if err then
