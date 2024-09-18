@@ -77,21 +77,20 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = client_id_name .. "=" .. client_id_value
+	local request_body = client_id_name .. "=" .. ngx.escape_uri(client_id_value)
 	if custom_params ~= nil then
 		for param, value in pairs(custom_params) do
-			request_body = request_body .. "&" .. param .. "=" .. value
+			request_body = request_body .. "&" .. param .. "=" .. ngx.escape_uri(value)
 		end
 	end
 
-	core.log.info("Built request: " ..  request_body)
-	core.log.info("Escaped request: " .. ngx.escape_uri(request_body))
+	core.log.info("Built request body: " ..  request_body)
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
 			method = 'POST',
 			path = parsed_url.path,
-			body = ngx.escape_uri(request_body),
+			body = request_body,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded",
 			},

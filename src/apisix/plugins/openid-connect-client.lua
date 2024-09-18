@@ -81,26 +81,26 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = "client_id=" .. client_id .. "&client_secret=" .. client_secret
+	local request_body = "client_id=" .. ngx.escape_uri(client_id) .. "&client_secret=" .. ngx.escape_uri(client_secret)
 	if scope ~= nil then
-		request_body = request_body .. "&scope=" .. scope
+		request_body = request_body .. "&scope=" .. ngx.escape_uri(scope)
 	end
 
 	if grant_type ~= nil then
-		request_body = request_body .. "&grant_type=" .. grant_type
+		request_body = request_body .. "&grant_type=" .. ngx.escape_uri(grant_type)
 	end
 
 	if resource_server ~= nil then
-		request_body = request_body .. "&resourceServer=" .. resource_server
+		request_body = request_body .. "&resourceServer=" .. ngx.escape_uri(resource_server)
 	end
 
-	core.log.info("request body: " .. request_body)
+	core.log.info("Built request body: " .. request_body)
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
 			method = 'POST',
 			path = parsed_url.path,
-			body = ngx.escape_uri(request_body),
+			body = request_body,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded",
 			},
