@@ -66,7 +66,7 @@ function _M.access(conf, ctx)
 
 	local cached_token = token_cache:get(client_id)
 	if cached_token ~= nil then
-		core.log.debug("found token in cache, using cached token")
+		core.log.info("found token in cache, using cached token")
 		core.request.add_header(ctx, "Authorization", "Bearer " .. cached_token)
 		return
 	end
@@ -94,19 +94,19 @@ function _M.access(conf, ctx)
 		request_body = request_body .. "&resourceServer=" .. resource_server
 	end
 
-	core.log.debug("request body: " .. request_body)
+	core.log.info("request body: " .. request_body)
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
 			method = 'POST',
 			path = parsed_url.path,
-			body = request_body,
+			body = ngx.escape_uri(request_body),
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded",
 			},
 		})
 
-		core.log.debug("IDP response status: ", res.status)
+		core.log.info("IDP response status: ", res.status)
 		if call_err ~= nil or res.status ~= 200 then
 			err = "getting access token failed"
 		end
