@@ -85,6 +85,7 @@ function _M.access(conf, ctx)
 	end
 
 	core.log.info("Built request: " ..  request_body)
+	core.log.info("Escaped request: " .. ngx.escape_uri(request_body))
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
