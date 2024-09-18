@@ -90,7 +90,7 @@ function _M.access(conf, ctx)
 		local res, call_err = assert(httpc:request {
 			method = 'POST',
 			path = parsed_url.path,
-			body = request_body,
+			body = ngx.escape_uri(request_body),
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded",
 			},
