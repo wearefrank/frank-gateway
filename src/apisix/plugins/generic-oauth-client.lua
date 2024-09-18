@@ -69,7 +69,7 @@ function _M.access(conf, ctx)
 
 	local parsed_url = url.parse(token_endpoint)
 
-	core.log.info("Parsed token url (scheme, host, path, port): " ..  parsed_url.scheme .. parsed_url.host .. parsed_url.path .. parsed_url.port)
+	core.log.info("Parsed token url (scheme, host, path, port): " ..  parsed_url.scheme .. "|" .. parsed_url.host .. "|" .. parsed_url.path .. "|" .. parsed_url.port)
 	local httpc = assert(require('resty.http').new())
 	local ok, err = httpc:connect {
 		ssl_verify = false,
