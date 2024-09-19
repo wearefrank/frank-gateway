@@ -22,7 +22,7 @@ local schema = {
 			minimum = 1,
 			maximum = 100000,
 			default = 300,
-			description = "default expiration of cached tokens, when expiration is not provided by IDP in token response"
+			description = "default expiration of cached tokens, when expiration is not provided by IDP in response token"
 		},
 		scope = {
 			type = "string"

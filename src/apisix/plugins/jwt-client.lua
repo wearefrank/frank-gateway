@@ -1,9 +1,10 @@
 local core = require("apisix.core")
 local url  = require("net.url")
+local json = require("apisix.core.json")
 
-local token_cache = ngx.shared["generic-oauth-client-cache"]
+local token_cache = ngx.shared["jwt-client-cache"]
 
-local plugin_name = "generic-oauth-client"
+local plugin_name = "jwt-client"
 
 local schema = {
 	type = "object",
@@ -19,15 +20,15 @@ local schema = {
 			description = "value for the parameter with the name defined in 'client_id_field_name'",
 			type = "string"
 		},
-		default_expiration = {
+        default_expiration = {
 			type = "integer",
 			minimum = 1,
 			maximum = 100000,
-			default = 300,
+			default = 600,
 			description = "default expiration of cached tokens, when expiration is not provided by IDP in response token"
 		},
 		custom_parameters = {
-			description = "Set your own parameters for OAuth request",
+			description = "Set your own parameters for token request",
 			type = "object",
 			minProperties = 1,
 			patternProperties = {
@@ -76,7 +77,6 @@ function _M.access(conf, ctx)
 
 	local parsed_url = url.parse(token_endpoint)
 
-	-- core.log.info("Parsed token url (scheme, host, path, port): " ..  parsed_url.scheme .. "|" .. parsed_url.host .. "|" .. parsed_url.path .. "|" .. parsed_url.port)
 	local httpc = assert(require('resty.http').new())
 	local ok, err = httpc:connect {
 		ssl_verify = false,
@@ -85,40 +85,42 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = client_id_name .. "=" .. ngx.escape_uri(client_id_value)
+	local request_body = "{" .. "\"" .. client_id_name .. "\"" .. ":" .. "\"" .. client_id_value .. "\""
 	if custom_params ~= nil then
 		for param, value in pairs(custom_params) do
-			request_body = request_body .. "&" .. param .. "=" .. ngx.escape_uri(value)
+			request_body = request_body .. "," .. "\"" .. param .. "\"" .. ":" .. "\"" .. value .. "\""
 		end
 	end
+    request_body = request_body .. "}"
 
-	core.log.info("Built request body: " ..  request_body)
+	core.log.info("Built request: " ..  request_body)
 
 	if ok and not err then
-		local res, call_err = assert(httpc:request {
+		local response, call_err = assert(httpc:request {
 			method = 'POST',
 			path = parsed_url.path,
 			body = request_body,
 			headers = {
-				["Content-Type"] = "application/x-www-form-urlencoded",
+				["Content-Type"] = "application/json",
 			},
 		})
 
-		core.log.info("IDP response status: ", res.status)
-		if call_err ~= nil or res.status ~= 200 then
+		if call_err ~= nil or response.status ~= 200 then
 			err = "getting token failed"
 		end
-		local body, err = res:read_body()
+        core.log.info("IDP response status: ", response.status)
+
+        local body, err = response:read_body()
 		if err then
 			core.log.error(err)
 		end
-
+ 
 		local token_response = core.json.decode(body)
-		local expiration = token_response.expires_in or conf.default_expiration
 
-		token_cache:set(client_id_value, token_response.access_token, expiration)
-		core.log.info("Token Cached: " .. token_response.access_token)
-		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
+		token_cache:set(client_id_value, token_response.token, conf.default_expiration)
+		core.log.info("Token Cached: " .. token_response.token)
+
+		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.token)
 		core.log.info("Full request: " .. core.request)
 	end
 
