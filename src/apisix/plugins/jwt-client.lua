@@ -85,10 +85,10 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = "{" .. client_id_name .. ":" .. client_id_value
+	local request_body = "{" .. "\"" .. client_id_name .. "\"" .. ":" .. "\"" .. client_id_value .. "\""
 	if custom_params ~= nil then
 		for param, value in pairs(custom_params) do
-			request_body = request_body .. "," .. param .. ":" .. value
+			request_body = request_body .. "," .. "\"" .. param .. "\"" .. ":" .. "\"" .. value .. "\""
 		end
 	end
     request_body = request_body .. "}"
