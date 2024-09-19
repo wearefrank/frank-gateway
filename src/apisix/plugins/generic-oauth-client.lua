@@ -69,7 +69,7 @@ function _M.access(conf, ctx)
 
 	local parsed_url = url.parse(token_endpoint)
 
-	core.log.info("Parsed token url (scheme, host, path, port): " ..  parsed_url.scheme .. "|" .. parsed_url.host .. "|" .. parsed_url.path .. "|" .. parsed_url.port)
+	core.log.info("Parsed token url (scheme, host, path, port): ", parsed_url)
 	local httpc = assert(require('resty.http').new())
 	local ok, err = httpc:connect {
 		ssl_verify = false,
@@ -112,7 +112,7 @@ function _M.access(conf, ctx)
 		token_cache:set(client_id_value, token_response.access_token, expiration)
 		core.log.info("Token Cached: " .. token_response.access_token)
 		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
-		core.log.info("Full request: " .. core.request)
+		core.log.info("Full request: ", core.request)
 	end
 
 	if err then
