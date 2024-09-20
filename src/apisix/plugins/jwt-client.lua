@@ -70,7 +70,7 @@ function _M.access(conf, ctx)
 
 	local cached_token = token_cache:get(client_id_value)
 	if cached_token ~= nil then
-		core.log.info("found token in cache, using cached token")
+		core.log.info("JWT client found token in cache, using cached token")
 		core.request.add_header(ctx, "Authorization", "Bearer " .. cached_token)
 		return
 	end
@@ -78,12 +78,14 @@ function _M.access(conf, ctx)
 	local parsed_url = url.parse(token_endpoint)
 
 	local httpc = assert(require('resty.http').new())
+	core.log.info("JWT client before connect")
 	local ok, err = httpc:connect {
 		ssl_verify = false,
 		scheme = parsed_url.scheme,
 		host = parsed_url.host,
 		port = parsed_url.port,
 	}
+	core.log.info("JWT client after connect")
 
 	local request_body = "{" .. "\"" .. client_id_name .. "\"" .. ":" .. "\"" .. client_id_value .. "\""
 	if custom_params ~= nil then
@@ -93,7 +95,7 @@ function _M.access(conf, ctx)
 	end
     request_body = request_body .. "}"
 
-	core.log.info("Built request: " ..  request_body)
+	core.log.info("JWT client build request: " ..  request_body)
 
 	if ok and not err then
 		local response, call_err = assert(httpc:request {
@@ -104,11 +106,12 @@ function _M.access(conf, ctx)
 				["Content-Type"] = "application/json",
 			},
 		})
+		core.log.info("JWT client request")
 
 		if call_err ~= nil or response.status ~= 200 then
 			err = "getting token failed"
 		end
-        core.log.info("IDP response status: ", response.status)
+        core.log.info("JWT client IDP response status: ", response.status)
 
         local body, err = response:read_body()
 		if err then
@@ -118,14 +121,14 @@ function _M.access(conf, ctx)
 		local token_response = core.json.decode(body)
 
 		token_cache:set(client_id_value, token_response.token, conf.default_expiration)
-		core.log.info("Token Cached: " .. token_response.token)
+		core.log.info("JWT client token Cached: " .. token_response.token)
 
 		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.token)
-		core.log.info("Full request: " .. core.request)
+		core.log.info("JWT client full request: " .. core.request)
 	end
 
 	if err then
-		core.log.error(err)
+		core.log.error("JWT client connection error: ", err)
 	end
 
 	httpc:close()
