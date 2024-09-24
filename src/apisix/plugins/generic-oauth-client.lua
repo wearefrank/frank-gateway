@@ -19,6 +19,13 @@ local schema = {
 			description = "value for the parameter with the name defined in 'client_id_field_name'",
 			type = "string"
 		},
+		default_expiration = {
+			type = "integer",
+			minimum = 1,
+			maximum = 100000,
+			default = 300,
+			description = "default expiration of cached tokens, when expiration is not provided by IDP in response token"
+		},
 		custom_parameters = {
 			description = "Set your own parameters for OAuth request",
 			type = "object",
@@ -107,7 +114,7 @@ function _M.access(conf, ctx)
 		end
 
 		local token_response = core.json.decode(body)
-		local expiration = token_response.expires_in or 300
+		local expiration = token_response.expires_in or conf.default_expiration
 
 		token_cache:set(client_id_value, token_response.access_token, expiration)
 		core.log.info("Token Cached: " .. token_response.access_token)
