@@ -118,11 +118,7 @@ function _M.access(conf, ctx)
 
 		token_cache:set(client_id_value, token_response.access_token, expiration)
 		core.log.info("Token Cached: " .. token_response.access_token)
-		
-		local cached_token = token_cache:get(client_id_value)
-		core.request.add_header(ctx, "Authorization", "Bearer " .. cached_token)
-
-		core.log.info("Full request: ", core.request)
+		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
 	end
 
 	if err then
