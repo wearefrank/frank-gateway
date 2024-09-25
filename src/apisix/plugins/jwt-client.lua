@@ -124,7 +124,6 @@ function _M.access(conf, ctx)
 		core.log.info("JWT client token Cached: " .. token_response.token)
 
 		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.token)
-		core.log.info("JWT client full request: " .. core.request)
 	end
 
 	if err then
