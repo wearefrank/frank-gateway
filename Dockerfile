@@ -2,7 +2,7 @@ FROM apache/apisix:3.8.0-debian
 
 LABEL org.opencontainers.image.title="Frank!Gateway"
 LABEL org.opencontainers.image.description="Open Source API Gateway by We Are Frank! based on Apache APISIX"
-LABEL org.opencontainers.image.vendor="We Are Frank!"
+LABEL org.opencontainers.image.vendor="WeAreFrank!"
 LABEL org.opencontainers.image.version="0.2-beta"
 
 ARG BUILD_DATE
