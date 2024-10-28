@@ -7,7 +7,6 @@ LABEL org.opencontainers.image.version="0.2-beta"
 
 ARG BUILD_DATE
 LABEL org.opencontainers.image.created=$BUILD_DATE
-LABEL org.opencontainers.image.authors="https://github.com/pimg, https://github.com/jjansenvr"
 LABEL based-on="Apache APISIX 3.8"
 
 COPY src /usr/local/apisix/custom-plugins
