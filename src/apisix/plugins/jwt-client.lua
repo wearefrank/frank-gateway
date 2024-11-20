@@ -83,7 +83,6 @@ function _M.access(conf, ctx)
 		scheme = parsed_url.scheme,
 		host = parsed_url.host,
 		port = parsed_url.port,
-		ssl_server_name = parsed_url.host
 	})
 	core.log.info("JWT client after connect", err)
 
@@ -103,7 +102,7 @@ function _M.access(conf, ctx)
 			path = parsed_url.path,
 			body = request_body,
 			headers = {
-				["Content-Type"] = "application/json"
+				["Content-Type"] = "application/json",
 			},
 		})
 		core.log.info("JWT client request")
