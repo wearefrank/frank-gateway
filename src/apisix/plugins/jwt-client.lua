@@ -80,6 +80,7 @@ function _M.access(conf, ctx)
 	local httpc = assert(require('resty.http').new())
 	core.log.info("JWT client before connect", parsed_url)
 	local ok, err = httpc:connect({
+		ssl_verify = false,
 		scheme = parsed_url.scheme,
 		host = parsed_url.host,
 		port = parsed_url.port,
