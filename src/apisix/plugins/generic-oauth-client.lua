@@ -19,6 +19,11 @@ local schema = {
 			description = "value for the parameter with the name defined in 'client_id_field_name'",
 			type = "string"
 		},
+		ssl_verify = {
+			description = "Verify SSL certificate of host",
+			type = "boolean",
+			default = false,
+		},
 		default_expiration = {
 			type = "integer",
 			minimum = 1,
@@ -66,6 +71,7 @@ function _M.access(conf, ctx)
 	local client_id_value = conf.client_id_value
 	local token_endpoint = conf.token_endpoint
 	local custom_params = conf.custom_parameters
+	local verify_ssl = conf.ssl_verify
 
 	local cached_token = token_cache:get(client_id_value)
 	if cached_token ~= nil then
@@ -79,7 +85,7 @@ function _M.access(conf, ctx)
 	core.log.info("Parsed token url (scheme, host, path, port): ", parsed_url)
 	local httpc = assert(require('resty.http').new())
 	local ok, err = httpc:connect {
-		ssl_verify = false,
+		ssl_verify = verify_ssl,
 		scheme = parsed_url.scheme,
 		host = parsed_url.host,
 		port = parsed_url.port,
