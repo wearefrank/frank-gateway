@@ -105,7 +105,9 @@ jobs:
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 #5.5.1
         with:
           images: ${{ matrix.image }}
-          tags: ${{github.run_id}}
+          tags: |
+            type=ref,event=branch
+            type=raw,value=${{ github.run_number }}
           #   type=semver,pattern={{version}},value=${{ needs.release.outputs.version-next }}
           #   type=semver,pattern={{major}}.{{minor}},value=${{ needs.release.outputs.version-next }}
           #   type=semver,pattern={{major}},value=${{ needs.release.outputs.version-next }}
