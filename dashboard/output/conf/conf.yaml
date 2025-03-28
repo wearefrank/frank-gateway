@@ -167,7 +167,7 @@ plugins:
   - uri-blocker
   - wolf-rbac
   - zipkin
-  - elasticsearch-logge
+  - elasticsearch-logger
   - openfunction
   - tencent-cloud-cls
   - ai
