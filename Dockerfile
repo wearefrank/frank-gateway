@@ -13,15 +13,12 @@ COPY src /usr/local/apisix/custom-plugins
 COPY conf/config-default.yaml /usr/local/apisix/conf/config-default.yaml
 
 # Copy Haal Centraal certificates into image
-COPY certs/haal-centraal/Staat-der-Nederlanden-Private-Root-CA-G1.pem /usr/local/share/ca-certificates/Staat-der-Nederlanden-Private-Root-CA-G1.crt
-COPY certs/haal-centraal/DomPrivateServicesCA-G1.pem /usr/local/share/ca-certificates/DomPrivateServicesCA-G1.crt
-COPY certs/haal-centraal/QuoVadis-PKIoverheid-Private-Services-CA-G1-PEM.pem /usr/local/share/ca-certificates/QuoVadis-PKIoverheid-Private-Services-CA-G1-PEM.crt
+COPY certs /usr/local/share/ca-certificates
+
 
 #set permissions as root
 USER root
-RUN chmod 644 /usr/local/share/ca-certificates/Staat-der-Nederlanden-Private-Root-CA-G1.crt
-RUN chmod 644 /usr/local/share/ca-certificates/DomPrivateServicesCA-G1.crt
-RUN chmod 644 /usr/local/share/ca-certificates/QuoVadis-PKIoverheid-Private-Services-CA-G1-PEM.crt
+RUN chmod -R 644 /usr/local/share/ca-certificates
 
 #update the local cert store
 RUN update-ca-certificates
