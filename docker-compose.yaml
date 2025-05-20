@@ -30,7 +30,7 @@ services:
       apisix:
 
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:63
+    image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
       - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
