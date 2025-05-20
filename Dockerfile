@@ -13,8 +13,7 @@ COPY src /usr/local/apisix/custom-plugins
 COPY conf/config-default.yaml /usr/local/apisix/conf/config-default.yaml
 
 # Copy Haal Centraal certificates into image
-COPY certs/* /usr/local/share/ca-certificates/
-
+COPY certs/ /usr/local/share/ca-certificates/
 
 #set permissions as root
 USER root
