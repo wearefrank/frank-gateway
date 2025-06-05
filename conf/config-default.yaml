@@ -31,7 +31,7 @@ apisix:
   #   - ip: 127.0.0.2          # If not set, default to `0.0.0.0`
   #     port: 9082
   #     enable_http2: true
-  enable_admin: true           # Admin API
+  enable_admin: false          # Admin API
   enable_dev_mode: false       # If true, set nginx `worker_processes` to 1.
   enable_reuseport: true       # If true, enable nginx SO_REUSEPORT option.
   show_upstream_status_in_response_header: false  # If true, include the upstream HTTP status code in
@@ -635,9 +635,13 @@ plugin_attr:          # Plugin attributes
     set_ngx_var: false                # export zipkin variables to nginx variables
 
 deployment:                    # Deployment configurations
-  role: traditional            # Set deployment mode: traditional, control_plane, or data_plane.
-  role_traditional:
-    config_provider: etcd      # Set the configuration center.
+  role: data_plane             # Set deployment to standalone.
+  role_data_plane:
+    config_provider: yaml      # Set the configuration center.
+
+  # role: traditional            # Set deployment mode: traditional, control_plane, or data_plane.
+  # role_traditional:
+  #   config_provider: etcd      # Set the configuration center.
 
   #role_data_plane:            # Set data plane details if role is data_plane.
   #  config_provider: etcd     # Set the configuration center: etcd, xds, or yaml.
@@ -645,25 +649,25 @@ deployment:                    # Deployment configurations
   #role_control_plane:         # Set control plane details if role is control_plane.
   #  config_provider: etcd     # Set the configuration center.
 
-  admin:                       # Admin API
-    admin_key_required: true   # Enable Admin API authentication by default for security.
-    admin_key:
-      -
-        name: admin                             # admin: write access to configurations.
-        key: edd1c9f034335f136f87ad84b625c8f1   # Set API key for the admin of Admin API.
-        role: admin
-      -
-        name: viewer                            # viewer: read-only to configurations.
-        key: 4054f7cf07e344346cd3f287985e76a2   # Set API key for the viewer of Admin API.
-        role: viewer
+  admin:
+    # admin_key_required: true   # Enable Admin API authentication by default for security.
+    # admin_key:
+    #   -
+    #     name: admin                             # admin: write access to configurations.
+    #     key: edd1c9f034335f136f87ad84b625c8f1   # Set API key for the admin of Admin API.
+    #     role: admin
+    #   -
+    #     name: viewer                            # viewer: read-only to configurations.
+    #     key: 4054f7cf07e344346cd3f287985e76a2   # Set API key for the viewer of Admin API.
+    #     role: viewer
 
-    enable_admin_cors: true       # Enable Admin API CORS response header `Access-Control-Allow-Origin`.
-    # allow_admin:                  # Limit Admin API access by IP addresses.
+    # enable_admin_cors: true       # Enable Admin API CORS response header `Access-Control-Allow-Origin`.
+    allow_admin: false                  # Limit Admin API access by IP addresses.
       # - 127.0.0.0/24              # If not set, any IP address is allowed.
       # - "::/64"
-    admin_listen:                 # Set the Admin API listening addresses.
-      ip: 0.0.0.0                 # Set listening IP.
-      port: 9180                  # Set listening port. Beware of port conflict with node_listen.
+    # admin_listen:                 # Set the Admin API listening addresses.
+    #   ip: 0.0.0.0                 # Set listening IP.
+    #   port: 9180                  # Set listening port. Beware of port conflict with node_listen.
 
     # https_admin: true           # Enable SSL for Admin API on IP and port specified in admin_listen.
                                   # Use admin_api_mtls.admin_ssl_cert and admin_api_mtls.admin_ssl_cert_key.
@@ -672,23 +676,23 @@ deployment:                    # Deployment configurations
     #   admin_ssl_cert_key: ""    # Set path to SSL/TLS key.
     #   admin_ssl_ca_cert: ""     # Set path to CA certificate used to sign client certificates.
 
-    admin_api_version: v3         # Set the version of Admin API (latest: v3).
+    # admin_api_version: v3         # Set the version of Admin API (latest: v3).
 
-  etcd:
-    host:                         # Set etcd address(es) in the same etcd cluster.
-      - "http://etcd:2379"   # If TLS is enabled for etcd, use https://127.0.0.1:2379.
-    prefix: /apisix               # Set etcd prefix.
-    timeout: 30                   # Set timeout in seconds.
+  # etcd:
+    # host:                         # Set etcd address(es) in the same etcd cluster.
+    #   - "http://etcd:2379"   # If TLS is enabled for etcd, use https://127.0.0.1:2379.
+    # prefix: /apisix               # Set etcd prefix.
+    # timeout: 30                   # Set timeout in seconds.
     # resync_delay: 5             # Set resync time in seconds after a sync failure.
                                   # The actual resync time would be resync_delay plus 50% random jitter.
     # health_check_timeout: 10    # Set timeout in seconds for etcd health check.
                                   # Default to 10 if not set or a negative value is provided.
-    startup_retry: 2              # Set the number of retries to etcd on startup. Default to 2.
+    # startup_retry: 2              # Set the number of retries to etcd on startup. Default to 2.
     # user: root                  # Set the root username for etcd.
     # password: 5tHkHhYkjr6cQ     # Set the root password for etcd.
-    tls:
+    # tls:
       # cert: /path/to/cert       # Set the path to certificate used by the etcd client
       # key: /path/to/key         # Set the path to path of key used by the etcd client
-      verify: true                # Verify the etcd certificate when establishing a TLS connection with etcd.
+      # verify: true                # Verify the etcd certificate when establishing a TLS connection with etcd.
       # sni:                      # The SNI for etcd TLS requests.
                                   # If not set, the host from the URL is used.

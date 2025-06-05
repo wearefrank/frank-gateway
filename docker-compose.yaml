@@ -15,28 +15,16 @@
 # limitations under the License.
 #
 
-name: frank-api-platform # Name of the parent container
+name: frank-gateway # Name of the parent container
 services:
-  apisix-dashboard:
-    image: ghcr.io/wearefrank/frank-gateway-dashboard:[version]
-    volumes:
-      - ./dashboard/output/conf/conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
-    restart: always
-    depends_on:
-     - etcd
-    ports:
-    - "9000:9000"
-    networks:
-      apisix:
-
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:[version]
+    image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
+      - ./src:/usr/local/apisix/custom-plugins
       - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
-      # - ./conf/config-default.yaml:/usr/local/apisix/conf/config-custom.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
-    depends_on:
-      - etcd
+      - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
+      # - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
@@ -45,48 +33,29 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
-      
-  etcd:
-    image: bitnami/etcd:3.4.15
-    restart: always
-    volumes:
-      - etcd_data:/bitnami/etcd
-    environment:
-      ETCD_ENABLE_V2: "true"
-      ALLOW_NONE_AUTHENTICATION: "yes"
-      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
-      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
-    ports:
-      - "2379:2379/tcp"
-    networks:
-      apisix:
     
-  prometheus:
-    image: prom/prometheus:v2.25.0
-    restart: always
-    volumes:
-      - ./conf/prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-    networks:
-      apisix:
+  # prometheus:
+  #   image: prom/prometheus:v2.25.0
+  #   restart: always
+  #   volumes:
+  #     - ./conf/prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     apisix:
     
-  grafana:
-    image: grafana/grafana:7.3.7
-    restart: always
-    ports:
-      - "3000:3000"
-    volumes:
-      - "./conf/grafana_conf/provisioning:/etc/grafana/provisioning"
-      - "./conf/grafana_conf/dashboards:/var/lib/grafana/dashboards"
-      - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
-    networks:
-      apisix:
+  # grafana:
+  #   image: grafana/grafana:7.3.7
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - "./conf/grafana_conf/provisioning:/etc/grafana/provisioning"
+  #     - "./conf/grafana_conf/dashboards:/var/lib/grafana/dashboards"
+  #     - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
+  #   networks:
+  #     apisix:
 
 networks:
   apisix:
     driver: bridge
-
-volumes:
-  etcd_data:
-    driver: local
