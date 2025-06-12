@@ -10,7 +10,9 @@ LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL based-on="Apache APISIX 3.8"
 
 COPY src /usr/local/apisix/custom-plugins
+COPY conf/config.yaml /usr/local/apisix/conf/config.yaml
 COPY conf/config-default.yaml /usr/local/apisix/conf/config-default.yaml
+COPY conf/apisix-standalone-config.yaml /usr/local/apisix/conf/apisix.yaml
 
 # Copy Haal Centraal certificates into image
 COPY certs/ /usr/local/share/ca-certificates/
