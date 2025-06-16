@@ -1,0 +1,80 @@
+local core = require("apisix.core")
+local url  = require("net.url")
+
+local plugin_name = "frank-sender"
+
+local schema = {
+	type = "object",
+	properties = {
+		frank_endpoint = {
+			type = "string"
+		}
+	},
+	required = {"frank_endpoint"}
+}
+
+local metadata_schema = {}
+
+local _M = {
+	version = 0.1,
+	priority = 1,
+	name = plugin_name,
+	schema = schema,
+	metadata_schema = metadata_schema
+}
+
+function _M.check_schema(conf, schema_type)
+	if schema_type == core.schema.TYPE_METADATA then
+		return core.schema.check(metadata_schema, conf)
+	end
+	return core.schema.check(schema, conf)
+end
+
+function _M.access(conf, ctx)
+
+	local frank_endpoint = conf.frank_endpoint
+	local parsed_url = url.parse(frank_endpoint)
+
+	local httpc = assert(require('resty.http').new())
+	local ok, err = httpc:connect {
+		ssl_verify = false,
+		scheme = parsed_url.scheme,
+		host = parsed_url.host,
+		port = parsed_url.port,
+	}
+
+	local request_body = "test_request"
+
+	core.log.info("Initial body: " .. request_body .. "; Initial headers: " .. core.request.get_headers() .. "sending to Frank:" .. frank_endpoint)
+
+	if ok and not err then
+		local res, call_err = assert(httpc:request {
+			method = 'POST',
+			path = parsed_url.path,
+			body = request_body,
+			headers = {
+				["Content-Type"] = "text/plain",
+			},
+		})
+
+		core.log.info("IDP response status: ", res.status)
+		if call_err ~= nil or res.status ~= 200 then
+			err = "error:" .. call_err "; http code: ".. res.status
+		end
+		local body, err = res:read_body()
+		if err then
+			core.log.error(err)
+		end
+
+	    core.log.info("Transformed body: " .. request_body .. "sending to Frank:" .. frank_endpoint)
+        
+	end
+
+	if err then
+		core.log.error(err)
+	end
+
+	httpc:close()
+end
+
+return _M

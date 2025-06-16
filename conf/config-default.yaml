@@ -525,6 +525,7 @@ plugins:                           # plugin list (sorted by priority)
   - example-plugin                 # priority: 0
   - fsc
   - openid-connect-client
+  - frank-sender
   - generic-oauth-client
   - jwt-client
   - limit-size
