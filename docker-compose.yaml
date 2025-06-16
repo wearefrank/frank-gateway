@@ -23,6 +23,7 @@ services:
     volumes:
       - ./src:/usr/local/apisix/custom-plugins
       - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
+      - ./conf/config-default.yaml:/usr/local/apisix/conf/config.yaml
       - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
       # - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
     ports:
@@ -33,6 +34,22 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
+  
+  frank:
+    image: nexus.frankframework.org/frankframework:latest
+    restart: always
+    environment:
+      - instance.name=plugin-frank
+      - configuration.names=test-frank
+      - environment=test
+    volumes:
+      - ./test-frank:/opt/frank/configurations
+    develop:
+      watch:
+        - action: sync
+          path: ./test-frank
+          target: /opt/frank/configurations
+
     
   # prometheus:
   #   image: prom/prometheus:v2.25.0
