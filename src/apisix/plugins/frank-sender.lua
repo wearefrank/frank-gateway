@@ -1,5 +1,8 @@
 local core = require("apisix.core")
 local url  = require("net.url")
+local ngx = ngx
+local req_set_body_data = ngx.req.set_body_data
+local req_get_body_data = ngx.req.get_body_data
 
 local plugin_name = "frank-sender"
 
@@ -43,9 +46,10 @@ function _M.access(conf, ctx)
 		port = parsed_url.port,
 	}
 
-	local request_body = "test_request"
+	ngx.req.read_body()
+	local request_body = req_get_body_data()
 
-	core.log.info("Initial body: " .. request_body .. "; Initial headers: " .. core.request.get_headers() .. "sending to Frank:" .. frank_endpoint)
+	core.log.info("Initial body: " .. request_body .. "; sending to Frank:" .. frank_endpoint)
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
@@ -56,8 +60,8 @@ function _M.access(conf, ctx)
 				["Content-Type"] = "text/plain",
 			},
 		})
-
-		core.log.info("IDP response status: ", res.status)
+		
+		core.log.info("Frank responde code: ", res.status)
 		if call_err ~= nil or res.status ~= 200 then
 			err = "error:" .. call_err "; http code: ".. res.status
 		end
@@ -66,8 +70,8 @@ function _M.access(conf, ctx)
 			core.log.error(err)
 		end
 
-	    core.log.info("Transformed body: " .. request_body .. "sending to Frank:" .. frank_endpoint)
-        
+	    core.log.info("Transformed body: " .. body)
+		req_set_body_data(body)
 	end
 
 	if err then

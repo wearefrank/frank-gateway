@@ -4,10 +4,10 @@
 	>
 	<Adapter name="Adapter1a">
 		<Receiver name="Receiver1a">
-			<ApiListener name="Listener1a" uriPattern="frank-test"/>
+			<ApiListener name="Listener1a" uriPattern="frank-test" methods="POST"/>
 		</Receiver>
 		<Pipeline>
-			<EchoPipe name="HelloWorld" getInputFromFixedValue="Hello World!"/>
+			<EchoPipe name="HelloWorld" getInputFromFixedValue="Pong!"/>
 		</Pipeline>
 	</Adapter>
 </Configuration>

@@ -23,8 +23,8 @@ services:
     volumes:
       - ./src:/usr/local/apisix/custom-plugins
       - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
-      - ./conf/config-default.yaml:/usr/local/apisix/conf/config.yaml
       - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
       # - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
     ports:
       - "9180:9180/tcp"
@@ -35,23 +35,19 @@ services:
     networks:
       apisix:
   
-  frank:
-    image: nexus.frankframework.org/frankframework:latest
-    restart: always
-    environment:
-      - instance.name=plugin-frank
-      - configuration.names=test-frank
-      - environment=test
-    volumes:
-      - ./test-frank:/opt/frank/configurations
-    develop:
-      watch:
-        - action: sync
-          path: ./test-frank
-          target: /opt/frank/configurations
-
-    
-  # prometheus:
+  # frank:
+  #   image: frankframework/frankframework:latest
+  #   restart: always
+  #   environment:
+  #     - dtap.stage=LOC
+  #     - instance.name=test-frank
+  #     - configuration.names=test-frank
+  #   volumes:
+  #     - ./test-frank/Configuration.xml:/opt/frank/configurations/Configuration.xml
+  #     - ./test-frank/src/main/webapp/META-INF/context.xml:/usr/local/tomcat/conf/Catalina/localhost/ROOT.xml
+  #   ports:
+  #     - "8080:8080/tcp"
+  # # prometheus:
   #   image: prom/prometheus:v2.25.0
   #   restart: always
   #   volumes:

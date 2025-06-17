@@ -14,6 +14,13 @@ routes:
     upstream_id: 1
     status: 1
 
+  - name: frank-test
+    id: 3
+    uri: /anything
+    upstream_id: 1
+    plugins:
+      frank-sender:
+        frank_endpoint: http://host.docker.internal:8080/api/frank-test
 
 upstreams:
   - name: httpbin
