@@ -18,11 +18,14 @@
 name: frank-gateway # Name of the parent container
 services:
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:master
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    # image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
       - ./src:/usr/local/apisix/custom-plugins
-      - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
+      # - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
       - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
       # - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
@@ -47,6 +50,7 @@ services:
   #     - ./test-frank/src/main/webapp/META-INF/context.xml:/usr/local/tomcat/conf/Catalina/localhost/ROOT.xml
   #   ports:
   #     - "8080:8080/tcp"
+
   # # prometheus:
   #   image: prom/prometheus:v2.25.0
   #   restart: always

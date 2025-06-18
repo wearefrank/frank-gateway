@@ -50,6 +50,7 @@ function _M.access(conf, ctx)
 	local request_body = req_get_body_data()
 
 	core.log.info("Initial body: " .. request_body .. "; sending to Frank:" .. frank_endpoint)
+	-- local consumer = 
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
@@ -58,6 +59,9 @@ function _M.access(conf, ctx)
 			body = request_body,
 			headers = {
 				["Content-Type"] = "text/plain",
+				["consumer"] = "consumer1",
+				
+
 			},
 		})
 		
@@ -65,13 +69,13 @@ function _M.access(conf, ctx)
 		if call_err ~= nil or res.status ~= 200 then
 			err = "error:" .. call_err "; http code: ".. res.status
 		end
-		local body, err = res:read_body()
+		local transformed_body, err = res:read_body()
 		if err then
 			core.log.error(err)
 		end
 
-	    core.log.info("Transformed body: " .. body)
-		req_set_body_data(body)
+	    core.log.info("Transformed body: " .. transformed_body)
+		req_set_body_data(transformed_body)
 	end
 
 	if err then

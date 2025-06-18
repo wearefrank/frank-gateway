@@ -1,4 +1,4 @@
-FROM apache/apisix:3.8.0-debian
+FROM apache/apisix:3.12.0-debian
 
 LABEL org.opencontainers.image.title="Frank!Gateway"
 LABEL org.opencontainers.image.description="Open Source API Gateway by We Are Frank! based on Apache APISIX"
