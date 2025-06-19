@@ -1,0 +1,34 @@
+routes:
+  - name: foo
+    uri: /foo/*
+    service_id: 1
+    plugins:
+      openid-connect:
+        client_id: apisix
+        client_secret: WxUoCcLdNGJnYHxg4QkpEFNQ39GU5Ahz
+        discovery: http://keycloak.iam.svc.cluster.local:8080/realms/apisix_test_realm/.well-known/openid-configuration
+        scope: "openid profile"
+        bearer_only: false
+        realm: apisix_test_realm
+        introspection_endpoint_auth_method: client_secret_post
+        redirect_uri: http://localhost:9080/foo/callback
+services:
+  - id: 1
+    name: "foo-demo"
+    desc: "test service"
+    upstream_id: 2
+    plugins:
+      openid-connect-client:
+        token_endpoint: "http://keycloak.iam.svc.cluster.local:8080/realms/external-test-realm/protocol/openid-connect/token"
+        client_id: "external-test-client"
+        client_secret: "4tjSUMHjWag5qFfby1xkiCrpFlTTGVCx"
+upstreams:
+  - id: 2
+    name: "echo-upstream"
+    desc: "echo API"
+    type: "roundrobin"
+    scheme: "https"
+    pass_host: "node",
+    nodes:
+        "echo-api.3scale.net:443": 1
+#END

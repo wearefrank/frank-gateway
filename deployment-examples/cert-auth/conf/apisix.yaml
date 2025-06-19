@@ -1,0 +1,19 @@
+routes:
+  - name: foo
+    uri: /foo/*
+    service_id: 1
+services:
+  - id: 1
+    name: "foo-demo"
+    desc: "test service"
+    upstream_id: 2
+upstreams:
+  - id: 2
+    name: "echo-upstream"
+    desc: "echo API"
+    type: "roundrobin"
+    scheme: "https"
+    pass_host: "node",
+    nodes:
+      "echo-api.3scale.net:443": 1
+#END
