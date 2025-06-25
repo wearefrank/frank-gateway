@@ -17,8 +17,20 @@
 
 name: frank-gateway # Name of the parent container
 services:
+  apisix-dashboard:
+    image: ghcr.io/wearefrank/frank-gateway-dashboard:11498508359
+    volumes:
+      - ./dashboard/output/conf/conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
+    restart: always
+    depends_on:
+     - etcd
+    ports:
+    - "9000:9000"
+    networks:
+      apisix:
+
   apisix:
-    image: frank-gateway:local
+    image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
       - ./src:/usr/local/apisix/custom-plugins
