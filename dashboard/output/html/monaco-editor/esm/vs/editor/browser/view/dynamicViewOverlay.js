@@ -1,1 +1,0 @@
-import{ViewEventHandler}from"../../common/viewModel/viewEventHandler.js";export class DynamicViewOverlay extends ViewEventHandler{}

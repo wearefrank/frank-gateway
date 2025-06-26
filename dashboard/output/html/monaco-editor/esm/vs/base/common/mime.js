@@ -1,1 +1,0 @@
-export var Mimes;(function(t){t.text="text/plain",t.binary="application/octet-stream",t.unknown="application/unknown",t.markdown="text/markdown",t.latex="text/latex"})(Mimes||(Mimes={}));

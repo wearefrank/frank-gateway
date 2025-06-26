@@ -1,1 +1,0 @@
-import{SyncDescriptor}from"./descriptors.js";const _registry=[];export function registerSingleton(r,e,t){e instanceof SyncDescriptor||(e=new SyncDescriptor(e,[],t)),_registry.push([r,e])}export function getSingletonServiceDescriptors(){return _registry}
