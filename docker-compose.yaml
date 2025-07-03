@@ -22,6 +22,7 @@ services:
     restart: always
     volumes:
       - ./src:/usr/local/apisix/custom-plugins
+      # - ./conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./certs/test/:/usr/local/apisix/ssl/
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
@@ -34,6 +35,26 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
+    environment:
+      SERVER_CERT: certs/test/apisix.pem
+      SERVER_KEY: certs/test/apisix-key.pem
+      BULT_CLIENT_CHAIN: certs/test/ca-bundle.pem
+  
+  soapui:
+    build:
+      context: ./soapui
+    depends_on:
+      - apisix
+    environment:
+      - COMMAND_LINE=-r -j -f/reports -I /project/apisix-tests.xml
+    volumes:
+      - ./soapui/project:/project
+      - ./soapui/reports:/reports
+    networks:
+      - apisix
+    restart: "no"
+
+
     
   # prometheus:
   #   image: prom/prometheus:v2.25.0
