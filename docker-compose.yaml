@@ -36,9 +36,10 @@ services:
     networks:
       apisix:
     environment:
-      SERVER_CERT: certs/test/apisix.pem
-      SERVER_KEY: certs/test/apisix-key.pem
-      BULT_CLIENT_CHAIN: certs/test/ca-bundle.pem
+      SERVER_CERT: "${SERVER_CERT}"
+      SERVER_KEY: "${SERVER_KEY}"
+      BULT_CLIENT_CHAIN: "${BULT_CLIENT_CHAIN}"
+      
   
   soapui:
     build:
