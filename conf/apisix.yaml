@@ -13,7 +13,7 @@ upstreams:
     desc: "echo API"
     type: "roundrobin"
     scheme: "https"
-    pass_host: "node",
+    pass_host: "node"
     nodes:
       "echo-api.3scale.net:443": 1
 #END
