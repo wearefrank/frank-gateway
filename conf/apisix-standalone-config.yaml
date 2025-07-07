@@ -8,17 +8,27 @@ ssls:
     client:
       ca: ${{BULT_CLIENT_CHAIN}}
       depth: 1
+  - id: 2
+    snis:
+      - "apisix"
+      - "apisix.127.0.0.1.nip.io"
+    cert: ${{SERVER_CERT}}
+    key:  ${{SERVER_KEY}}
+    client:
+      ca: ${{SELF_SIGNED_CA}}
+      depth: 1
+
 
 consumers:
   - username: certuser
     plugins:
       cert-auth:
         cn: ssl.bult.bz
-  
-  - username: apisix
+  - username: testuser
     plugins:
       cert-auth:
-        cn: localhost
+        cn: CLIENT
+
 
 routes:
   - name: gateway-test
@@ -39,7 +49,12 @@ routes:
 
   - name: upstream-test
     id: 2
-    uri: /ip
+    uri: /headers
+    plugins:
+      cert-auth: {}
+      consumer-restriction: 
+        whitelist: 
+          - testuser
     upstream_id: 1
     status: 1
 
