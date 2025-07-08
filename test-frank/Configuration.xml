@@ -6,28 +6,28 @@
 		<Receiver name="HeaderBasedReceiver">
 			<ApiListener
 				name="HeaderBasedApiListener"
-				uriPattern="header-routing"
+				uriPattern="frank-test"
 				method="POST"
-				headerParams="consumer"/>
+				headerParams="Consumer"/>
 		</Receiver>
 		
 		<Pipeline firstPipe="RoutingPipe">
 			<!-- Route based on the 'consumer' header value -->
 			<IfPipe name="RoutingPipe" 
 					getInputFromSessionKey="headers"
-					xpathExpression="normalize-space(/headers/header[@name='consumer']) = 'consumer1'"
-					thenForwardName="route1" 
-					elseForwardName="route2">
-				
-				<Forward name="route1" path="Consumer1Processor" />
-				<Forward name="route2" path="Consumer2Processor" />
+					xpathExpression="normalize-space(/headers/header[@name='Consumer']) = '&quot;consumer1&quot;'"
+				>				
+				<Forward name="then" path="Consumer1Process" />
+				<Forward name="else" path="NoConsumerProcess" />
 			</IfPipe>
 
 			<!-- Process for consumer1 -->
-			<EchoPipe name="Consumer1Processor" getInputFromFixedValue="consumer1!"/>
+			<EchoPipe name="Consumer1Process" getInputFromFixedValue="Consumer nummer 1!">
+				<Forward name="success" path="READY"/>
+			</EchoPipe>
 
 			<!-- Process for consumer2 or any other consumer -->
-			<EchoPipe name="Consumer2Processor" getInputFromFixedValue="consumer2!"/>
+			<EchoPipe name="NoConsumerProcess" getInputFromFixedValue="No consumer!"/>
 		</Pipeline>
 	</Adapter>
 </Configuration>
