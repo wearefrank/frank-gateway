@@ -15,7 +15,7 @@
 			<!-- Route based on the 'consumer' header value -->
 			<IfPipe name="RoutingPipe" 
 					getInputFromSessionKey="headers"
-					xpathExpression="normalize-space(/headers/header[@name='Consumer']) = '&quot;consumer1&quot;'"
+					xpathExpression="normalize-space(/headers/header[@name='Consumer']) = 'consumer1'"
 				>				
 				<Forward name="then" path="Consumer1Process" />
 				<Forward name="else" path="NoConsumerProcess" />

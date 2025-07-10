@@ -1,9 +1,9 @@
-local core = require("apisix.core")
 local url  = require("net.url")
-
-local token_cache = ngx.shared["openid-connect-client-cache"]
+local core = require("apisix.core")
 
 local plugin_name = "openid-connect-client"
+
+local token_cache = ngx.shared["openid-connect-client-cache"]
 
 local schema = {
 	type = "object",
@@ -46,10 +46,10 @@ local schema = {
 local metadata_schema = {}
 
 local _M = {
-	version = 0.1,
-	priority = 1,
-	name = plugin_name,
-	schema = schema,
+	name 			= plugin_name,
+	schema 			= schema,
+	version 		= 0.1,
+	priority 		= 1,
 	metadata_schema = metadata_schema
 }
 
@@ -62,13 +62,13 @@ end
 
 function _M.access(conf, ctx)
 
-	local grant_type = conf.grant_type
-	local client_id = conf.client_id
-	local client_secret = conf.client_secret
-	local token_endpoint = conf.token_endpoint
-	local scope = conf.scope
+	local scope 		  = conf.scope
+	local client_id 	  = conf.client_id
+	local verify_ssl 	  = conf.ssl_verify
+	local grant_type	  = conf.grant_type
+	local client_secret   = conf.client_secret
+	local token_endpoint  = conf.token_endpoint
 	local resource_server = conf.resource_server
-	local verify_ssl = conf.ssl_verify
 
 	local cached_token = token_cache:get(client_id)
 	if cached_token ~= nil then
@@ -81,19 +81,15 @@ function _M.access(conf, ctx)
 
 	local httpc = assert(require('resty.http').new())
 	local ok, err = httpc:connect {
-		ssl_verify = verify_ssl,
-		scheme = parsed_url.scheme,
-		host = parsed_url.host,
-		port = parsed_url.port,
+		host 	   = parsed_url.host,
+		port 	   = parsed_url.port,
+		scheme 	   = parsed_url.scheme,
+		ssl_verify = verify_ssl
 	}
 
-	local request_body = "client_id=" .. ngx.escape_uri(client_id) .. "&client_secret=" .. ngx.escape_uri(client_secret)
+	local request_body = "client_id=" .. ngx.escape_uri(client_id) .. "&client_secret=" .. ngx.escape_uri(client_secret) .. "&grant_type=" .. ngx.escape_uri(grant_type)
 	if scope ~= nil then
 		request_body = request_body .. "&scope=" .. ngx.escape_uri(scope)
-	end
-
-	if grant_type ~= nil then
-		request_body = request_body .. "&grant_type=" .. ngx.escape_uri(grant_type)
 	end
 
 	if resource_server ~= nil then
@@ -104,9 +100,9 @@ function _M.access(conf, ctx)
 
 	if ok and not err then
 		local res, call_err = assert(httpc:request {
-			method = 'POST',
-			path = parsed_url.path,
-			body = request_body,
+			path    = parsed_url.path,
+			body    = request_body,
+			method  = 'POST',
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded",
 			},
