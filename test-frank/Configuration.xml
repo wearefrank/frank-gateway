@@ -2,15 +2,22 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="../FrankConfig.xsd"
 	>
-	<Adapter name="HeaderBasedRoutingAdapter">
+	<Adapter name="TestAdapter">
 		<Receiver name="HeaderBasedReceiver">
 			<ApiListener
 				name="HeaderBasedApiListener"
 				uriPattern="frank-test"
-				method="POST"
+				methods="POST,PATCH,DELETE,PUT"
 				headerParams="Consumer"/>
+
+			<ApiListener
+				name="UriParamApiListener"
+				uriPattern="frank-test-query"
+				method="GET,PATCH,HEAD,OPTIONS"
+				uriParams="Consumer"/>
 		</Receiver>
-		
+
+
 		<Pipeline firstPipe="RoutingPipe">
 			<!-- Route based on the 'consumer' header value -->
 			<IfPipe name="RoutingPipe" 
@@ -26,8 +33,8 @@
 				<Forward name="success" path="READY"/>
 			</EchoPipe>
 
-			<!-- Process for consumer2 or any other consumer -->
-			<EchoPipe name="NoConsumerProcess" getInputFromFixedValue="No consumer!"/>
+			<!-- Process for any other consumer -->
+			<EchoPipe name="NoConsumerProcess" getInputFromFixedValue="Not consumer 1!"/>
 		</Pipeline>
 	</Adapter>
 </Configuration>

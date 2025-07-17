@@ -16,9 +16,11 @@ routes:
 
   - name: frank-test
     id: 3
-    uri: /anything
+    uri: /frank-sender
     upstream_id: 1
     plugins:
+      proxy-rewrite:
+        uri: /anything
       frank-sender:
         frank_endpoint: http://host.docker.internal:8080/api/frank-test
 
