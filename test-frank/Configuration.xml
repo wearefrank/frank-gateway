@@ -1,0 +1,34 @@
+<Configuration
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../FrankConfig.xsd"
+	>
+	<Adapter name="TestAdapter">
+		<Receiver name="HeaderBasedReceiver">
+			<ApiListener
+				name="HeaderBasedApiListener"
+				uriPattern="frank-test"
+				methods="ANY"
+				headerParams="Consumer"/>
+		</Receiver>
+
+
+		<Pipeline firstPipe="RoutingPipe">
+			<!-- Route based on the 'consumer' header value -->
+			<IfPipe name="RoutingPipe" 
+					getInputFromSessionKey="headers"
+					xpathExpression="normalize-space(/headers/header[@name='Consumer']) = 'consumer1'"
+				>				
+				<Forward name="then" path="Consumer1Process" />
+				<Forward name="else" path="NoConsumerProcess" />
+			</IfPipe>
+
+			<!-- Process for consumer1 -->
+			<EchoPipe name="Consumer1Process" getInputFromFixedValue="Consumer 1!">
+				<Forward name="success" path="READY"/>
+			</EchoPipe>
+
+			<!-- Process for any other consumer -->
+			<EchoPipe name="NoConsumerProcess" getInputFromFixedValue="Not consumer 1!"/>
+		</Pipeline>
+	</Adapter>
+</Configuration>

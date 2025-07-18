@@ -15,28 +15,18 @@
 # limitations under the License.
 #
 
-name: frank-api-platform # Name of the parent container
+name: frank-gateway # Name of the parent container
 services:
-  apisix-dashboard:
-    image: ghcr.io/wearefrank/frank-gateway-dashboard:11498508359
-    volumes:
-      - ./dashboard/output/conf/conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
-    restart: always
-    depends_on:
-     - etcd
-    ports:
-    - "9000:9000"
-    networks:
-      apisix:
-
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:master
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    # image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
-      - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
-      # - ./conf/config-default.yaml:/usr/local/apisix/conf/config-custom.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
-    depends_on:
-      - etcd
+      - ./src:/usr/local/apisix/custom-plugins
+      - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
@@ -45,48 +35,42 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
-      
-  etcd:
-    image: bitnami/etcd:3.4.15
+  
+  frank:
+    image: frankframework/frankframework:latest
     restart: always
-    volumes:
-      - etcd_data:/bitnami/etcd
     environment:
-      ETCD_ENABLE_V2: "true"
-      ALLOW_NONE_AUTHENTICATION: "yes"
-      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
-      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
-    ports:
-      - "2379:2379/tcp"
-    networks:
-      apisix:
-    
-  prometheus:
-    image: prom/prometheus:v2.25.0
-    restart: always
+      - dtap.stage=LOC
+      - instance.name=test-frank
+      - configuration.names=test-frank
     volumes:
-      - ./conf/prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./test-frank/Configuration.xml:/opt/frank/configurations/Configuration.xml
+      - ./test-frank/src/main/webapp/META-INF/context.xml:/usr/local/tomcat/conf/Catalina/localhost/ROOT.xml
     ports:
-      - "9090:9090"
-    networks:
-      apisix:
+      - "8080:8080/tcp"
+
+  # # prometheus:
+  #   image: prom/prometheus:v2.25.0
+  #   restart: always
+  #   volumes:
+  #     - ./conf/prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     apisix:
     
-  grafana:
-    image: grafana/grafana:7.3.7
-    restart: always
-    ports:
-      - "3000:3000"
-    volumes:
-      - "./conf/grafana_conf/provisioning:/etc/grafana/provisioning"
-      - "./conf/grafana_conf/dashboards:/var/lib/grafana/dashboards"
-      - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
-    networks:
-      apisix:
+  # grafana:
+  #   image: grafana/grafana:7.3.7
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - "./conf/grafana_conf/provisioning:/etc/grafana/provisioning"
+  #     - "./conf/grafana_conf/dashboards:/var/lib/grafana/dashboards"
+  #     - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
+  #   networks:
+  #     apisix:
 
 networks:
   apisix:
     driver: bridge
-
-volumes:
-  etcd_data:
-    driver: local
