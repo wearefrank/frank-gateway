@@ -20,16 +20,15 @@ routes:
     upstream_id: 1
     plugins:
       proxy-rewrite:
-        uri: /anything
+        uri: /any
       frank-sender:
         frank_endpoint: http://host.docker.internal:8080/api/frank-test
 
 upstreams:
-  - name: httpbin
+  - name: httpbun
     id: 1
     nodes:
-      "httpbin.org": 1
+      "httpbun.com": 1
     type: roundrobin
-
 
 #END

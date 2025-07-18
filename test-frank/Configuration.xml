@@ -7,14 +7,8 @@
 			<ApiListener
 				name="HeaderBasedApiListener"
 				uriPattern="frank-test"
-				methods="POST,PATCH,DELETE,PUT"
+				methods="ANY"
 				headerParams="Consumer"/>
-
-			<ApiListener
-				name="UriParamApiListener"
-				uriPattern="frank-test-query"
-				method="GET,PATCH,HEAD,OPTIONS"
-				uriParams="Consumer"/>
 		</Receiver>
 
 
@@ -29,7 +23,7 @@
 			</IfPipe>
 
 			<!-- Process for consumer1 -->
-			<EchoPipe name="Consumer1Process" getInputFromFixedValue="Consumer nummer 1!">
+			<EchoPipe name="Consumer1Process" getInputFromFixedValue="Consumer 1!">
 				<Forward name="success" path="READY"/>
 			</EchoPipe>
 
