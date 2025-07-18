@@ -25,10 +25,8 @@ services:
     restart: always
     volumes:
       - ./src:/usr/local/apisix/custom-plugins
-      # - ./conf/config-default.yaml:/usr/local/apisix/conf/config-default.yaml
       - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
-      # - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"

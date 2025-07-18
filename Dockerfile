@@ -1,17 +1,11 @@
 FROM apache/apisix:3.12.0-debian
 
-LABEL org.opencontainers.image.title="Frank!Gateway"
-LABEL org.opencontainers.image.description="Open Source API Gateway by We Are Frank! based on Apache APISIX"
-LABEL org.opencontainers.image.vendor="WeAreFrank!"
-LABEL org.opencontainers.image.version="0.2-beta"
-
 ARG BUILD_DATE
 LABEL org.opencontainers.image.created=$BUILD_DATE
-LABEL based-on="Apache APISIX 3.8"
+LABEL based-on="Apache APISIX 3.12"
 
 COPY src /usr/local/apisix/custom-plugins
 COPY conf/config.yaml /usr/local/apisix/conf/config.yaml
-COPY conf/config-default.yaml /usr/local/apisix/conf/config-default.yaml
 COPY conf/apisix-standalone-config.yaml /usr/local/apisix/conf/apisix.yaml
 
 # Copy Haal Centraal certificates into image
