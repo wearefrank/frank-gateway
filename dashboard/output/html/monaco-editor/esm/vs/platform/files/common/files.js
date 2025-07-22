@@ -1,1 +1,0 @@
-export var FileKind;(function(F){F[F["FILE"]=0]="FILE",F[F["FOLDER"]=1]="FOLDER",F[F["ROOT_FOLDER"]=2]="ROOT_FOLDER"})(FileKind||(FileKind={}));

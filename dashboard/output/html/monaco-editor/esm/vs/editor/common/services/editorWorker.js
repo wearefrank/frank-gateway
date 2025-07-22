@@ -1,1 +1,0 @@
-import{createDecorator}from"../../../platform/instantiation/common/instantiation.js";export const ID_EDITOR_WORKER_SERVICE="editorWorkerService";export const IEditorWorkerService=createDecorator(ID_EDITOR_WORKER_SERVICE);
