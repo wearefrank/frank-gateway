@@ -1,0 +1,164 @@
+ssls:
+  - id: 1
+    snis:
+      - "localhost"
+    cert: |
+      -----BEGIN CERTIFICATE-----
+      MIIEhzCCA2+gAwIBAgIUadbpyXaSoT603a+kchf7lGAOe5owDQYJKoZIhvcNAQEL
+      BQAwgYQxCzAJBgNVBAYTAk5MMRUwEwYDVQQIEwxadWlkLUhvbGxhbmQxEjAQBgNV
+      BAcTCVJvdHRlcmRhbTEYMBYGA1UEChMPTWlqbk9yZ2FuaXNhdGllMR4wHAYDVQQL
+      ExVDZXJ0aWZpY2F0ZSBBdXRob3JpdHkxEDAOBgNVBAMTB01pam4gQ0EwHhcNMjUw
+      NTIyMTQzMDAwWhcNMjYwNTIyMTQzMDAwWjB2MQswCQYDVQQGEwJOTDEVMBMGA1UE
+      CBMMWnVpZC1Ib2xsYW5kMRIwEAYDVQQHEwlSb3R0ZXJkYW0xDzANBgNVBAoTBkFQ
+      SVNJWDEUMBIGA1UECxMLSW5mb3JtYXRpY2ExFTATBgNVBAMTDGFwaXNpeC5sb2Nh
+      bDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANe3POdFClnafJBUDa9J
+      +vGHTL1dZLVP04xMPFm/SsLxlAZb2RIOpwnYrw7H+qJVf+7/6Tg6A2DB6genrp2r
+      Kt8hIMn58D34pT3O7aII6ZV5mPi7HRjq3QQfV5k1q0ZVIPSxori9ZUs4Hixdg/k/
+      4Rc6VmB5YNoliHsmHEJoLv0jLcgx+aFKONA9Sx3k57FqeeLv5awiE7LMd+Sy3VOH
+      x/10BTEulpYp+3CyPOLlykNEN+5x5b/xwijOeSdS/SPzLQrPmO51CI/CvyqqtmUO
+      srnPW6mTsuX2b2ZvuGCTA2AL6CjbTMkPgQ8T65/VCSVqTETygdkGNC07bggWc7fW
+      qlkCAwEAAaOB/TCB+jAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUH
+      AwEwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQU6ToikOQgTZYxFkcpLC/8kpFUGx8w
+      HwYDVR0jBBgwFoAUvrPNU2emxJ7P79A2xw9w5R5Tgz0wgYQGA1UdEQR9MHuCDmFw
+      aXNpeC1nYXRld2F5giFhcGlzaXgtZ2F0ZXdheS5pbmdyZXNzLWFwaXNpeC5zdmOC
+      L2FwaXNpeC1nYXRld2F5LmluZ3Jlc3MtYXBpc2l4LnN2Yy5jbHVzdGVyLmxvY2Fs
+      gglsb2NhbGhvc3SHBH8AAAGHBApgg9AwDQYJKoZIhvcNAQELBQADggEBAEIDwLx9
+      hRl6zfDP+YdKj/yJoEXOyzt6eCmGhdGzTr7KpcYz88U7KMAJFDVdDnZp2/TPmqjB
+      hmsM1ec/n0LbmVe84KtuN0aq8VWfzDL6ksFgzozLMqwItlpXbzAPRVWcj+j15NxZ
+      cdfQu9H1aIwdr0WbW/TR7/l/ZZ6cSLjCQ/uwJ9lfUvswHrMC+v3fjvYxtLC/J5Sl
+      e7jNq1ExeXikhDVcIefrNvIws1vOCyQuTry45tZUISkSBSNendKkPW3WJPBqe80y
+      F68Jl8A7ekx/dx35q0sUpxCBeU9twVHcUemo+vba2kdf91i16Mad8zn2jqLQc5We
+      NccpkrHb4zNSE3c=
+      -----END CERTIFICATE-----
+    key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpAIBAAKCAQEA17c850UKWdp8kFQNr0n68YdMvV1ktU/TjEw8Wb9KwvGUBlvZ
+      Eg6nCdivDsf6olV/7v/pODoDYMHqB6eunasq3yEgyfnwPfilPc7togjplXmY+Lsd
+      GOrdBB9XmTWrRlUg9LGiuL1lSzgeLF2D+T/hFzpWYHlg2iWIeyYcQmgu/SMtyDH5
+      oUo40D1LHeTnsWp54u/lrCITssx35LLdU4fH/XQFMS6Wlin7cLI84uXKQ0Q37nHl
+      v/HCKM55J1L9I/MtCs+Y7nUIj8K/Kqq2ZQ6yuc9bqZOy5fZvZm+4YJMDYAvoKNtM
+      yQ+BDxPrn9UJJWpMRPKB2QY0LTtuCBZzt9aqWQIDAQABAoIBADhLcpJsOxJN6XoE
+      5XlcVifYBlfY2qJSjcOsVYeaW1lakCXErHaA6miwaqbx21+n7nYhxOxOf3ktwfRz
+      dydgdxS54YO0PVT+4aiqqutBZiwDCr/GnQZWrI0Z3NN35RW6u5oADZYmnxutLnqn
+      gPx4Bjb4m3gb1QG5D9ALlw5hf/nBTNYt5MErcp/tfFnmm1PZDmpVHkvNVT5kY+Z2
+      wkt3fOeHDaf/WPi31W3TFKTSYRNBg1IP/fv11SUQWEsntPqZn4UfFCOByvlkekUT
+      EF2oJ9D/bnmWH1k4rf0cKbHTYH3EbcNjqKfkJ3CNYqGR/FUnrRJrpSva1SefjoHB
+      bhcKNzECgYEA6YfjzBfvfIdjujBuz+B/5ogHI5F/lclZbcabXkWLSZfF3ueBB8oT
+      9GUnls1KFT8Iny3Oj4ElG0I2IKOopBr+jyfwYGzq+bOIhCO+DecSW1L6qRW9IZvz
+      JQ8lZNVVmkYspO9PrFKfrCJwgFOHNJkQG70TXf8KTWit/xeB+omEXz0CgYEA7HiL
+      cYVXBsZ9oK7o/CnC68vGou02RYQe3owoVs1MGotmjeGqEhjBeGdktmawtXxrCXve
+      p6hfVo2pfm+jVzggRukD0F0q8X1xRgFhmP1EVMAB3UQvC48D+czz2703qHWCG6MF
+      ALMTWojJ3pkn+jDlmXDig5SII0McxCnk1u8uaU0CgYAcRm7HZFKD0mS5w2l3U+hI
+      gknS/afj++gPCZAAPw1ZUL4Nehw+VDJMUf8UHDEPF320wDgVWf6jKUYid45QqFAQ
+      BzbsheOBbkJmNWmqh0LKueZNmKs4qYgsAYR2i/n8XujC45LS+4IHtnfGodZqAOpZ
+      YXA53kpiCv2eODttmT7kxQKBgQC9WQTnQIrf3P5pNMVQbSwsXT5P5bvITDPfpcED
+      SF5A/xB+WY0x8mqwu7G0MGQc3mRi8rHl8/drOgHXQRM82q9VuG2aYY/qULTsBl0d
+      AOe/KQQVJey5x6m6U3eMo2W22Wj2MkHmPn4nx1JFkMOnHZIrnG10SPH9slaNaLJZ
+      vKmgHQKBgQCW2vvSwtWeKRSEMmnkcn1MVRBWxMSnSm1J0dL3aAWRxATyukxBCk+v
+      Mj9UUOQGnmV8S85X36UU/TAgBvLUwWxy8OoAPs02aBB3qiAwn+T2/GVaEdBJytIV
+      xDF/ZqBV7VmoeBA+Pkb5aCpAuclrP7mvY9ZakVi/2AfVCz9X0SLLLA==
+      -----END RSA PRIVATE KEY-----
+    client:
+      ca: |
+        -----BEGIN CERTIFICATE-----
+        MIIFBjCCAu6gAwIBAgIRAIp9PhPWLzDvI4a9KQdrNPgwDQYJKoZIhvcNAQELBQAw
+        TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh
+        cmNoIEdyb3VwMRUwEwYDVQQDEwxJU1JHIFJvb3QgWDEwHhcNMjQwMzEzMDAwMDAw
+        WhcNMjcwMzEyMjM1OTU5WjAzMQswCQYDVQQGEwJVUzEWMBQGA1UEChMNTGV0J3Mg
+        RW5jcnlwdDEMMAoGA1UEAxMDUjExMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+        CgKCAQEAuoe8XBsAOcvKCs3UZxD5ATylTqVhyybKUvsVAbe5KPUoHu0nsyQYOWcJ
+        DAjs4DqwO3cOvfPlOVRBDE6uQdaZdN5R2+97/1i9qLcT9t4x1fJyyXJqC4N0lZxG
+        AGQUmfOx2SLZzaiSqhwmej/+71gFewiVgdtxD4774zEJuwm+UE1fj5F2PVqdnoPy
+        6cRms+EGZkNIGIBloDcYmpuEMpexsr3E+BUAnSeI++JjF5ZsmydnS8TbKF5pwnnw
+        SVzgJFDhxLyhBax7QG0AtMJBP6dYuC/FXJuluwme8f7rsIU5/agK70XEeOtlKsLP
+        Xzze41xNG/cLJyuqC0J3U095ah2H2QIDAQABo4H4MIH1MA4GA1UdDwEB/wQEAwIB
+        hjAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwEgYDVR0TAQH/BAgwBgEB
+        /wIBADAdBgNVHQ4EFgQUxc9GpOr0w8B6bJXELbBeki8m47kwHwYDVR0jBBgwFoAU
+        ebRZ5nu25eQBc4AIiMgaWPbpm24wMgYIKwYBBQUHAQEEJjAkMCIGCCsGAQUFBzAC
+        hhZodHRwOi8veDEuaS5sZW5jci5vcmcvMBMGA1UdIAQMMAowCAYGZ4EMAQIBMCcG
+        A1UdHwQgMB4wHKAaoBiGFmh0dHA6Ly94MS5jLmxlbmNyLm9yZy8wDQYJKoZIhvcN
+        AQELBQADggIBAE7iiV0KAxyQOND1H/lxXPjDj7I3iHpvsCUf7b632IYGjukJhM1y
+        v4Hz/MrPU0jtvfZpQtSlET41yBOykh0FX+ou1Nj4ScOt9ZmWnO8m2OG0JAtIIE38
+        01S0qcYhyOE2G/93ZCkXufBL713qzXnQv5C/viOykNpKqUgxdKlEC+Hi9i2DcaR1
+        e9KUwQUZRhy5j/PEdEglKg3l9dtD4tuTm7kZtB8v32oOjzHTYw+7KdzdZiw/sBtn
+        UfhBPORNuay4pJxmY/WrhSMdzFO2q3Gu3MUBcdo27goYKjL9CTF8j/Zz55yctUoV
+        aneCWs/ajUX+HypkBTA+c8LGDLnWO2NKq0YD/pnARkAnYGPfUDoHR9gVSp/qRx+Z
+        WghiDLZsMwhN1zjtSC0uBWiugF3vTNzYIEFfaPG7Ws3jDrAMMYebQ95JQ+HIBD/R
+        PBuHRTBpqKlyDnkSHDHYPiNX3adPoPAcgdF3H2/W0rmoswMWgTlLn1Wu0mrks7/q
+        pdWfS6PJ1jty80r2VKsM/Dj3YIDfbjXKdaFU5C+8bhfJGqU3taKauuz0wHVGT3eo
+        6FlWkWYtbt4pgdamlwVeZEW+LM7qZEJEsMNPrfC03APKmZsJgpWCDWOKZvkZcvjV
+        uYkQ4omYCTX5ohy+knMjdOmdH9c7SpqEWBDC86fiNex+O0XOMEZSa8DA
+        -----END CERTIFICATE-----
+        -----BEGIN CERTIFICATE-----
+        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
+        -----END CERTIFICATE-----
+      depth: 1
+
+consumers:
+  - username: certuser
+    plugins:
+      cert-auth:
+        cn: ssl.bult.bz
+        # cn: localhost
+
+routes:
+  - name: gateway-test
+    id: 1
+    uri: /anything
+    plugins:
+      cert-auth: {}
+      consumer-restriction: 
+        whitelist: 
+          - certuser
+    upstream:
+      nodes:
+        "httpbin.org": 1
+      type: roundrobin
+      scheme: https
+    status: 1
+
+
+  - name: upstream-test
+    id: 2
+    uri: /ip
+    upstream_id: 1
+    status: 1
+
+
+upstreams:
+  - name: httpbin
+    id: 1
+    nodes:
+      "httpbin.org": 1
+    type: roundrobin
+
+
+#END
