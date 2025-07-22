@@ -22,8 +22,8 @@ services:
     restart: always
     volumes:
       - ./src:/usr/local/apisix/custom-plugins
+      - ./conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
-      - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
@@ -32,7 +32,7 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
-    
+      
   # prometheus:
   #   image: prom/prometheus:v2.25.0
   #   restart: always
