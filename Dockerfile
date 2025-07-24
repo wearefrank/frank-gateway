@@ -11,12 +11,6 @@ COPY conf/apisix.yaml /usr/local/apisix/conf/apisix.yaml
 # Copy Haal Centraal certificates into image
 COPY certs/ /usr/local/share/ca-certificates/
 
-#Copy test certificates into image
-COPY certs/test/apisix.pem /usr/local/apisix/ssl/apisix.pem
-COPY certs/test/apisix.pem /usr/local/apisix/ssl/apisix-key.pem
-COPY certs/test/ca-bundle.pem /usr/local/apisix/ssl/ca-bundle.pem
-
-
 #set permissions as root
 USER root
 RUN chmod -R 644 /usr/local/share/ca-certificates
