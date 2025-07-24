@@ -25,7 +25,7 @@ services:
     restart: always
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins
-      - ../../conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ../../conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
       - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml
     ports:
       - "9180:9180/tcp"

@@ -7,7 +7,7 @@
 			<ApiListener
 				name="HeaderBasedApiListener"
 				uriPattern="frank-test"
-				methods="ANY"
+				methods="GET,PUT,POST,PATCH,DELETE,HEAD,OPTIONS"
 				headerParams="Consumer"/>
 		</Receiver>
 
