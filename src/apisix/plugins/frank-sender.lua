@@ -41,22 +41,14 @@ function _M.access(conf, ctx) -- think about if this needs to be access phase or
 	
 	ngx_req.read_body()
 	local request_body = req_get_body_data()
-
-	local frank_headers = ngx_req.get_headers()
+	
 	local frank_url = url.parse(frank_endpoint)
 	local request_method = core.request.get_method()
 	local request_params = {
 		path = frank_url.path,
 		method = request_method,
+		headers = ngx_req.get_headers()
 	}
-	
-	local consumer = core.request.header(ctx, "Consumer")
-    if consumer then
-		core.log.info("Found consumer header: ", consumer)
-		frank_headers["Consumer"] = consumer
-	else
-		core.log.info("No Consumer header found in request. Continuing without.")
-	end
 	
 	local httpc = assert(require('resty.http').new())
 	local ok, err = httpc:connect {
@@ -66,18 +58,7 @@ function _M.access(conf, ctx) -- think about if this needs to be access phase or
 		port = frank_url.port,
 	}
 
-	core.log.info("Headers for Frank BEFORE CONTENTTYPE: ", core.json.encode(frank_headers))
-
-	local content_type = core.request.header(ctx, "Content-Type")
-	if content_type then
-		frank_headers["Content-Type"] = content_type
-		core.log.info("Using content type from header: ", content_type)
-	else
-		core.log.info("No Content-Type header found in request. Using default of application/json.")
-	end
-
-	core.log.info("Headers for Frank AFTER CONTENTTYPE: ", core.json.encode(frank_headers))
-
+	core.log.info("Headers for Frank: ", core.json.encode(request_params.headers))
 	if request_body ~= nil then
 		request_params.body = request_body
 		core.log.info("Request body set for Frank: ", request_body)
@@ -102,6 +83,8 @@ function _M.access(conf, ctx) -- think about if this needs to be access phase or
 		if err then
 			core.log.error(err)
 		end
+
+		--maybe set headers from frank too?
 
 		core.log.info("Transformed body: " .. transformed_body)
 		req_set_body_data(transformed_body)

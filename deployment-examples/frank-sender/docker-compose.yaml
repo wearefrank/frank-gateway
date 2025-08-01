@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 
 name: frank-gateway # Name of the parent container
 services:
@@ -21,9 +21,9 @@ services:
     image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
-      - ../../src:/usr/local/apisix/custom-plugins
-      - ../../conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
-      - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
+      - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml #Load local routes, upstreams, etc. specific for this plugin
+      - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml #Load generic apisix configuration
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
@@ -37,14 +37,25 @@ services:
     image: frankframework/frankframework:latest
     restart: always
     environment:
-      - dtap.stage=LOC
-      - instance.name=test-frank
-      - configuration.names=test-frank
+      dtap.stage: LOC
+      instance.name: test-frank
+      configurations.directory.autoLoad: true
     volumes:
-      - ./test-frank/Configuration.xml:/opt/frank/configurations/Configuration.xml
-      - ./test-frank/src/main/webapp/META-INF/context.xml:/usr/local/tomcat/conf/Catalina/localhost/ROOT.xml
+      - ./src/configurations/:/opt/frank/configurations/
+      - ./src/resources/:/opt/frank/resources/
     ports:
       - "8080:8080/tcp"
+    networks:
+      apisix:
+
+  httpbun:
+    image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
+    restart: always
+    ports:
+      - "80:80/tcp"
+    networks:
+      apisix:
+
 
   # # prometheus:
   #   image: prom/prometheus:v2.25.0
@@ -67,6 +78,7 @@ services:
   #     - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
   #   networks:
   #     apisix:
+
 
 networks:
   apisix:

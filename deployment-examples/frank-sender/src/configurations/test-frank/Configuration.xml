@@ -1,14 +1,11 @@
-<Configuration
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="../FrankConfig.xsd"
-	>
-	<Adapter name="TestAdapter">
+<Configuration name="test-frank" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../FrankConfig.xsd">
+	<Adapter name="HeaderBasedRoutingAdapter">
 		<Receiver name="HeaderBasedReceiver">
 			<ApiListener
 				name="HeaderBasedApiListener"
 				uriPattern="frank-test"
-				methods="GET,PUT,POST,PATCH,DELETE,HEAD,OPTIONS"
-				headerParams="Consumer"/>
+				methods="GET, PUT, POST, PATCH, DELETE, HEAD"
+				headerParams="consumer"/>
 		</Receiver>
 
 
@@ -16,7 +13,7 @@
 			<!-- Route based on the 'consumer' header value -->
 			<IfPipe name="RoutingPipe" 
 					getInputFromSessionKey="headers"
-					xpathExpression="normalize-space(/headers/header[@name='Consumer']) = 'consumer1'"
+					xpathExpression="normalize-space(/headers/header[@name='consumer']) = 'consumer1'"
 				>				
 				<Forward name="then" path="Consumer1Process" />
 				<Forward name="else" path="NoConsumerProcess" />
