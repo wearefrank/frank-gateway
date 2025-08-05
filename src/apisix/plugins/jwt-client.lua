@@ -25,6 +25,11 @@ local schema = {
 			type = "boolean",
 			default = false,
 		},
+		use_cache = {
+			description = "Enable caching of acquired access tokens.",
+			type = "boolean",
+			default = true,
+		},
         default_expiration = {
 			type = "integer",
 			minimum = 1,
@@ -71,12 +76,13 @@ function _M.access(conf, ctx)
 	local client_id_name = conf.client_id_field_name
 	local client_id_value = conf.client_id_value
 	local token_endpoint = conf.token_endpoint
+	local use_cache 	  = conf.use_cache
 	local custom_params = conf.custom_parameters
 	local verify_ssl = conf.ssl_verify
 
 	local cached_token = token_cache:get(client_id_value)
-	if cached_token ~= nil then
-		core.log.info("JWT client found token in cache, using cached token")
+	if cached_token ~= nil and use_cache == true then
+		core.log.info("found token in cache, using cached token")
 		core.request.add_header(ctx, "Authorization", "Bearer " .. cached_token)
 		return
 	end
@@ -85,14 +91,14 @@ function _M.access(conf, ctx)
 
 	local httpc = assert(require('resty.http').new())
 	core.log.info("JWT client before connect", parsed_url)
-	local ok, err = httpc:connect({
+	local ok, err = httpc:connect {
 		ssl_verify = verify_ssl,
 		scheme = parsed_url.scheme,
 		host = parsed_url.host,
 		port = parsed_url.port,
 		ssl_server_name = parsed_url.host
-	})
-	core.log.info("JWT client after connect", err)
+	}
+	core.log.info("JWT client after connect ", err)
 
 	local request_body = "{" .. "\"" .. client_id_name .. "\"" .. ":" .. "\"" .. client_id_value .. "\""
 	if custom_params ~= nil then
@@ -102,7 +108,7 @@ function _M.access(conf, ctx)
 	end
     request_body = request_body .. "}"
 
-	core.log.info("JWT client build request: " ..  request_body)
+	core.log.info("JWT client request: " ..  request_body)
 
 	if ok and not err then
 		local response, call_err = assert(httpc:request {

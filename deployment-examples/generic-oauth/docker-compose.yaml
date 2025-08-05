@@ -1,0 +1,82 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: frank-gateway-oidc-client-test # Name of the parent container
+services:
+  apisix:
+    image: ghcr.io/wearefrank/frank-gateway:master
+    restart: always
+    volumes:
+      - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
+      - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml #Load local routes, upstreams, etc. specific for this plugin
+      - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml #Load generic apisix configuration
+    ports:
+      - "9180:9180/tcp"
+      - "9080:9080/tcp"
+      - "9091:9091/tcp"
+      - "9092:9092/tcp"
+      - "9443:9443/tcp"
+    networks:
+      apisix:
+  
+  httpbun:
+    image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
+    restart: always
+    ports:
+      - "80:80/tcp"
+    networks:
+      apisix:
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+    command: "start-dev --http-port=9081 --import-realm --verbose"
+    volumes:
+      - ./keycloak-export.json:/opt/keycloak/data/import/keycloak-export.json
+    environment:
+      KC_HTTP_PORT: 9081
+      KEYCLOAK_ADMIN: admin_real
+      KEYCLOAK_ADMIN_PASSWORD: admin_real
+    ports:
+      - "9081:9081"
+    networks:
+      apisix:
+
+  # # prometheus:
+  #   image: prom/prometheus:v2.25.0
+  #   restart: always
+  #   volumes:
+  #     - ./conf/prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     apisix:
+    
+  # grafana:
+  #   image: grafana/grafana:7.3.7
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - "./conf/grafana_conf/provisioning:/etc/grafana/provisioning"
+  #     - "./conf/grafana_conf/dashboards:/var/lib/grafana/dashboards"
+  #     - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
+  #   networks:
+  #     apisix:
+
+
+networks:
+  apisix:
+    driver: bridge

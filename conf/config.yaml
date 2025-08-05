@@ -528,6 +528,7 @@ plugins:                           # plugin list (sorted by priority)
   - cert-auth                      # priority 100
   - frank-sender
   - generic-oauth-client
+  - openid-connect-client
   - jwt-client
   - limit-size
   #- gm                            # priority: -43

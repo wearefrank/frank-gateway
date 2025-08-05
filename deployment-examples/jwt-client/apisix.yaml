@@ -1,35 +1,38 @@
 routes:
-  - name: oidc_correct
-    uri: /any/oidc-correct
+  - name: jwt_correct
+    uri: /any/jwt-correct
     service_id: 1
     
-  - name: oidc_wrong_client_id
-    uri: /any/oidc-wrong-id
+  - name: jwt_wrong_client_id
+    uri: /any/jwt-wrong-id
     service_id: 2
 
-  - name: oidc_wrong_client_secret
-    uri: /any/oidc-wrong-secret
+  - name: jwt_wrong_client_secret
+    uri: /any/jwt-wrong-secret
     service_id: 3
 
-  - name: oidc_wrong_token_endpoint
-    uri: /any/oidc-wrong-endpoint
+  - name: jwt_wrong_token_endpoint
+    uri: /any/jwt-wrong-endpoint
     service_id: 4
 
 
 services:
   - id: 1
-    name: "oidc-correct"
+    name: "jwt-correct"
     upstream_id: 2
     plugins:
-      openid-connect-client:
+      jwt-client:
         use_cache: false
         grant_type: "client_credentials"
         token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
-        client_id: "oidc-test-client"
-        client_secret: "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx"
+        client_id_field_name: "client_id"
+        client_id_value: "oidc-test-client"
+        custom_parameters: {
+          "client_secret": "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx",
+          }
         
   - id: 2
-    name: "oidc-test-wrong-client_id"
+    name: "jwt-test-wrong-client_id"
     upstream_id: 2
     plugins:
       openid-connect-client:
@@ -40,7 +43,7 @@ services:
         client_secret: "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx"
 
   - id: 3
-    name: "oidc-test-wrong-client_secret"
+    name: "jwt-test-wrong-client_secret"
     upstream_id: 2
     plugins:
       openid-connect-client:
@@ -51,7 +54,7 @@ services:
         client_secret: "fout"
 
   - id: 4
-    name: "oidc-test-wrong-token_endpoint"
+    name: "jwt-test-wrong-token_endpoint"
     upstream_id: 2
     plugins:
       openid-connect-client:
