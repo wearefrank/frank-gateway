@@ -1,0 +1,63 @@
+ssls:
+  - id: 1
+    snis:
+      - "localhost"
+      - "127.0.0.1.nip.io"
+    cert: ${{SERVER_CERT}}
+    key:  ${{SERVER_KEY}}
+    client:
+      ca: ${{BULT_CLIENT_CHAIN}}
+      depth: 1
+  - id: 2
+    snis:
+      - "apisix"
+      - "apisix.127.0.0.1.nip.io"
+      - "soap.127.0.0.1.nip.io" 
+    cert: ${{SERVER_CERT}}
+    key:  ${{SERVER_KEY}}
+    client:
+      ca: ${{SELF_SIGNED_CA}}
+      depth: 1
+
+
+consumers:
+  - username: certuser
+    plugins:
+      cert-auth:
+        cn: ssl.bult.bz
+  - username: testuser
+    plugins:
+      cert-auth:
+        cn: CLIENT
+
+routes:
+  - name: get-limit-size-test
+    id: 1
+    uri: /bytes/*
+    plugins:
+      limit-size:
+        request_limit: 1
+        request_limit_unit: bytes
+        full_request: true
+    upstream_id: 1
+    status: 1
+
+
+  - name: post-limit-size-test
+    id: 2
+    uri: /bytes/*
+    plugins:
+      limit-size:
+          request_limit: 1
+          request_limit_unit: bytes
+      upstream_id: 1
+      status: 1
+
+upstreams:
+  - name: httpbun
+    id: 1
+    nodes:
+      "host.docker.internal:80": 1
+    type: roundrobin
+
+#END
