@@ -12,6 +12,7 @@ ssls:
     snis:
       - "apisix"
       - "apisix.127.0.0.1.nip.io"
+      - "soap.127.0.0.1.nip.io" 
     cert: ${{SERVER_CERT}}
     key:  ${{SERVER_KEY}}
     client:
@@ -39,11 +40,7 @@ routes:
       consumer-restriction: 
         whitelist: 
           - certuser
-    upstream:
-      nodes:
-        "httpbin.org": 1
-      type: roundrobin
-      scheme: https
+    upstream_id: 1
     status: 1
 
 
@@ -58,13 +55,45 @@ routes:
     upstream_id: 1
     status: 1
 
+  - name: get-limit-size-test
+    id: 3
+    uri: /bytes/*
+    plugins:
+      limit-size:
+        request_limit: 1
+        request_limit_unit: bytes
+        full_request: true
+    upstream_id: 1
+    status: 1
+
+
+  - name: post-limit-size-test
+    id: 4
+    uri: /bytes/*
+    plugins:
+      limit-size:
+          request_limit: 1
+          request_limit_unit: bytes
+      upstream_id: 1
+      status: 1
+
+  - name: soapaction-test
+    id: 5
+    uri: /soap/myservice
+    plugins:
+      soap-action-router:
+        match_action: "TestAction"
+      proxy-rewrite:
+        uri: /any
+    upstream_id: 1
+    status: 1 
+
 
 upstreams:
-  - name: httpbin
+  - name: httpbun
     id: 1
     nodes:
-      "httpbin.org": 1
+      "host.docker.internal:80": 1
     type: roundrobin
-
 
 #END
