@@ -36,8 +36,7 @@ routes:
     id: 1
     uri: /soap/myservice
     plugins:
-      soap-action-router:
-        match_action: "TestAction"
+      soap-action-router: {}
       proxy-rewrite:
         uri: /any
     upstream_id: 1

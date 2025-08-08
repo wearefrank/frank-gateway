@@ -6,16 +6,6 @@ local ngx 			= require("ngx")
 local plugin_name = "soap-action-router"
 
 local schema = {
-	type = "object",
-	properties = {
-		match_action = {
-			type = "string",
-			description = "The SOAP action to match against the SOAPAction header or Content-Type header or body."
-		},
-	},
-	required = {"match_action"},
-	additionalProperties = false,
-	description = "This plugin matches the SOAPAction header or the action in the Content-Type header or body, and adds a header if it matches."
 }
 
 local metadata_schema = {}
@@ -33,8 +23,10 @@ local function find_action_in_body(element, soap_action_match, target_tbl)
 	core.log.info("Finding SOAPAction in body")
 	for k,v in pairs(element) do
 		if type(v) ~= "table" then
-			if type(k) == "string" and k:match(soap_action_match) then
-				target_tbl["SOAPAction"] = v
+			if type(k) == "string" and k:match('Action') then
+                if v == soap_action_match then
+					target_tbl["SOAPAction"] = v
+				end
 			end
 		end
 		if type(v) == "table" then
@@ -49,6 +41,7 @@ function _M.access(conf, ctx)
         core.log.info("Matched SOAPAction. Header was added.")
     else
         core.log.info("No match for SOAPAction.")
+        return 403, { message = "Forbidden: Invalid or missing SOAPAction." }
     end
 end
 
@@ -62,6 +55,7 @@ function _M:match_soap_action(target_action)
             core.log.info("SOAPAction matches target action: ", target_action)
             return true
         end
+        return false
     end
 
     -- If no match or SOAPAction missing, try to get from Content-Type (SOAP 1.2)
