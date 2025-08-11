@@ -6,6 +6,15 @@ local ngx 			= require("ngx")
 local plugin_name = "soap-action-router"
 
 local schema = {
+	type = "object",
+	properties = {
+		match_action = {
+			type = "string",
+			description = "The SOAP action to match against the SOAPAction header or Content-Type header or body."
+		},
+	},
+	additionalProperties = false,
+	description = "This plugin matches the SOAPAction header or the action in the Content-Type header or body, and adds a header if it matches."
 }
 
 local metadata_schema = {}
