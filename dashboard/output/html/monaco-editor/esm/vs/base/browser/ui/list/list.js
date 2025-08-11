@@ -1,1 +1,0 @@
-export class ListError extends Error{constructor(r,s){super(`ListError [${r}] ${s}`)}}

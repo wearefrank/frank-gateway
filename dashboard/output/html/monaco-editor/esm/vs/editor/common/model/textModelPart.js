@@ -1,1 +1,0 @@
-export class TextModelPart{constructor(){this._isDisposed=!1}dispose(){this._isDisposed=!0}assertNotDisposed(){if(this._isDisposed)throw new Error("TextModelPart is disposed!")}}

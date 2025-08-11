@@ -21,9 +21,9 @@ services:
     image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
-      - ./src:/usr/local/apisix/custom-plugins
-      - ./conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
-      - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ../../src:/usr/local/apisix/custom-plugins
+      - ../../conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
@@ -32,18 +32,21 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
-    env_file: ./.env
-      
-  httpbun:
-    image: sharat87/httpbun:latest
+  
+  frank:
+    image: frankframework/frankframework:latest
     restart: always
+    environment:
+      - dtap.stage=LOC
+      - instance.name=test-frank
+      - configuration.names=test-frank
+    volumes:
+      - ./test-frank/Configuration.xml:/opt/frank/configurations/Configuration.xml
+      - ./test-frank/src/main/webapp/META-INF/context.xml:/usr/local/tomcat/conf/Catalina/localhost/ROOT.xml
     ports:
-      - "80:80/tcp"
-    networks:
-      apisix:
+      - "8080:8080/tcp"
 
-    
-  # prometheus:
+  # # prometheus:
   #   image: prom/prometheus:v2.25.0
   #   restart: always
   #   volumes:

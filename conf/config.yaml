@@ -22,6 +22,7 @@ apisix:
   enable_http2: true
   enable_control: false  # Control API
   config_center: yaml
+
   control:
     ip: "0.0.0.0"
     port: 9092
@@ -148,7 +149,7 @@ nginx_config:                     # Config for render the template to generate n
   # user: root                    # Set the execution user of the worker process. This is only
                                   # effective if the master process runs with super-user privileges.
   error_log: logs/error.log       # Location of the error log.
-  error_log_level:  info          # Logging level: info, debug, notice, warn, error, crit, alert, or emerg.
+  error_log_level: warn          # Logging level: info, debug, notice, warn, error, crit, alert, or emerg.
   worker_processes: auto          # Automatically determine the optimal number of worker processes based
                                   # on the available system resources.
                                   # If you want use multiple cores in container, you can inject the number of
@@ -525,8 +526,7 @@ plugins:                           # plugin list (sorted by priority)
   # <- recommend to use priority (0, 100) for your custom plugins
   - example-plugin                 # priority: 0
   - cert-auth                      # priority 100
-  - fsc
-  - openid-connect-client
+  - frank-sender
   - generic-oauth-client
   - jwt-client                     #- gm
   - limit-size                     # priority: -43

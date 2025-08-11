@@ -155,18 +155,11 @@ services:
     desc: "test service"
     upstream_id: 3
 upstreams:
-  - id: 3
-    name: "echo-upstream"
-    desc: "echo API"
-    type: "roundrobin"
-    scheme: "https"
-    pass_host: "node"
-    nodes:
-      "echo-api.3scale.net:443": 1
-
   - name: httpbin
-    id: 2
+    id: 1
     nodes:
       "httpbin.org": 1
     type: roundrobin
+
+
 #END

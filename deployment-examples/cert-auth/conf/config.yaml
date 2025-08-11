@@ -197,7 +197,6 @@ nginx_config:                     # Config for render the template to generate n
     # The configuration should be well indented!
   http_configuration_snippet: |
     lua_ssl_protocols TLSv1.2 TLSv1.3;
-  #   lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.pem;  # This causes an error in the newest version since lua_ssl_trusted_certificate is auto generated and you'll have double entries.
   http_server_configuration_snippet: |
     lua_ssl_verify_depth 4;
     # Add custom Nginx http server configuration to nginx.conf.
