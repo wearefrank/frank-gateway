@@ -6,6 +6,15 @@ local ngx 			= require("ngx")
 local plugin_name = "soap-action-router"
 
 local schema = {
+	type = "object",
+	properties = {
+		match_action = {
+			type = "string",
+			description = "The SOAP action to match against the SOAPAction header or Content-Type header or body."
+		},
+	},
+	additionalProperties = false,
+	description = "This plugin matches the SOAPAction header or the action in the Content-Type header or body, and adds a header if it matches."
 }
 
 local metadata_schema = {}
@@ -20,10 +29,11 @@ local _M = {
 
 -- need to traverse the table since we do not know the xmlns prefixes beforehand
 local function find_action_in_body(element, soap_action_match, target_tbl)
+	core.log.info("Finding SOAPAction in body")
 	for k,v in pairs(element) do
 		if type(v) ~= "table" then
-			if type(k) == "string" and k:match("Action") then
-				if v == soap_action_match then
+			if type(k) == "string" and k:match('Action') then
+                if v == soap_action_match then
 					target_tbl["SOAPAction"] = v
 				end
 			end
@@ -34,37 +44,70 @@ local function find_action_in_body(element, soap_action_match, target_tbl)
 	end
 end
 
+function _M.access(conf, ctx)
+    local matched = _M:match_soap_action(conf.match_action)
+    if matched then
+        core.log.info("Matched SOAPAction. Header was added.")
+    else
+        core.log.info("No match for SOAPAction.")
+        return 403, { message = "Forbidden: Invalid or missing SOAPAction." }
+    end
+end
+
 function _M:match_soap_action(target_action)
-	local soap_action = ngx.req.get_headers()['SOAPAction']
-	if soap_action ~= nil then
-	else
-		local content_type = ngx.req.get_headers()['Content-Type']
-		for k in string.gmatch(content_type, "[^;]+") do
-			local key, value = k:match("([^=]+)=(.*)")
-			if key == "action" then
-				soap_action = value:gsub("^%s*[\"']*(.-)[\"']*%s*$", "%1")
-			end
-		end
-	end
+    local headers = ngx.req.get_headers()
+    local soap_action = headers["SOAPAction"]
 
-	if soap_action == nil then
-		local body = core.request.get_body()
-		if body ~= nil then
-			local handler = xmlhandler:new()
-			local parser = xml2lua.parser(handler)
-			parser:parse(body)
-			local flat_tbl = {}
-			find_action_in_body(handler.root, target_action, flat_tbl)
-			soap_action = flat_tbl["SOAPAction"]
-		end
-	end
+    if soap_action then
+        soap_action = soap_action:gsub("^%s*[\"']*(.-)[\"']*%s*$", "%1")  -- remove quotes and whitespace
+        if soap_action == target_action then
+            core.log.info("SOAPAction matches target action: ", target_action)
+            return true
+        end
+        return false
+    end
 
-	if soap_action == target_action then
-		core.request.add_header("SOAPAction", soap_action)
-		return true
-	else
-		return false
-	end
+    -- If no match or SOAPAction missing, try to get from Content-Type (SOAP 1.2)
+    local content_type = headers["Content-Type"]
+    if content_type then
+        for k in string.gmatch(content_type, "[^;]+") do
+            local key, value = k:match("^%s*([^=]+)%s*=%s*\"?([^\";]+)\"?")
+            if key and key:lower() == "action" then
+                soap_action = value
+                if soap_action == target_action then
+                    core.request.add_header("SOAPAction", soap_action)
+                    core.log.info("Matched action from Content-Type header: ", soap_action)
+                    return true
+                end
+            end
+        end
+    end
+
+    -- Final fallback: parse body for action
+    core.log.info("Trying to find SOAPAction in body")
+    local body, err = core.request.get_body()
+    if not body then
+        core.log.warn("Could not get request body: ", err)
+        return false
+    end
+
+    local handler = xmlhandler:new()
+    local parser = xml2lua.parser(handler)
+
+    local ok, parse_err = pcall(function() parser:parse(body) end)
+    if not ok then
+        core.log.error("Failed to parse XML body: ", parse_err)
+        return false
+    end
+
+    local found_tbl = {}
+    find_action_in_body(handler.root, target_action, found_tbl)
+    if found_tbl["SOAPAction"] then
+        core.request.add_header("SOAPAction", found_tbl["SOAPAction"])
+        core.log.info("SOAPAction extracted from body and added: ", found_tbl["SOAPAction"])
+        return true
+    end
+    return false
 end
 
 return _M

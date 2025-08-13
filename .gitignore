@@ -8,3 +8,6 @@ keycloak/
 
 # exception to the rule
 !logs/.gitkeep 
+
+soapui/Files/SoapUI-x64-5.8.0.sh
+soapui/reports/

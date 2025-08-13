@@ -528,9 +528,10 @@ plugins:                           # plugin list (sorted by priority)
   - cert-auth                      # priority 100
   - frank-sender
   - generic-oauth-client
+  - jwt-client                    
+  - limit-size                     
+  - soap-action-router             
   - openid-connect-client
-  - jwt-client
-  - limit-size
   #- gm                            # priority: -43
   - aws-lambda                     # priority: -1899
   - azure-functions                # priority: -1900
