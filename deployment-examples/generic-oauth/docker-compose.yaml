@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: frank-gateway-oidc-client-test # Name of the parent container
+name: frank-gateway-generic-oauth-client-test # Name of the parent container
 services:
   apisix:
     image: ghcr.io/wearefrank/frank-gateway:master

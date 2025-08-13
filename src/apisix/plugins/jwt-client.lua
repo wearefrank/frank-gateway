@@ -91,7 +91,7 @@ function _M.access(conf, ctx)
 
 	local httpc = assert(require('resty.http').new())
 	core.log.info("JWT client before connect", parsed_url)
-	local ok, err = httpc:connect {
+	local _, err = httpc:connect {
 		ssl_verify = verify_ssl,
 		scheme = parsed_url.scheme,
 		host = parsed_url.host,
@@ -100,6 +100,11 @@ function _M.access(conf, ctx)
 	}
 	core.log.info("JWT client after connect ", err)
 
+	if err then
+		core.log.error(err)
+		httpc:close()
+		return 500, { message = err }
+	end
 	local request_body = "{" .. "\"" .. client_id_name .. "\"" .. ":" .. "\"" .. client_id_value .. "\""
 	if custom_params ~= nil then
 		for param, value in pairs(custom_params) do
@@ -110,40 +115,34 @@ function _M.access(conf, ctx)
 
 	core.log.info("JWT client request: " ..  request_body)
 
-	if ok and not err then
-		local response, call_err = assert(httpc:request {
-			method = 'POST',
-			path = parsed_url.path,
-			body = request_body,
-			headers = {
-				["Content-Type"] = "application/json"
-			},
-		})
-		core.log.info("JWT client request")
+	local res, call_err = assert(httpc:request {
+		method = 'POST',
+		path = parsed_url.path,
+		body = request_body,
+		headers = {
+			["Content-Type"] = "application/json"
+		},
+	})
 
-		if call_err ~= nil or response.status ~= 200 then
-			err = "getting token failed"
+	local body, _ = res:read_body()
+	core.log.info("IDP response status: ", res.status)
+	if call_err ~= nil or res.status ~= 200 then
+		core.log.error("Http error: ", body)
+		core.log.error("Call error: ", call_err)
+		httpc:close()
+		if body == nil then
+			return res.status, { message = "Failed to make request to IDP. No error message was given. Error code: " .. res.status }
+		else
+			return res.status, { message = body }
 		end
-        core.log.info("JWT client IDP response status: ", response.status)
-
-        local body, err = response:read_body()
-		if err then
-			core.log.error(err)
-		end
- 
+	else
 		local token_response = core.json.decode(body)
+		local expiration = token_response.expires_in or conf.default_expiration
 
-		token_cache:set(client_id_value, token_response.token, conf.default_expiration)
-		core.log.info("JWT client token Cached: " .. token_response.token)
-
-		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.token)
+		token_cache:set(client_id_value, token_response.access_token, expiration)
+		core.request.add_header(ctx, "Authorization", "Bearer " .. token_response.access_token)
+		httpc:close()
 	end
-
-	if err then
-		core.log.error("JWT client connection error: ", err)
-	end
-
-	httpc:close()
 end
 
 return _M

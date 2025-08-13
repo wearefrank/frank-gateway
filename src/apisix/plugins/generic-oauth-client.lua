@@ -86,7 +86,6 @@ function _M.access(conf, ctx)
 		return
 	end
 
-
 	local parsed_url = url.parse(token_endpoint)
 
 	local httpc = assert(require('resty.http').new())

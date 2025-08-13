@@ -15,7 +15,6 @@ routes:
     uri: /any/jwt-wrong-endpoint
     service_id: 4
 
-
 services:
   - id: 1
     name: "jwt-correct"
@@ -23,47 +22,56 @@ services:
     plugins:
       jwt-client:
         use_cache: false
-        grant_type: "client_credentials"
-        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
+        token_endpoint: "http://host.docker.internal:8080/token"
         client_id_field_name: "client_id"
-        client_id_value: "oidc-test-client"
+        client_id_value: "jwt_client_id"
         custom_parameters: {
-          "client_secret": "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx",
+            "client_secret": "jwt_client_secret",
+            "grant_type": "client_credentials"
           }
         
   - id: 2
-    name: "jwt-test-wrong-client_id"
+    name: "jwt-wrong-client_id"
     upstream_id: 2
     plugins:
-      openid-connect-client:
+      jwt-client:
         use_cache: false
-        grant_type: "client_credentials"
-        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
-        client_id: "fout"
-        client_secret: "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx"
+        token_endpoint: "http://host.docker.internal:8080/token"
+        client_id_field_name: "client_id"
+        client_id_value: "fout"
+        custom_parameters: {
+            "client_secret": "jwt_client_secret",
+            "grant_type": "client_credentials"
+          }
 
   - id: 3
-    name: "jwt-test-wrong-client_secret"
+    name: "jwt-wrong-client_secret"
     upstream_id: 2
     plugins:
-      openid-connect-client:
+      jwt-client:
         use_cache: false
-        grant_type: "client_credentials"
-        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
-        client_id: "oidc-test-client"
-        client_secret: "fout"
-
+        token_endpoint: "http://host.docker.internal:8080/token"
+        client_id_field_name: "client_id"
+        client_id_value: "jwt_client_id"
+        custom_parameters: {
+            "client_secret": "fout",
+            "grant_type": "client_credentials"
+          }
+          
   - id: 4
-    name: "jwt-test-wrong-token_endpoint"
+    name: "jwt-wrong-token_endpoint"
     upstream_id: 2
     plugins:
-      openid-connect-client:
+      jwt-client:
         use_cache: false
-        grant_type: "client_credentials"
-        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/fout"
-        client_id: "oidc-test-client"
-        client_secret: "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx"
-        
+        token_endpoint: "http://host.docker.internal:8080/fout"
+        client_id_field_name: "client_id"
+        client_id_value: "jwt_client_id"
+        custom_parameters: {
+            "client_secret": "jwt_client_secret",
+            "grant_type": "client_credentials"
+          }
+
 upstreams:
   - id: 2
     name: "echo-upstream"

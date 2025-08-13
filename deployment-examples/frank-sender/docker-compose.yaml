@@ -15,7 +15,7 @@
 # limitations under the License.
 
 
-name: frank-gateway # Name of the parent container
+name: frank-gateway-frank-sender-tests # Name of the parent container
 services:
   apisix:
     image: ghcr.io/wearefrank/frank-gateway:master

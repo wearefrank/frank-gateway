@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: frank-gateway-oidc-client-test # Name of the parent container
+name: frank-gateway-jwt-client-test # Name of the parent container
 services:
   apisix:
     image: ghcr.io/wearefrank/frank-gateway:master
@@ -54,6 +54,11 @@ services:
     networks:
       apisix:
 
+  json-idp:
+    build: ./idp
+    ports:
+      - "8080:8080"
+
   # # prometheus:
   #   image: prom/prometheus:v2.25.0
   #   restart: always
@@ -75,8 +80,7 @@ services:
   #     - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
   #   networks:
   #     apisix:
-
-
+  
 networks:
   apisix:
     driver: bridge
