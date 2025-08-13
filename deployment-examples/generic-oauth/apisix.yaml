@@ -1,0 +1,83 @@
+routes:
+  - name: generic_correct
+    uri: /any/generic-correct
+    service_id: 1
+    
+  - name: generic_wrong_client_id
+    uri: /any/generic-wrong-id
+    service_id: 2
+
+  - name: generic_wrong_client_secret
+    uri: /any/generic-wrong-secret
+    service_id: 3
+
+  - name: generic_wrong_token_endpoint
+    uri: /any/generic-wrong-endpoint
+    service_id: 4
+
+
+services:
+  - id: 1
+    name: "generic-correct"
+    upstream_id: 2
+    plugins:
+      generic-oauth-client:
+        use_cache: false
+        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
+        client_id_field_name: "client_id"
+        client_id_value: "oidc-test-client"
+        custom_parameters: {
+          "client_secret": "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx",
+          "grant_type": "client_credentials"
+        }
+
+  - id: 2
+    name: "generic-test-wrong-client_id"
+    upstream_id: 2
+    plugins:
+      generic-oauth-client:
+        use_cache: false
+        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
+        client_id_field_name: "client_id"
+        client_id_value: "fout"
+        custom_parameters: {
+          "client_secret": "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx",
+          "grant_type": "client_credentials"
+        }
+        
+  - id: 3
+    name: "generic-test-wrong-client_secret"
+    upstream_id: 2
+    plugins:
+      generic-oauth-client:
+        use_cache: false
+        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
+        client_id_field_name: "client_id"
+        client_id_value: "oidc-test-client"
+        custom_parameters: {
+          "client_secret": "fout",
+          "grant_type": "client_credentials"
+        }
+        
+  - id: 4
+    name: "generic-test-wrong-token_endpoint"
+    upstream_id: 2
+    plugins:
+      generic-oauth-client:
+        use_cache: false
+        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/fout"
+        client_id_field_name: "client_id"
+        client_id_value: "oidc-test-client"
+        custom_parameters: {
+          "client_secret": "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx",
+          "grant_type": "client_credentials"
+        }
+        
+upstreams:
+  - id: 2
+    name: "echo-upstream"
+    desc: "echo API"
+    type: roundrobin
+    nodes:
+        "host.docker.internal:80": 1
+#END

@@ -149,7 +149,7 @@ nginx_config:                     # Config for render the template to generate n
   # user: root                    # Set the execution user of the worker process. This is only
                                   # effective if the master process runs with super-user privileges.
   error_log: logs/error.log       # Location of the error log.
-  error_log_level: warn          # Logging level: info, debug, notice, warn, error, crit, alert, or emerg.
+  error_log_level: info          # Logging level: info, debug, notice, warn, error, crit, alert, or emerg.
   worker_processes: auto          # Automatically determine the optimal number of worker processes based
                                   # on the available system resources.
                                   # If you want use multiple cores in container, you can inject the number of
@@ -528,9 +528,11 @@ plugins:                           # plugin list (sorted by priority)
   - cert-auth                      # priority 100
   - frank-sender
   - generic-oauth-client
-  - jwt-client                     #- gm
-  - limit-size                     # priority: -43
+  - jwt-client                    
+  - limit-size                     
   - soap-action-router             
+  - openid-connect-client
+  #- gm                            # priority: -43
   - aws-lambda                     # priority: -1899
   - azure-functions                # priority: -1900
   - openwhisk                      # priority: -1901

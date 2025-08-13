@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-name: frank-gateway-frank-sender-tests # Name of the parent container
+name: frank-gateway-generic-oauth-client-test # Name of the parent container
 services:
   apisix:
     image: ghcr.io/wearefrank/frank-gateway:master
@@ -33,21 +32,6 @@ services:
     networks:
       apisix:
   
-  frank:
-    image: frankframework/frankframework:latest
-    restart: always
-    environment:
-      dtap.stage: LOC
-      instance.name: test-frank
-      configurations.directory.autoLoad: true
-    volumes:
-      - ./src/configurations/:/opt/frank/configurations/
-      - ./src/resources/:/opt/frank/resources/
-    ports:
-      - "8080:8080/tcp"
-    networks:
-      apisix:
-
   httpbun:
     image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
     restart: always
@@ -56,6 +40,19 @@ services:
     networks:
       apisix:
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+    command: "start-dev --http-port=9081 --import-realm --verbose"
+    volumes:
+      - ./keycloak-export.json:/opt/keycloak/data/import/keycloak-export.json
+    environment:
+      KC_HTTP_PORT: 9081
+      KEYCLOAK_ADMIN: admin_real
+      KEYCLOAK_ADMIN_PASSWORD: admin_real
+    ports:
+      - "9081:9081"
+    networks:
+      apisix:
 
   # # prometheus:
   #   image: prom/prometheus:v2.25.0
