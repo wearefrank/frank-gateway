@@ -19,7 +19,7 @@ upstreams:
   - name: httpbun
     id: 1
     nodes:
-      "httpbun.com": 1
+      "host.docker.internal:80": 1
     type: roundrobin
 
 #END

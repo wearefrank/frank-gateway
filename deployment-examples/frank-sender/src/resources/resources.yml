@@ -1,0 +1,4 @@
+jdbc:
+- name: test-frank
+  type: org.h2.jdbcx.JdbcDataSource
+  url: jdbc:h2:/opt/frank/h2/haalcentraal-connector

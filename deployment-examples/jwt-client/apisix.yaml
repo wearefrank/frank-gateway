@@ -1,0 +1,82 @@
+routes:
+  - name: jwt_correct
+    uri: /any/jwt-correct
+    service_id: 1
+    
+  - name: jwt_wrong_client_id
+    uri: /any/jwt-wrong-id
+    service_id: 2
+
+  - name: jwt_wrong_client_secret
+    uri: /any/jwt-wrong-secret
+    service_id: 3
+
+  - name: jwt_wrong_token_endpoint
+    uri: /any/jwt-wrong-endpoint
+    service_id: 4
+
+services:
+  - id: 1
+    name: "jwt-correct"
+    upstream_id: 2
+    plugins:
+      jwt-client:
+        use_cache: false
+        token_endpoint: "http://host.docker.internal:8080/token"
+        client_id_field_name: "client_id"
+        client_id_value: "jwt_client_id"
+        custom_parameters: {
+            "client_secret": "jwt_client_secret",
+            "grant_type": "client_credentials"
+          }
+        
+  - id: 2
+    name: "jwt-wrong-client_id"
+    upstream_id: 2
+    plugins:
+      jwt-client:
+        use_cache: false
+        token_endpoint: "http://host.docker.internal:8080/token"
+        client_id_field_name: "client_id"
+        client_id_value: "fout"
+        custom_parameters: {
+            "client_secret": "jwt_client_secret",
+            "grant_type": "client_credentials"
+          }
+
+  - id: 3
+    name: "jwt-wrong-client_secret"
+    upstream_id: 2
+    plugins:
+      jwt-client:
+        use_cache: false
+        token_endpoint: "http://host.docker.internal:8080/token"
+        client_id_field_name: "client_id"
+        client_id_value: "jwt_client_id"
+        custom_parameters: {
+            "client_secret": "fout",
+            "grant_type": "client_credentials"
+          }
+          
+  - id: 4
+    name: "jwt-wrong-token_endpoint"
+    upstream_id: 2
+    plugins:
+      jwt-client:
+        use_cache: false
+        token_endpoint: "http://host.docker.internal:8080/fout"
+        client_id_field_name: "client_id"
+        client_id_value: "jwt_client_id"
+        custom_parameters: {
+            "client_secret": "jwt_client_secret",
+            "grant_type": "client_credentials"
+          }
+
+upstreams:
+  - id: 2
+    name: "echo-upstream"
+    desc: "echo API"
+    type: roundrobin
+    nodes:
+        "host.docker.internal:80": 1
+#END
