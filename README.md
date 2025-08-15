@@ -63,7 +63,7 @@ The FSC plugin:
 - Can act as a Inway in a FSC NLX group
 - Can combine the FSC NLX Inway with different APISIX plugins 
 
-Detailed documentation on the FSC plugin and how to run and test the FSC plugin locally can be found [here](deployment-examples/fsc/FSC-NLX.md)
+Detailed documentation on the FSC plugin and how to run and test the FSC plugin locally can be found [here](tests/fsc/FSC-NLX.md)
 
 ### SOAP action router
 APISIX can create routing rules based on HTTP headers. However, within SOAP the specific operation is determined by the SOAP action, this SOAP action can either be in a HTTP header, Content-Type header or body.
