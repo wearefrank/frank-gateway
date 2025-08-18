@@ -72,7 +72,7 @@ jobs:
         run: docker-compose down
 
       - name: Upload Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: soapui-reports-${{ matrix.plugin }}
           path: ./soapui/reports
