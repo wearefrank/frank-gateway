@@ -128,4 +128,4 @@ jobs:
       setup-script: |
         docker compose -f /tests/${{ matrix.plugin-test-dir }}/docker-compose.yml up -d
       teardown-script: |
-        docker compose -f /tests/${{ matrix.plugin-test-dir }}/docker-compose.yml down
+        docker compose -f /tests/${{ matrix.plugin-test-dir }}/docker-compose.yml down -v
