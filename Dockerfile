@@ -1,5 +1,7 @@
 FROM apache/apisix:3.12.0-debian
 
+HEALTHCHECK --interval=5s --timeout=3s --retries=10 CMD apisix test || exit 1
+
 ARG BUILD_DATE
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL based-on="Apache APISIX 3.12"
