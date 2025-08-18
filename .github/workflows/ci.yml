@@ -121,16 +121,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Save image as artifact
-        run: docker save ${{ steps.meta.outputs.tags }} | gzip > app-image.tar.gz
-
-      - name: Upload image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-image
-          path: app-image.tar.gz
-
+          
   test-plugins:
     uses: wearefrank/ci-cd-templates/.github/workflows/soapui-testrunner.yml@6d9d6438dd46887a375db769167b29bb54b39d78
     needs: [ build-image, discover-plugin-tests]
