@@ -1,0 +1,78 @@
+name: Run SoapUI Plugin Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  discover-plugins:
+    runs-on: ubuntu-latest
+    outputs:
+      plugin-matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Find all subdirectories in tests/
+        id: set-matrix
+        run: |
+          echo "🔍 Discovering test directories in ./tests/"
+          plugins=$(find tests -mindepth 1 -maxdepth 1 -type d -printf '"%f",' | sed 's/,$//')
+          echo "matrix=[${plugins}]"
+          echo "matrix=[${plugins}]" >> $GITHUB_OUTPUT
+
+  run-tests:
+    needs: discover-plugins
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: ${{ fromJson(needs.discover-plugins.outputs.plugin-matrix) }}
+
+    name: Run tests for ${{ matrix.plugin }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Start Docker Compose
+        working-directory: ./tests/${{ matrix.plugin }}
+        run: docker-compose up -d
+
+      - name: Wait for APISIX to be ready
+        run: |
+          timeout=60
+          until curl -s http://localhost:9080 || [ $timeout -eq 0 ]; do
+            echo "Waiting for APISIX... ($timeout seconds left)"
+            sleep 1
+            timeout=$((timeout - 1))
+          done
+          if [ $timeout -eq 0 ]; then
+            echo "APISIX did not become ready"
+            exit 1
+          fi
+
+      - name: Run SoapUI Tests
+        working-directory: ./tests/${{ matrix.plugin }}
+        run: |
+          mkdir -p reports
+          docker run --rm \
+            -v "$PWD:/tests" \
+            -v "$PWD/reports:/reports" \
+            openjdk:11 bash -c "
+              apt-get update && apt-get install -y curl unzip &&
+              curl -L -o soapui.zip https://s3.amazonaws.com/downloads.eviware/soapuios/5.7.0/SoapUI-5.7.0-linux-bin.zip &&
+              unzip -q soapui.zip &&
+              SoapUI-5.7.0/bin/testrunner.sh -j -f /reports /tests/*.xml
+            "
+
+      - name: Shutdown Docker Compose
+        working-directory: ./tests/${{ matrix.plugin }}
+        run: docker-compose down
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: soapui-reports-${{ matrix.plugin }}
+          path: ./soapui/reports

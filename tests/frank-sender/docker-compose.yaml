@@ -20,6 +20,9 @@ services:
   apisix:
     image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
+    depends_on:
+      frank:
+        condition: service_started
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml #Load local routes, upstreams, etc. specific for this plugin
