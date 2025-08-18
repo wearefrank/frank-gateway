@@ -38,7 +38,7 @@ jobs:
 
       - name: Start Docker Compose
         working-directory: ./tests/${{ matrix.plugin }}
-        run: docker-compose up -d
+        run: docker compose up -d
 
       - name: Wait for APISIX to be ready
         run: |
@@ -69,7 +69,7 @@ jobs:
 
       - name: Shutdown Docker Compose
         working-directory: ./tests/${{ matrix.plugin }}
-        run: docker-compose down
+        run: docker compose down
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4
