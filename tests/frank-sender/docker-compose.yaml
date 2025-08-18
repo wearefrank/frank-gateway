@@ -18,7 +18,7 @@
 name: frank-gateway-frank-sender-tests # Name of the parent container
 services:
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:master
+    image: ghcr.io/${IMAGE_ID:-${IMAGE_TAG:-wearefrank/frank-gateway}}
     restart: always
     depends_on:
       frank:

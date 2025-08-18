@@ -125,3 +125,7 @@ jobs:
       project-dir: /tests/${{ matrix.plugin-test-dir }}
       soapui-project: soapui-project.xml
       image-id: ${{ needs.build-image.outputs.image-id }}
+      setup-script: |
+        docker compose -f /tests/${{ matrix.plugin-test-dir }}/docker-compose.yml up -d
+      teardown-script: |
+        docker compose -f /tests/${{ matrix.plugin-test-dir }}/docker-compose.yml down
