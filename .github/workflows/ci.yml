@@ -10,11 +10,12 @@ on:
     branches: [ master ]
 
 env:
+  DOCKERFILE: ./Dockerfile
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-
+  IMAGE: ghcr.io/wearefrank/frank-gateway
 jobs:
   # version-next:
   #   runs-on: ubuntu-latest
@@ -38,17 +39,28 @@ jobs:
   #       id: reference
   #       uses: wearefrank/ci-cd-templates/next-reference@5ec30763e8d8eeed008edcac3c6a329367e42760 #1.0.4
  
-          
-  build-and-push-image:
+  discover-plugin-tests:
     runs-on: ubuntu-latest
+    outputs:
+      plugin-matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find all subdirectories in tests/
+        id: set-matrix
+        run: |
+          echo "🔍 Discovering test directories in ./tests/"
+          plugins=$(find tests -mindepth 1 -maxdepth 1 -type d -printf '"%f",' | sed 's/,$//')
+          echo "matrix=[${plugins}]"
+          echo "matrix=[${plugins}]" >> $GITHUB_OUTPUT
+
+          
+  build-image:
+    runs-on: ubuntu-latest
+    outputs: 
+      image-id: ${{ steps.build-and-push.outputs.imageid }}
   #  needs: version-next
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - dockerfile: ./Dockerfile
-            image: ghcr.io/wearefrank/frank-gateway
-            
+
     permissions:
       contents: read
       packages: write
@@ -82,8 +94,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 #5.5.1
         with:
-          images: ${{ matrix.image }}
-          tags: ${{ github.run_id }}
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=raw,value=${{ github.run_number }}          
           #   type=semver,pattern={{version}},value=${{ needs.version-next.outputs.version-next }}
           #   type=semver,pattern={{major}}.{{minor}},value=${{ needs.version-next.outputs.version-next }}
           #   type=semver,pattern={{major}},value=${{ needs.version-next.outputs.version-next }}
@@ -99,9 +113,34 @@ jobs:
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
           context: .
+          platforms: linux/amd64, linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
-          file: ${{ matrix.dockerfile }}
+          file: ${{ env.DOCKERFILE }}
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Save image as artifact
+        run: docker save ${{ steps.meta.outputs.tags }} | gzip > app-image.tar.gz
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-image
+          path: app-image.tar.gz
+
+  test-plugins:
+    uses: wearefrank/ci-cd-templates/.github/workflows/soapui-testrunner.yml@6d9d6438dd46887a375db769167b29bb54b39d78
+    needs: [ build-image, discover-plugin-tests]
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin-test-dir: ${{ fromJson(needs.discover-plugin-tests.outputs.plugin-matrix) }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      project-dir: /tests/${{ matrix.plugin-test-dir }}
+      soapui-project: soapui-project.xml
+      image-id: ${{ needs.build-image.outputs.image-id }}
