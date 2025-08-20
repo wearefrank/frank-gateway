@@ -222,7 +222,7 @@
           <con:params/>
           <con:element>data</con:element>
         </con:representation>
-        <con:request name="Request 1" id="fb880d5d-498a-4e0a-b93a-f7b0caae8ce4" mediaType="application/json" sslKeystore="certs/test/keystore/BULT_certuser.p12">
+        <con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="Request 1" id="fb880d5d-498a-4e0a-b93a-f7b0caae8ce4" mediaType="application/json" sslKeystore="BULT_certuser.p12">
           <con:settings>
             <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">
               &lt;xml-fragment/></con:setting>
@@ -269,7 +269,7 @@
           <con:params/>
           <con:element xmlns:head="https://apisix.127.0.0.1.nip.io/headers">head:Response</con:element>
         </con:representation>
-        <con:request name="Request 1" id="04d146d8-9143-4977-9cef-3f7defb17893" mediaType="application/json" sslKeystore="certs/test/keystore/BULT_certuser.p12">
+        <con:request name="Request 1" id="04d146d8-9143-4977-9cef-3f7defb17893" mediaType="application/json" sslKeystore="BULT_certuser.p12">
           <con:settings>
             <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">
               &lt;xml-fragment/></con:setting>
@@ -468,13 +468,12 @@
           <con:params/>
           <con:element>data</con:element>
         </con:representation>
-        <con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="Request 1" id="f3aadf34-7013-4ec3-ad7f-ee8cbaa6b05d" mediaType="application/json" sslKeystore="certs/test/keystore/CLIENT_testuser.p12 ">
           <con:settings>
             <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">
               &lt;xml-fragment/></con:setting>
           </con:settings>
           <con:endpoint>https://apisix.127.0.0.1.nip.io:9443</con:endpoint>
-          <con:request/>
+          <con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request id="acb0ca18-90bb-4e38-871b-38c7ef64302b" mediaType="application/json"><con:settings/><con:parameters/></con:request>
           <con:originalUri>https://apisix/ip</con:originalUri>
           <con:credentials>
             <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
@@ -483,7 +482,7 @@
           <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
           <con:jmsPropertyConfig/>
           <con:parameters/>
-        </con:request>
+        
       </con:method>
       <con:method name="Method 2" id="9ad9254b-8c18-47c1-bbe6-0c4b4f0eb41a" method="GET">
         <con:settings/>
@@ -518,7 +517,7 @@
           <con:params/>
           <con:element>data</con:element>
         </con:representation>
-        <con:request name="Request 1" id="69fb85c6-8ff9-4507-b8c9-24b9ff5b88f8" mediaType="application/json" sslKeystore="certs/test/keystore/CLIENT_testuser.p12 ">
+        <con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:request name="Request 1" id="69fb85c6-8ff9-4507-b8c9-24b9ff5b88f8" mediaType="application/json" sslKeystore="CLIENT_testuser.p12 ">
           <con:settings>
             <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">
               &lt;xml-fragment/></con:setting>
@@ -545,11 +544,10 @@
       <con:testStep type="restrequest" name="Happy flow - testuser" id="36acb9b3-3ac4-46fc-88f0-3d565f73dd1a">
         <con:settings/>
         <con:config service="cert-auth" resourcePath="/headers" methodName="Method 1" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-          <con:restRequest name="Happy flow - testuser" id="f3aadf34-7013-4ec3-ad7f-ee8cbaa6b05d" mediaType="application/json" sslKeystore="certs/test/keystore/CLIENT_testuser.p12">
+          <con:restRequest name="Happy flow - testuser" id="f3aadf34-7013-4ec3-ad7f-ee8cbaa6b05d" mediaType="application/json" sslKeystore="CLIENT_testuser.p12">
             <con:settings>
               <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
-              <con:setting id="com.eviware.soapui.impl.support.AbstractHttpRequest@follow-redirects">
-                true</con:setting>
+              <con:setting id="com.eviware.soapui.impl.support.AbstractHttpRequest@follow-redirects">true</con:setting>
               <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@remove_empty_content">false</con:setting>
               <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@strip-whitespaces">false</con:setting>
             </con:settings>
@@ -598,11 +596,11 @@
       <con:testStep type="restrequest" name="UnHappy flow - forbidden" id="46df777c-2dae-41fc-9352-8a65539e47f5">
         <con:settings/>
         <con:config service="cert-auth" resourcePath="/anything" methodName="Method 2" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-          <con:restRequest name="UnHappy flow - forbidden" id="69fb85c6-8ff9-4507-b8c9-24b9ff5b88f8" mediaType="application/json" sslKeystore="certs/test/keystore/CLIENT_testuser.p12 ">
+          <con:restRequest name="UnHappy flow - forbidden" id="69fb85c6-8ff9-4507-b8c9-24b9ff5b88f8" mediaType="application/json" sslKeystore="CLIENT_testuser.p12">
             <con:settings>
               <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">
                 &lt;xml-fragment/></con:setting>
-            </con:settings>
+            <con:setting id="com.eviware.soapui.impl.support.AbstractHttpRequest@follow-redirects">true</con:setting></con:settings>
             <con:endpoint>https://apisix.127.0.0.1.nip.io:9443</con:endpoint>
             <con:request/>
             <con:originalUri>https://apisix.127.0.0.1.nip.io/headers</con:originalUri>
@@ -634,7 +632,16 @@
           </con:restRequest>
         </con:config>
       </con:testStep>
-      <con:properties>
+      <con:setupScript>import com.eviware.soapui.impl.wsdl.support.wss.crypto.CryptoType
+
+// 1. Specify the path to your keystore
+def keystorePath = context.expand('${projectDir}') + "/certs/test/keystore/CLIENT_testuser.p12"
+
+// 2. Add a keystore
+testRunner.testCase.testSuite.project.wssContainer.addCrypto(keystorePath,"",CryptoType.KEYSTORE) //path, password, cryptoType
+
+// 3. Get the status in the log
+log.info(testRunner.testCase.testSuite.project.wssContainer.getCryptoByName("CLIENT_testuser.p12").getStatus()) // specify the name of your keystore</con:setupScript><con:properties>
         <con:property>
           <con:name>client_profile</con:name>
           <con:value>testuser</con:value>
@@ -658,11 +665,10 @@
       <con:testStep type="restrequest" name="Happy flow - certuser" id="699f1459-c920-4f09-acc2-f7950fd93b0f">
         <con:settings/>
         <con:config service="cert-auth" resourcePath="/anything" methodName="GET localhost/anything" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-          <con:restRequest name="Happy flow - certuser" id="fb880d5d-498a-4e0a-b93a-f7b0caae8ce4" mediaType="application/json" sslKeystore="certs/test/keystore/BULT_certuser.p12">
+          <con:restRequest name="Happy flow - certuser" id="fb880d5d-498a-4e0a-b93a-f7b0caae8ce4" mediaType="application/json" sslKeystore="BULT_certuser.p12">
             <con:settings>
-              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">
-                &lt;xml-fragment/></con:setting>
-            </con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+            <con:setting id="com.eviware.soapui.impl.support.AbstractHttpRequest@follow-redirects">true</con:setting></con:settings>
             <con:endpoint>https://127.0.0.1.nip.io:9443</con:endpoint>
             <con:request/>
             <con:originalUri>https://localhost/anything</con:originalUri>
@@ -705,11 +711,10 @@
       <con:testStep type="restrequest" name="UnHappy flow - certuser" id="8d70f27c-e6ed-4ed7-98f2-acc2822ca203">
         <con:settings/>
         <con:config service="cert-auth" resourcePath="/headers" methodName="Method 2" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-          <con:restRequest name="UnHappy flow - certuser" id="04d146d8-9143-4977-9cef-3f7defb17893" mediaType="application/json" sslKeystore="certs/test/keystore/BULT_certuser.p12">
+          <con:restRequest name="UnHappy flow - certuser" id="04d146d8-9143-4977-9cef-3f7defb17893" mediaType="application/json" sslKeystore="BULT_certuser.p12">
             <con:settings>
-              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">
-                &lt;xml-fragment/></con:setting>
-            </con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+            <con:setting id="com.eviware.soapui.impl.support.AbstractHttpRequest@follow-redirects">true</con:setting><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@strip-whitespaces">false</con:setting></con:settings>
             <con:endpoint>https://127.0.0.1.nip.io:9443</con:endpoint>
             <con:request/>
             <con:originalUri>https://apisix.127.0.0.1.nip.io/headers</con:originalUri>
@@ -743,27 +748,19 @@
           </con:restRequest>
         </con:config>
       </con:testStep>
-      <con:properties/>
+      <con:setupScript>import com.eviware.soapui.impl.wsdl.support.wss.crypto.CryptoType
+
+// 1. Specify the path to your keystore
+def keystorePath = context.expand('${projectDir}') + "/certs/test/keystore/BULT_certuser.p12"
+
+// 2. Add a keystore
+testRunner.testCase.testSuite.project.wssContainer.addCrypto(keystorePath,"Sander",CryptoType.KEYSTORE) //path, password, cryptoType
+
+// 3. Get the status in the log
+log.info(testRunner.testCase.testSuite.project.wssContainer.getCryptoByName("BULT_certuser.p12").getStatus()) // specify the name of your keystore</con:setupScript><con:properties/>
     </con:testCase>
     <con:properties/>
-  <con:setupScript>import com.eviware.soapui.settings.SSLSettings
-import com.eviware.soapui.SoapUI
-
-// Paths and passwords from project properties
-def clientKeystorePath = context.expand('${#Project#keystorePathCLIENT}')
-def clientKeystorePassword = context.expand('${#Project#keystorePasswordCLIENT}')
-
-def bultKeystorePath = context.expand('${#Project#keystorePathBULT}')
-def bultKeystorePassword = context.expand('${#Project#keystorePasswordBULT}')
-
-// Set CLIENT keystore
-SoapUI.settings.setString(SSLSettings.KEYSTORE, clientKeystorePath)
-SoapUI.settings.setString(SSLSettings.KEYSTORE_PASSWORD, clientKeystorePassword)
-
-// If you need to switch dynamically to BULT keystore at runtime:
-SoapUI.settings.setString(SSLSettings.KEYSTORE, bultKeystorePath)
-SoapUI.settings.setString(SSLSettings.KEYSTORE_PASSWORD, bultKeystorePassword)
-</con:setupScript></con:testSuite>
+  </con:testSuite>
   <con:properties>
     <con:property>
       <con:name>keystorePathCLIENT</con:name>
@@ -775,15 +772,8 @@ SoapUI.settings.setString(SSLSettings.KEYSTORE_PASSWORD, bultKeystorePassword)
     </con:property>
   </con:properties>
   <con:wssContainer>
-    <con:crypto>
-      <con:source>${#Project#keystorePathCLIENT}</con:source>
-      <con:type>KEYSTORE</con:type>
-    </con:crypto>
-    <con:crypto>
-      <con:source>${#Project#keystorePathBULT}</con:source>
-      <con:password>Sander</con:password>
-      <con:type>KEYSTORE</con:type>
-    </con:crypto>
+    
+    
   </con:wssContainer>
   <con:oAuth2ProfileContainer/>
   <con:oAuth1ProfileContainer/>

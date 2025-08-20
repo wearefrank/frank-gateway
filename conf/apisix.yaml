@@ -1,57 +1,7 @@
-ssls:
-  - id: 1
-    snis:
-      - "localhost"
-      - "127.0.0.1.nip.io"
-    cert: ${{SERVER_CERT}}
-    key:  ${{SERVER_KEY}}
-    client:
-      ca: ${{BULT_CLIENT_CHAIN}}
-      depth: 1
-  - id: 2
-    snis:
-      - "apisix"
-      - "apisix.127.0.0.1.nip.io"
-      - "soap.127.0.0.1.nip.io" 
-    cert: ${{SERVER_CERT}}
-    key:  ${{SERVER_KEY}}
-    client:
-      ca: ${{SELF_SIGNED_CA}}
-      depth: 1
-
-
-consumers:
-  - username: certuser
-    plugins:
-      cert-auth:
-        cn: ssl.bult.bz
-  - username: testuser
-    plugins:
-      cert-auth:
-        cn: CLIENT
-
-
 routes:
-  - name: gateway-test
-    id: 1
-    uri: /anything
-    plugins:
-      cert-auth: {}
-      consumer-restriction: 
-        whitelist: 
-          - certuser
-    upstream_id: 1
-    status: 1
-
-
   - name: upstream-test
     id: 2
-    uri: /headers
-    plugins:
-      cert-auth: {}
-      consumer-restriction: 
-        whitelist: 
-          - testuser
+    uri: /ip
     upstream_id: 1
     status: 1
 
@@ -59,7 +9,7 @@ upstreams:
   - name: httpbun
     id: 1
     nodes:
-      "host.docker.internal:80": 1
+      "httpbun.com": 1
     type: roundrobin
 
 #END
