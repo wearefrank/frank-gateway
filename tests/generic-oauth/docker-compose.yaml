@@ -82,4 +82,4 @@ services:
 
 networks:
   apisix:
-    driver: bridge
+    driver: host
