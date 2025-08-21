@@ -131,7 +131,7 @@ jobs:
     with:
       image-build-artifact-name: 'build-docker-image'
       image-tarball-file: 'image.tar'
-      reports-artifact-name: 'soapui_report_${{ matrix.plugin-test-dir }}'
+      # reports-artifact-name: 'soapui_report_${{ matrix.plugin-test-dir }}'
       soapui-project: tests/${{ matrix.plugin-test-dir }}/soapui-project.xml
       image-id: ${{ needs.build-image.outputs.image-id }}
       image-name: ${{ github.repository }}
