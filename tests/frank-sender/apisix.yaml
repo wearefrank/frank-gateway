@@ -13,13 +13,13 @@ routes:
       proxy-rewrite:
         uri: /any
       frank-sender:
-        frank_endpoint: http://host.docker.internal:8080/api/frank-test
+        frank_endpoint: http://localhost:8080/api/frank-test
 
 upstreams:
   - name: httpbun
     id: 1
     nodes:
-      "host.docker.internal:80": 1
+      "localhost:80": 1
     type: roundrobin
 
 #END
