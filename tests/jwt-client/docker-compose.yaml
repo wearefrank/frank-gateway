@@ -20,8 +20,9 @@ services:
     image: ${IMAGE_ID:-${IMAGE_TAG:-ghcr.io/wearefrank/frank-gateway}}
     restart: always
     depends_on:
-      keycloak:
-        condition: service_started
+      - keycloak
+      - httpbun
+      - json-idp
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml #Load local routes, upstreams, etc. specific for this plugin
