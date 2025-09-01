@@ -18,10 +18,11 @@ name: frank-gateway-generic-oauth-client-test # Name of the parent container
 services:
   apisix:
     image: ${IMAGE_ID:-${IMAGE_TAG:-ghcr.io/wearefrank/frank-gateway}}
-    restart: always
     depends_on:
-      - keycloak
-      - httpbun
+      keycloak:
+        condition: service_started
+      httpbun:
+        condition: service_started
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml #Load local routes, upstreams, etc. specific for this plugin
@@ -35,7 +36,6 @@ services:
   
   httpbun:
     image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
-    restart: always
     ports:
       - "80:80/tcp"
 

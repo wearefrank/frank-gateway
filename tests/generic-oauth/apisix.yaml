@@ -23,7 +23,7 @@ services:
     plugins:
       generic-oauth-client:
         use_cache: false
-        token_endpoint: "http://localhost:9081/realms/fg-testing/protocol/openid-connect/token"
+        token_endpoint: "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token"
         client_id_field_name: "client_id"
         client_id_value: "oidc-test-client"
         custom_parameters: {
@@ -37,7 +37,7 @@ services:
     plugins:
       generic-oauth-client:
         use_cache: false
-        token_endpoint: "http://localhost:9081/realms/fg-testing/protocol/openid-connect/token"
+        token_endpoint: "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token"
         client_id_field_name: "client_id"
         client_id_value: "fout"
         custom_parameters: {
@@ -51,7 +51,7 @@ services:
     plugins:
       generic-oauth-client:
         use_cache: false
-        token_endpoint: "http://localhost:9081/realms/fg-testing/protocol/openid-connect/token"
+        token_endpoint: "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token"
         client_id_field_name: "client_id"
         client_id_value: "oidc-test-client"
         custom_parameters: {
@@ -65,7 +65,7 @@ services:
     plugins:
       generic-oauth-client:
         use_cache: false
-        token_endpoint: "http://localhost:9081/realms/fg-testing/protocol/openid-connect/fout"
+        token_endpoint: "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/fout"
         client_id_field_name: "client_id"
         client_id_value: "oidc-test-client"
         custom_parameters: {
@@ -75,9 +75,10 @@ services:
         
 upstreams:
   - id: 2
+    scheme: http
     name: "echo-upstream"
     desc: "echo API"
     type: roundrobin
     nodes:
-        "localhost:80": 1
+        "httpbun:80": 1
 #END

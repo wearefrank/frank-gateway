@@ -13,13 +13,13 @@ routes:
       proxy-rewrite:
         uri: /any
       frank-sender:
-        frank_endpoint: http://localhost:8080/api/frank-test
+        frank_endpoint: http://frank:8080/api/frank-test
 
 upstreams:
   - name: httpbun
     id: 1
     nodes:
-      "localhost:80": 1
+      "httpbun:80": 1
     type: roundrobin
 
 #END

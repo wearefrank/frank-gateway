@@ -21,8 +21,10 @@ services:
     image: ${IMAGE_ID:-${IMAGE_TAG:-ghcr.io/wearefrank/frank-gateway}}
     restart: always
     depends_on:
-      - frank
-      - httpbun
+      frank:
+        condition: service_started
+      httpbun:
+        condition: service_started
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml #Load local routes, upstreams, etc. specific for this plugin
@@ -33,9 +35,7 @@ services:
       - "9091:9091/tcp"
       - "9092:9092/tcp"
       - "9443:9443/tcp"
-    networks:
-      apisix:
-  
+
   frank:
     image: frankframework/frankframework:latest
     restart: always
@@ -48,17 +48,12 @@ services:
       - ./src/resources/:/opt/frank/resources/
     ports:
       - "8080:8080/tcp"
-    networks:
-      apisix:
 
   httpbun:
     image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
     restart: always
     ports:
       - "80:80/tcp"
-    networks:
-      apisix:
-
 
   # # prometheus:
   #   image: prom/prometheus:v2.25.0
@@ -81,8 +76,3 @@ services:
   #     - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
   #   networks:
   #     apisix:
-
-
-networks:
-  apisix:
-    driver: bridge

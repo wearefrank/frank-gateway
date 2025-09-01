@@ -22,7 +22,7 @@ services:
     plugins:
       jwt-client:
         use_cache: false
-        token_endpoint: "http://localhost:8080/token"
+        token_endpoint: "http://json-idp:8081/token"
         client_id_field_name: "client_id"
         client_id_value: "jwt_client_id"
         custom_parameters: {
@@ -36,7 +36,7 @@ services:
     plugins:
       jwt-client:
         use_cache: false
-        token_endpoint: "http://localhost:8080/token"
+        token_endpoint: "http://json-idp:8081/token"
         client_id_field_name: "client_id"
         client_id_value: "fout"
         custom_parameters: {
@@ -50,7 +50,7 @@ services:
     plugins:
       jwt-client:
         use_cache: false
-        token_endpoint: "http://localhost:8080/token"
+        token_endpoint: "http://json-idp:8081/token"
         client_id_field_name: "client_id"
         client_id_value: "jwt_client_id"
         custom_parameters: {
@@ -64,7 +64,7 @@ services:
     plugins:
       jwt-client:
         use_cache: false
-        token_endpoint: "http://localhost:8080/fout"
+        token_endpoint: "http://json-idp:8081/fout"
         client_id_field_name: "client_id"
         client_id_value: "jwt_client_id"
         custom_parameters: {
@@ -78,5 +78,5 @@ upstreams:
     desc: "echo API"
     type: roundrobin
     nodes:
-        "localhost:80": 1
+        "httpbun:80": 1
 #END

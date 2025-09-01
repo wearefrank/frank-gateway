@@ -51,7 +51,7 @@ jobs:
         run: |
           echo "🔍 Discovering test directories in ./tests/"
           plugins=$(find tests -mindepth 1 -maxdepth 1 -type d -printf '"%f",' | sed 's/,$//')
-          echo "matrix=[${plugins}]"
+          echo "Discovered tests for the following plugins=[${plugins}]"
           echo "matrix=[${plugins}]" >> $GITHUB_OUTPUT
 
           
@@ -120,8 +120,8 @@ jobs:
           retention-days: 1
 
   test-plugins:
-    uses: wearefrank/ci-cd-templates/.github/workflows/soapui-testrunner.yml@6d9d6438dd46887a375db769167b29bb54b39d78
-    needs: [ build-image, discover-plugin-tests]
+    uses: wearefrank/ci-cd-templates/.github/workflows/soapui-testrunner.yml@v2.0.8
+    needs: [ build-image, discover-plugin-tests ]
     strategy:
       fail-fast: false
       matrix:
@@ -131,11 +131,12 @@ jobs:
     with:
       image-build-artifact-name: 'build-docker-image'
       image-tarball-file: 'image.tar'
-      # reports-artifact-name: 'soapui_report_${{ matrix.plugin-test-dir }}'
+      reports-artifact-name: 'soapui_report_${{ matrix.plugin-test-dir }}'
       soapui-project: tests/${{ matrix.plugin-test-dir }}/soapui-project.xml
       image-id: ${{ needs.build-image.outputs.image-id }}
       image-name: ${{ github.repository }}
       setup-script: |
         docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml up -d
+        sleep 30s
       teardown-script: |
         docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml down -v
