@@ -6,7 +6,6 @@ LABEL based-on="Apache APISIX 3.12"
 
 COPY src /usr/local/apisix/custom-plugins
 COPY conf/config.yaml /usr/local/apisix/conf/config.yaml
-COPY conf/apisix.yaml /usr/local/apisix/conf/apisix.yaml
 
 # Copy Haal Centraal certificates into image
 COPY certs/ /usr/local/share/ca-certificates/
