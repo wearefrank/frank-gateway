@@ -1,19 +1,18 @@
 .PHONY: dev-startup
 dev-startup:
-	docker run -d --name apache-apisix-standalone \
+	docker run -it --name apache-apisix-standalone \
   	-p 9080:9080 \
   	-p 9443:9443 \
   	-p 9090:9090 \
-	-v $(shell pwd)/../config-default.yaml:/usr/local/apisix/conf/config-default.yaml \
-	-v $(shell pwd)/../config.yaml:/usr/local/apisix/conf/config.yaml \
-	-v $(shell pwd)/apisix.yaml:/usr/local/apisix/conf/apisix.yaml \
-	-v $(shell pwd)/../../src:/usr/local/apisix/custom-plugins \
-	-v $(shell pwd)/../../lib:/usr/local/apisix/custom-plugin-libs \
+	-v //$(pwd)/../config.yaml:/usr/local/apisix/conf/config.yaml \
+	-v //$(pwd)/apisix.yaml:/usr/local/apisix/conf/apisix.yaml \
+	-v //$(pwd)/../../src:/usr/local/apisix/custom-plugins \
+	-v //$(pwd)/../../lib:/usr/local/apisix/custom-plugin-libs \
 	--add-host=host.docker.internal:host-gateway \
-	--add-host=manager.organization-a.nlx.local:host-gateway \
-	--add-host=controller-api.organization-a.nlx.local:host-gateway \
-	--add-host=txlog-api.organization-a.nlx.local:host-gateway \
-  	apache/apisix:3.8.0-debian
+	--add-host=manager.organization-a.open-fsc.localhost:host-gateway \
+	--add-host=controller-api.organization-a.open-fsc.localhost:host-gateway \
+	--add-host=txlog-api.organization-a.open-fsc.localhost:host-gateway \
+  	apache/apisix:3.12.0-debian
 
 .PHONY: dev-start
 dev-start:
