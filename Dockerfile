@@ -1,4 +1,4 @@
-FROM apache/apisix:3.13.0-ubuntu
+FROM apache/apisix:3.14.1-ubuntu
 
 ARG BUILD_DATE
 LABEL org.opencontainers.image.created=$BUILD_DATE
