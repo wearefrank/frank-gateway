@@ -20,11 +20,9 @@ services:
   apisix:
     image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
-    depends_on:
-      - etcd
     volumes:
       # - ./src:/usr/local/apisix/custom-plugins #For testing during plugin development
-      # - ./conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ./conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
     ports:
       - "9180:9180/tcp"
@@ -35,20 +33,7 @@ services:
     networks:
       - loki
     env_file: ./.env
-
-  dashboard:
-    image: ghcr.io/wearefrank/frank-gateway-dashboard:11498508359
-    restart: always
-    depends_on:
-      - apisix
-      - etcd
-    volumes:
-      - ./conf/dashboard-conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
-    ports:
-      - "9000:9000/tcp"
-    networks:
-      - loki
-
+    
   httpbun:
     image: sharat87/httpbun:latest
     restart: always
@@ -86,21 +71,6 @@ services:
       - "./grafana_plugin:/usr/share/grafana/public/plugins/"
     networks:
       - loki
-
-  etcd:
-    image: quay.io/coreos/etcd:v3.6.5
-    restart: always
-    volumes:
-      - etcd_data:/bitnami/etcd
-    environment:
-      ETCD_ENABLE_V2: "true"
-      ALLOW_NONE_AUTHENTICATION: "yes"
-      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
-      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
-    ports:
-      - "2379:2379/tcp"
-    networks:
-      apisix:
 
   read:
     image: grafana/loki:latest
@@ -273,7 +243,3 @@ services:
 networks:
   loki:
     driver: bridge
-
-volumes:
-  etcd_data:
-    driver: local
