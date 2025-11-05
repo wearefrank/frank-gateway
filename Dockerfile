@@ -2,7 +2,7 @@ FROM apache/apisix:3.14.1-ubuntu
 
 ARG BUILD_DATE
 LABEL org.opencontainers.image.created=$BUILD_DATE
-LABEL based-on="Apache APISIX 3.12"
+LABEL based-on="Apache APISIX 3.14.1 Ubuntu"
 
 COPY src /usr/local/apisix/custom-plugins
 COPY conf/config.yaml /usr/local/apisix/conf/config.yaml
