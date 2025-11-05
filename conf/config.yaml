@@ -640,13 +640,13 @@ plugin_attr:          # Plugin attributes
     set_ngx_var: false                # export zipkin variables to nginx variables
 
 deployment:                    # Deployment configurations
-  role: data_plane             # Set deployment to standalone.
-  role_data_plane:
-    config_provider: yaml      # Set the configuration center.
+  # role: data_plane             # Set deployment to standalone.
+  # role_data_plane:
+  #   config_provider: yaml      # Set the configuration center.
 
-  # role: traditional            # Set deployment mode: traditional, control_plane, or data_plane.
-  # role_traditional:
-  #   config_provider: etcd      # Set the configuration center.
+  role: traditional            # Set deployment mode: traditional, control_plane, or data_plane.
+  role_traditional:
+    config_provider: etcd      # Set the configuration center.
 
   #role_data_plane:            # Set data plane details if role is data_plane.
   #  config_provider: etcd     # Set the configuration center: etcd, xds, or yaml.
