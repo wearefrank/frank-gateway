@@ -1,15 +1,142 @@
 routes:
   - name: upstream-test
     id: 2
-    uri: /ip
+    uri: /any
     upstream_id: 1
     status: 1
+
+  - name: upstream-test-users
+    id: 3
+    uri: /any/users
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - user1
+
+  - name: upstream-test-orders
+    id: 4
+    uri: /any/orders
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - user2
+
+  - name: upstream-test-products
+    id: 5
+    uri: /any/products
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - admin
+
+  - name: upstream-test-documents
+    id: 6
+    uri: /any/documents
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - admin
+
+  - name: upstream-test-health
+    id: 7
+    uri: /any/health
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - user1
+          - user2
+          - admin
+
+  - name: upstream-test-metrics
+    id: 8
+    uri: /any/metrics
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - admin
+
+  - name: upstream-test-status
+    id: 9
+    uri: /any/status
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - user1
+          - user2
+
+  - name: upstream-test-login
+    id: 10
+    uri: /any/login
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - user1
+          - user2
+          - admin
+
+  - name: upstream-test-logout
+    id: 11
+    uri: /any/logout
+    upstream_id: 1
+    status: 1
+    plugins:
+      basic-auth: {}
+      consumer-restriction:
+        whitelist:
+          - user1
+          - user2
+          - admin
+
+
+consumers:
+  - username: user1
+    plugins:
+      basic-auth:
+        username: user1
+        password: pass1
+
+  - username: user2
+    plugins:
+      basic-auth:
+        username: user2
+        password: pass2
+
+  - username: admin
+    plugins:
+      basic-auth:
+        username: admin
+        password: secret123
+
 
 upstreams:
   - name: httpbun
     id: 1
     nodes:
-      "httpbun.com": 1
+      "httpbun": 1
     type: roundrobin
 
 #END
