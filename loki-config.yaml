@@ -21,6 +21,8 @@ schema_config:
       index:
         prefix: index_
         period: 24h
+limits_config:
+  volume_enabled: true
 common:
   path_prefix: /loki
   replication_factor: 1

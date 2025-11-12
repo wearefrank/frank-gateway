@@ -15,11 +15,21 @@
 # limitations under the License.
 #
 datasources:
- - access: 'proxy'
-   editable: true
-   is_default: true
-   name: 'apisix'
-   org_id: 1
-   type: 'prometheus'
-   url: 'http://prometheus:9090'
-   version: 1
+  - access: 'proxy'
+    editable: true
+    is_default: true
+    name: 'apisix'
+    org_id: 1
+    type: 'prometheus'
+    url: 'http://prometheus:9090'
+    version: 1
+
+  - name: 'Loki'
+    type: loki
+    access: 'proxy'
+    url: 'http://gateway:3100'
+    org_id: 1
+    jsonData:
+      httpHeaderName1: 'X-Scope-OrgID'
+    secureJsonData:
+      httpHeaderValue1: 'tenant1'
