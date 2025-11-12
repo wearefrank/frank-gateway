@@ -126,7 +126,7 @@ function _M.check_schema(conf, schema_type)
         local registration_url = url.parse(conf.registration.controller_uri)
         conf.registration.host = registration_url.host
         conf.registration.port = registration_url.port or 443
-        conf.registration.path = "/groups/" .. conf.fsc_group_id .. "/inways/" .. conf.registration.inway_name
+        conf.registration.path = "/v1/groups/" .. conf.fsc_group_id .. "/inways/" .. conf.registration.inway_name
         core.log.debug("host: " .. conf.registration.host)
         core.log.debug("port: " .. conf.registration.port)
         core.log.debug("path: " .. conf.registration.path)
@@ -377,7 +377,7 @@ function _M.access(conf, ctx)
 
     local headers = ngx.req.get_headers()["Fsc-Authorization"]
     if headers == nil then
-        core.log.error("Fsc-Authorization header is missing: ", err)
+        core.log.error("Fsc-Authorization header is missing.")
         local error_msg = format_error("Access token is missing", "ERROR_CODE_ACCESS_TOKEN_MISSING")
         return 401, error_msg
     end
