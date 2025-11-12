@@ -139,10 +139,6 @@ upstreams:
       "httpbun": 1
     type: roundrobin
 
-
-plugins:
-  - name: prometheus
-
 global_rules: 
   - id: 1
     plugins:
