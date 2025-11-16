@@ -137,6 +137,9 @@ jobs:
       image-name: ${{ github.repository }}
       setup-script: |
         docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml up -d
-        sleep 30s
+        until curl -s http://localhost:9080 >/dev/null; do
+          echo "Waiting for APISIX..."
+          sleep 2
+        done
       teardown-script: |
         docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml down -v
