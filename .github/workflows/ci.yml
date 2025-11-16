@@ -128,6 +128,10 @@ jobs:
         plugin-test-dir: ${{ fromJson(needs.discover-plugin-tests.outputs.plugin-matrix) }}
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
+      BULT_CLIENT_CHAIN: ${{ secrets.BULT_CLIENT_CHAIN }}
+      SERVER_KEY: ${{ secrets.SERVER_KEY }}
+      SERVER_CERT: ${{ secrets.SERVER_CERT }}
+      SELF_SIGNED_CA: ${{ secrets.SELF_SIGNED_CA }}
     with:
       image-build-artifact-name: 'build-docker-image'
       image-tarball-file: 'image.tar'
@@ -136,10 +140,16 @@ jobs:
       image-id: ${{ needs.build-image.outputs.image-id }}
       image-name: ${{ github.repository }}
       setup-script: |
-        docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml up -d
-        until curl -s http://localhost:9080 >/dev/null; do
-          echo "Waiting for APISIX..."
-          sleep 2
-        done
+        # Ensure a .env file exists with secrets
+        touch tests/${{ matrix.plugin-test-dir }}/.env
+        echo "BULT_CLIENT_CHAIN=${{ secrets.BULT_CLIENT_CHAIN }}" >> tests/${{ matrix.plugin-test-dir }}/.env
+        echo "SERVER_KEY=${{ secrets.SERVER_KEY }}" >> tests/${{ matrix.plugin-test-dir }}/.env
+        echo "SERVER_CERT=${{ secrets.SERVER_CERT }}" >> tests/${{ matrix.plugin-test-dir }}/.env
+        echo "SELF_SIGNED_CA=${{ secrets.SELF_SIGNED_CA }}" >> tests/${{ matrix.plugin-test-dir }}/.env
+          docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml up -d
+          until curl -s http://localhost:9080 >/dev/null; do
+            echo "Waiting for APISIX..."
+            sleep 2
+          done
       teardown-script: |
         docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml down -v
