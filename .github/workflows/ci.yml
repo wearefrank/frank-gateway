@@ -56,7 +56,7 @@ jobs:
           echo "🔍 Discovering test directories in ./tests/"
           plugins=$(find tests -mindepth 1 -maxdepth 1 -type d -printf '"%f",' | sed 's/,$//')
           echo "Discovered tests for the following plugins=[${plugins}]"
-          echo "matrix=[${plugins}]" >> $GITHUB_OUTPUT`
+          echo "matrix=[${plugins}]" >> $GITHUB_OUTPUT
 
       - name: Create .env files for each plugin
         run: |
