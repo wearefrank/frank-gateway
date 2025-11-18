@@ -35,7 +35,6 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
-    env_file: ./.env
       
   httpbun:
     image: sharat87/httpbun:latest
