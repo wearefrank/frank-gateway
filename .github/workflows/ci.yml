@@ -68,8 +68,13 @@ jobs:
           SERVER_CERT=${{ secrets.SERVER_CERT }}
           SELF_SIGNED_CA=${{ secrets.SELF_SIGNED_CA }}
           EOF
-                    done
-
+              done
+      - name: Show created .env files
+        run: |
+          for dir in $(find tests -mindepth 1 -maxdepth 1 -type d); do
+            echo "--- $dir/.env ---"
+            cat "$dir/.env"
+          done
           
   build-image:
     runs-on: ubuntu-latest
