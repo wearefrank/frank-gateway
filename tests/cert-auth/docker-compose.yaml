@@ -15,18 +15,20 @@
 # limitations under the License.
 #
 
-name: frank-gateway # Name of the parent container
+name: frank-gateway-cert-auth-tests # Name of the parent container
 services:
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:master
+    image: ${IMAGE_ID:-${IMAGE_TAG:-ghcr.io/wearefrank/frank-gateway}}
     restart: always
+    depends_on:
+      httpbun:
+        condition: service_started
     volumes:
-      - ./src:/usr/local/apisix/custom-plugins
-      # - ./conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
-      - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
+      - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./certs/test/:/usr/local/apisix/ssl/
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
-      #  - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
+
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
@@ -37,12 +39,11 @@ services:
       apisix:
       
   httpbun:
-    image: sharat87/httpbun:latest
+    image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
     restart: always
     ports:
       - "80:80/tcp"
-    networks:
-      apisix:
+
 
     
   # prometheus:
@@ -66,7 +67,3 @@ services:
   #     - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
   #   networks:
   #     apisix:
-
-networks:
-  apisix:
-    driver: bridge
