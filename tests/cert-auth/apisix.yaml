@@ -3,6 +3,7 @@ ssls:
     snis:
       - "localhost"
       - "127.0.0.1.nip.io"
+      - "frank-gateway-cert-auth-tests-apisix-1"
     cert: ${{SERVER_CERT}}
     key:  ${{SERVER_KEY}}
     client:
