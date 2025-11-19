@@ -20,6 +20,7 @@ services:
   apisix:
     image: ${IMAGE_ID:-${IMAGE_TAG:-ghcr.io/wearefrank/frank-gateway}}
     restart: always
+    hostname: apisix
     depends_on:
       httpbun:
         condition: service_started
