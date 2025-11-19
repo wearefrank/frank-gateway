@@ -22,7 +22,8 @@ services:
     restart: always
     hostname: apisix
     extra_hosts:
-      - "127.0.0.1.nip.io"  # Maps localhost to container network if needed
+      - "127.0.0.1.nip.io:127.0.0.1"
+      - "localhost:127.0.0.1" # Maps localhost to container network if needed
     depends_on:
       httpbun:
         condition: service_started
