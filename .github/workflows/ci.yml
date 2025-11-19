@@ -61,7 +61,7 @@ jobs:
       - name: Create .env files for each plugin
         run: |
           # List of plugins that need .env
-          PLUGINS_WITH_ENV=("plugin1" "plugin2" "plugin3")
+          PLUGINS_WITH_ENV=("cert-auth" "limit-size")
 
           for dir in $(echo "${{ fromJson(needs.discover-plugin-tests.outputs.plugin-matrix) }}" | tr -d '[]" ,'); do
             if [[ " ${PLUGINS_WITH_ENV[@]} " =~ " ${dir} " ]]; then
