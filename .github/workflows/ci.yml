@@ -60,15 +60,22 @@ jobs:
 
       - name: Create .env files for each plugin
         run: |
-          for dir in $(find tests -mindepth 1 -maxdepth 1 -type d); do
-            echo "Creating .env for $dir"
-            cat <<EOF > $dir/.env
-          BULT_CLIENT_CHAIN=${{ secrets.BULT_CLIENT_CHAIN }}
-          SERVER_KEY=${{ secrets.SERVER_KEY }}
-          SERVER_CERT=${{ secrets.SERVER_CERT }}
-          SELF_SIGNED_CA=${{ secrets.SELF_SIGNED_CA }}
+          # List of plugins that need .env
+          PLUGINS_WITH_ENV=("plugin1" "plugin2" "plugin3")
+
+          for dir in $(echo "${{ fromJson(needs.discover-plugin-tests.outputs.plugin-matrix) }}" | tr -d '[]" ,'); do
+            if [[ " ${PLUGINS_WITH_ENV[@]} " =~ " ${dir} " ]]; then
+              echo "Creating .env for $dir"
+              cat <<EOF > $dir/.env
+              BULT_CLIENT_CHAIN=$(echo "${{ secrets.BULT_CLIENT_CHAIN }}" | base64 -d)
+              SERVER_KEY=$(echo "${{ secrets.SERVER_KEY }}" | base64 -d)
+              SERVER_CERT=$(echo "${{ secrets.SERVER_CERT }}" | base64 -d)
+              SELF_SIGNED_CA=$(echo "${{ secrets.SELF_SIGNED_CA }}" | base64 -d)
           EOF
-              done
+            else
+              echo "Skipping tests/$dir (does not require .env)"
+            fi
+          done
       - name: Show created .env files
         run: |
           for dir in $(find tests -mindepth 1 -maxdepth 1 -type d); do
@@ -168,7 +175,7 @@ jobs:
           echo "Waiting for APISIX..."
           sleep 2
         done
-        
+
         echo "Logs for APISIX container:"
         docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml logs apisix
 
