@@ -35,8 +35,6 @@ services:
       - "9091:9091/tcp"
       - "9092:9092/tcp"
       - "9443:9443/tcp"
-    networks:
-      apisix:
       
   httpbun:
     image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
