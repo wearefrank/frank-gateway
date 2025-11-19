@@ -75,6 +75,8 @@ jobs:
             echo "--- $dir/.env ---"
             cat "$dir/.env"
           done
+
+      
           
   build-image:
     runs-on: ubuntu-latest
@@ -166,6 +168,14 @@ jobs:
           echo "Waiting for APISIX..."
           sleep 2
         done
+        
+        echo "Logs for APISIX container:"
+        docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml logs apisix
+
+        echo "APISIX health check:"
+        docker ps
+        docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml ps
+
 
       teardown-script: |
         docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml down -v
