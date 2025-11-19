@@ -64,22 +64,19 @@ jobs:
           PLUGINS_WITH_ENV=("cert-auth" "limit-size")
 
           for plugin in "${PLUGINS_WITH_ENV[@]}"; do
-          if [[ " ${PLUGINS_WITH_ENV[@]} " =~ " ${dir} " ]]; then
             env_file="tests/$plugin/.env"
             echo "Creating .env file for plugin: $plugin"
 
-            cat <<EOF > $dir/.env
-              BULT_CLIENT_CHAIN=$(echo "${{ secrets.BULT_CLIENT_CHAIN }}" | base64 -d)
-              SERVER_KEY=$(echo "${{ secrets.SERVER_KEY }}" | base64 -d)
-              SERVER_CERT=$(echo "${{ secrets.SERVER_CERT }}" | base64 -d)
-              SELF_SIGNED_CA=$(echo "${{ secrets.SELF_SIGNED_CA }}" | base64 -d)
-            EOF
-          else
-            echo "Skipping tests/$dir (does not require .env)"
-          fi
-          done
+            cat <<EOF > "$env_file"
+          BULT_CLIENT_CHAIN=$(echo "${BULT_CLIENT_CHAIN}" | base64 -d)
+          SERVER_KEY=$(echo "${SERVER_KEY}" | base64 -d)
+          SERVER_CERT=$(echo "${SERVER_CERT}" | base64 -d)
+          SELF_SIGNED_CA=$(echo "${SELF_SIGNED_CA}" | base64 -d)
+          EOF
+
             echo ".env file created at $env_file"
           done
+
       - name: Show created .env files
         run: |
           for dir in $(find tests -mindepth 1 -maxdepth 1 -type d); do
