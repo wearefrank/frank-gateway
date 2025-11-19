@@ -21,6 +21,8 @@ services:
     image: ${IMAGE_ID:-${IMAGE_TAG:-ghcr.io/wearefrank/frank-gateway}}
     restart: always
     hostname: apisix
+    extra_hosts:
+      - "localhost:127.0.0.1"  # Maps localhost to container network if needed
     depends_on:
       httpbun:
         condition: service_started
