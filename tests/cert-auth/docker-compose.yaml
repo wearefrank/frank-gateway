@@ -27,7 +27,11 @@ services:
     depends_on:
       httpbun:
         condition: service_started
-    env_file: ./.env
+    environment:
+      - BULT_CLIENT_CHAIN
+      - SERVER_KEY
+      - SERVER_CERT
+      - SELF_SIGNED_CA
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml
