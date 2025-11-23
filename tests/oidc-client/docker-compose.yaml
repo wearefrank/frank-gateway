@@ -21,7 +21,7 @@ services:
     restart: always
     depends_on:
       keycloak:
-        condition: service_started
+        condition: service_healthy
       httpbun:
         condition: service_started
     volumes:
@@ -44,6 +44,11 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.3
     command: "start-dev --http-port=9081 --import-realm --verbose"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9081/realms/master"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     volumes:
       - ./keycloak-export.json:/opt/keycloak/data/import/keycloak-export.json
     environment:
