@@ -1,20 +1,20 @@
-local core          = require("apisix.core")
-local openidc       = require("resty.openidc")
-local ssl           = require("ngx.ssl")
-local resty_sha256  = require("resty.sha256")
-local base64        = require("ngx.base64")
-local os            = os
-local new_tab       = require "table.new"
-local errlog        = require "ngx.errlog"
-local ngx           = require("ngx")
-local string        = string
-local router        = require("apisix.router")
-local bp_manager    = require("apisix.utils.batch-processor")
-local url           = require("net.url")
+local core                = require("apisix.core")
+local openidc             = require("resty.openidc")
+local ssl                 = require("ngx.ssl")
+local resty_sha256        = require("resty.sha256")
+local base64              = require("ngx.base64")
+local os                  = os
+local new_tab             = require "table.new"
+local errlog              = require "ngx.errlog"
+local ngx                 = require("ngx")
+local string              = string
+local router              = require("apisix.router")
+local bp_manager          = require("apisix.utils.batch-processor")
+local url                 = require("net.url")
 
-local registration_cache = ngx.shared["fsc-registration"]
+local registration_cache  = ngx.shared["fsc-registration"]
 
-local plugin_name = "fsc"
+local plugin_name         = "fsc"
 
 local registration_schema = {
     type = "object",
@@ -29,10 +29,10 @@ local registration_schema = {
             type = "string"
         }
     },
-    required = {"controller_uri", "inway_address", "inway_name"}
+    required = { "controller_uri", "inway_address", "inway_name" }
 }
 
-local schema = {
+local schema              = {
     type = "object",
     properties = {
         manager_public_key = {
@@ -52,12 +52,12 @@ local schema = {
         },
         registration = registration_schema,
     },
-    required = {"manager_public_key", "fsc_group_id", "internal_cert_chain", "internal_key", "registration"}
+    required = { "manager_public_key", "fsc_group_id", "internal_cert_chain", "internal_key", "registration" }
 }
 
-local metadata_schema = {}
+local metadata_schema     = {}
 
-local _M = {
+local _M                  = {
     version = 0.1,
     priority = 1,
     name = plugin_name,
@@ -65,7 +65,7 @@ local _M = {
     metadata_schema = metadata_schema,
 }
 
-local register_inway = function(entry)
+local register_inway      = function(entry)
     local httpc = assert(require('resty.http').new())
     local ok, err = httpc:connect {
         scheme = 'https',
@@ -94,16 +94,14 @@ local register_inway = function(entry)
             registration_cache:set("registered", false)
             return false, err, 1
         end
-
     end
 
     httpc:close()
 
     return true
-
 end
 
-local config_bat = {
+local config_bat          = {
     name = plugin_name,
 }
 
@@ -178,7 +176,6 @@ local function format_error(error_message, error_code)
 end
 
 local function validate_token(manager_public_key)
-
     local opts = {
         public_key = manager_public_key,
         auth_accept_token_as_header_name = "Fsc-Authorization",
@@ -186,18 +183,22 @@ local function validate_token(manager_public_key)
 
     local res, err = openidc.bearer_jwt_verify(opts)
     return res, err
-
 end
 
 local function client_x5t_s256()
-
     local raw_client_cert = ngx.var.ssl_client_raw_cert
+    if raw_client_cert == nil then
+        core.log.error("client did not provide a certificate")
+        local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
+        return 403, error_msg
+    end
+
     local der_cert_chain, err = ssl.cert_pem_to_der(raw_client_cert)
 
     if err then
         core.log.error("Could not convert PEM certificate to DER")
         local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-        return 540, error_msg
+        return 403, error_msg
     end
 
     -- Nginx only has the sha1 fingerprint, RFC8705 needs the sha256 fingerprint
@@ -209,7 +210,7 @@ local function client_x5t_s256()
         if digest == nil then
             ngx.core.error("Could not calculate sha256 fingerprint from certficate")
             local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-            return 540, error_msg
+            return 403, error_msg
         end
 
         return digest
@@ -218,20 +219,17 @@ local function client_x5t_s256()
     local digest = sha256_fingerprint(der_cert_chain)
 
     local function encode_digest(digest)
-
         local encoded_digest = base64.encode_base64url(digest)
         if encoded_digest == nil then
             core.log.error("Could not base64url encode the digest")
             local error_msg = format_error("Invalid client cert", "ERROR_CODE_ACCESS_DENIED")
-            return 540, error_msg
+            return 403, error_msg
         end
 
         return encoded_digest
-
     end
 
     return encode_digest(digest)
-
 end
 
 local function token_x5t_s256(token)
@@ -251,7 +249,6 @@ local function is_valid_group_id(validated_token, group_id)
 end
 
 local function format_log_entry(token, group_id)
-
     local group_id = group_id
     local direction = "DIRECTION_INCOMING"
     local created_at = os.time()
@@ -263,7 +260,7 @@ local function format_log_entry(token, group_id)
 
     -- check if token contains delegation claims
     local source = {}
-    if token.act ~= nil  and token.act.sub ~= "" then
+    if token.act ~= nil and token.act.sub ~= "" then
         source.type = "SOURCE_TYPE_DELEGATED_SOURCE"
         source.outway_peer_id = token.sub
         source.delegator_peer_id = token.act.sub
@@ -374,7 +371,6 @@ local function send_tx_log_record(log_record, txLogConf)
 end
 
 function _M.access(conf, ctx)
-
     local headers = ngx.req.get_headers()["Fsc-Authorization"]
     if headers == nil then
         core.log.error("Fsc-Authorization header is missing.")
@@ -422,7 +418,8 @@ function _M.access(conf, ctx)
     -- FSC Group ID check
     local valid_group_id = is_valid_group_id(validated_token, conf.fsc_group_id)
     if not valid_group_id then
-        local error = string.format("wrong group ID in token: %s: want group ID %s", conf.fsc_group_id, validated_token.gid)
+        local error = string.format("wrong group ID in token: %s: want group ID %s", conf.fsc_group_id,
+            validated_token.gid)
         core.log.error(error)
         local error_msg = format_error(error, "WRONG_GROUP_ID_IN_TOKEN")
         return 403, error_msg
@@ -444,21 +441,20 @@ function _M.access(conf, ctx)
 
         if err then
             core.log.error("could not send log record to Tx log")
-            local error_msg = format_error("The TransactionLog record could not be created", "TRANSACTION_LOG_WRITE_ERROR")
+            local error_msg = format_error("The TransactionLog record could not be created",
+                "TRANSACTION_LOG_WRITE_ERROR")
             return 500, error_msg
         end
     end
 end
 
 function _M.body_filter(conf, ctx)
-
     local res_status_code = ngx.status
     if res_status_code == 404 or res_status_code == 503 or res_status_code == 502 then
         local error_response = core.json.encode(ctx.error_message)
         ngx.arg[1] = error_response
         ngx.arg[2] = true
     end
-
 end
 
 function _M.header_filter(conf, ctx)
@@ -467,7 +463,6 @@ function _M.header_filter(conf, ctx)
         ngx.status = 502
         core.response.clear_header_as_body_modified()
         ctx.error_message = format_error("Service unavailable", "ERROR_CODE_SERVICE_UNREACHABLE")
-
     elseif res_status_code == 404 then
         core.response.clear_header_as_body_modified()
         ctx.error_message = format_error("Not found", "ERROR_CODE_SERVICE_NOT_FOUND")
