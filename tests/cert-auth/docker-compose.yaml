@@ -27,7 +27,7 @@ services:
     depends_on:
       httpbun:
         condition: service_started
-    env_file: ./.env
+    env_file: ./.env.example
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml
