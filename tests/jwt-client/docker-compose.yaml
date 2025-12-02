@@ -17,8 +17,13 @@
 name: frank-gateway-jwt-client-test # Name of the parent container
 services:
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:master
+    image: ${IMAGE_ID:-${IMAGE_TAG:-ghcr.io/wearefrank/frank-gateway}}
     restart: always
+    depends_on:
+      json-idp:
+        condition: service_started
+      httpbun:
+        condition: service_started
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml #Load local routes, upstreams, etc. specific for this plugin
@@ -29,35 +34,17 @@ services:
       - "9091:9091/tcp"
       - "9092:9092/tcp"
       - "9443:9443/tcp"
-    networks:
-      apisix:
-  
+
   httpbun:
     image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
     restart: always
     ports:
       - "80:80/tcp"
-    networks:
-      apisix:
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0.3
-    command: "start-dev --http-port=9081 --import-realm --verbose"
-    volumes:
-      - ./keycloak-export.json:/opt/keycloak/data/import/keycloak-export.json
-    environment:
-      KC_HTTP_PORT: 9081
-      KEYCLOAK_ADMIN: admin_real
-      KEYCLOAK_ADMIN_PASSWORD: admin_real
-    ports:
-      - "9081:9081"
-    networks:
-      apisix:
 
   json-idp:
     build: ./idp
     ports:
-      - "8080:8080"
+      - "8081:8081"
 
   # # prometheus:
   #   image: prom/prometheus:v2.25.0
@@ -81,6 +68,3 @@ services:
   #   networks:
   #     apisix:
   
-networks:
-  apisix:
-    driver: bridge

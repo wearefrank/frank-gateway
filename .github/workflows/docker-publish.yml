@@ -12,10 +12,12 @@ on:
     tags: [ 'v*.*.*' ]
 
 env:
+  DOCKERFILE: ./Dockerfile
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  IMAGE: ghcr.io/wearefrank/frank-gateway
 
 jobs:
   # release:
@@ -64,13 +66,6 @@ jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
   #  needs: release
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - dockerfile: ./Dockerfile
-            image: ghcr.io/wearefrank/frank-gateway
-            
     permissions:
       contents: read
       packages: write
@@ -104,7 +99,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 #5.5.1
         with:
-          images: ${{ matrix.image }}
+          images: ${{ env.IMAGE }}
           tags: |
             type=ref,event=branch
             type=raw,value=${{ github.run_number }}
@@ -125,7 +120,7 @@ jobs:
           context: .
           platforms: linux/amd64, linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
-          file: ${{ matrix.dockerfile }}
+          file: ${{ env.DOCKERFILE }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

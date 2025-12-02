@@ -7,17 +7,15 @@ name: pr ci
 
 on:
   pull_request:
-    branches:
-      - master
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
+    branches: [ master ]
 
 env:
+  DOCKERFILE: ./Dockerfile
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-
+  IMAGE: ghcr.io/wearefrank/frank-gateway
 jobs:
   # version-next:
   #   runs-on: ubuntu-latest
@@ -41,17 +39,30 @@ jobs:
   #       id: reference
   #       uses: wearefrank/ci-cd-templates/next-reference@5ec30763e8d8eeed008edcac3c6a329367e42760 #1.0.4
  
-          
-  build-and-push-image:
+  discover-plugin-tests:
     runs-on: ubuntu-latest
+    outputs:
+      plugin-matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find all subdirectories in tests/
+        id: set-matrix
+        run: |
+          echo "🔍 Discovering test directories in ./tests/"
+          plugins=$(find tests -mindepth 1 -maxdepth 1 -type d -printf '"%f",' | sed 's/,$//')
+          echo "Discovered tests for the following plugins=[${plugins}]"
+          echo "matrix=[${plugins}]" >> $GITHUB_OUTPUT
+
+
+      
+          
+  build-image:
+    runs-on: ubuntu-latest
+    outputs: 
+      image-id: ${{ steps.build-and-push.outputs.imageid }}
   #  needs: version-next
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - dockerfile: ./Dockerfile
-            image: ghcr.io/wearefrank/frank-gateway
-            
+
     permissions:
       contents: read
       packages: write
@@ -69,24 +80,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
 
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
-      - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 #5.5.1
         with:
-          images: ${{ matrix.image }}
-          tags: ${{ github.run_id }}
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=raw,value=${{ github.run_number }}          
           #   type=semver,pattern={{version}},value=${{ needs.version-next.outputs.version-next }}
           #   type=semver,pattern={{major}}.{{minor}},value=${{ needs.version-next.outputs.version-next }}
           #   type=semver,pattern={{major}},value=${{ needs.version-next.outputs.version-next }}
@@ -102,9 +105,58 @@ jobs:
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          outputs: type=docker,dest=image.tar
+          push: false
+          file: ${{ env.DOCKERFILE }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: "Upload Docker tar"
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #4.6.2
+        with:
+          name: build-docker-image
+          path: ./image.tar
+          retention-days: 1
+
+  test-plugins:
+    uses:  wearefrank/ci-cd-templates/.github/workflows/soapui-testrunner.yml@v2.0.8
+    needs: [ build-image, discover-plugin-tests ]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin-test-dir: ${{ fromJson(needs.discover-plugin-tests.outputs.plugin-matrix) }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+    
+    with:
+      image-build-artifact-name: 'build-docker-image'
+      image-tarball-file: 'image.tar'
+      reports-artifact-name: 'soapui_report_${{ matrix.plugin-test-dir }}'
+      soapui-project: tests/${{ matrix.plugin-test-dir }}/soapui-project.xml
+      image-id: ${{ needs.build-image.outputs.image-id }}
+      image-name: ${{ github.repository }}
+      setup-script: |
+  
+        # Start the services
+        docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml up -d
+
+        # Wait for APISIX to be ready
+        until curl -s http://localhost:9080 >/dev/null; do
+          echo "Waiting for APISIX..."
+          sleep 2
+        done
+
+        echo "Logs for APISIX container:"
+        docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml logs apisix
+
+        echo "APISIX health check:"
+        docker ps
+        docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml ps
+
+
+      teardown-script: |
+        docker compose -f tests/${{ matrix.plugin-test-dir }}/docker-compose.yaml down -v
