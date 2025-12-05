@@ -360,6 +360,7 @@ local function send_tx_log_record(log_record, txLogConf)
         })
 
         core.log.debug("FSC TxLog API response status: ", res.status)
+        core.log.debug("FSC TxLog API response body: ", res.body)
         if call_err ~= nil or res.status ~= 204 then
             err = "tx logging failed"
         end
