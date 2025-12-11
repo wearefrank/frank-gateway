@@ -18,7 +18,7 @@
 name: frank-gateway # Name of the parent container
 services:
   apisix:
-    image: frank-gateway:local
+    image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
       - ./src:/usr/local/apisix/custom-plugins
@@ -35,7 +35,7 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
-    env_file: ./.env
+    
       
   httpbun:
     image: sharat87/httpbun:latest
