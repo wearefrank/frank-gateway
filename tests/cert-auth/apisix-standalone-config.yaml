@@ -67,40 +67,45 @@ ssls:
     client:
       ca: |
         -----BEGIN CERTIFICATE-----
-        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
+        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
+        jwOuzw==
         -----END CERTIFICATE-----
         -----BEGIN CERTIFICATE-----
-        MIICqzCCAZMCFG8ViO5+/dDxiF6mh3ORk4pn2aZ7MA0GCSqGSIb3DQEBCwUAMBEx
-        DzANBgNVBAMMBlJPT1RDQTAgFw0yMzA1MTcwODQyMzBaGA8yMTIzMDQyMzA4NDIz
-        MFowETEPMA0GA1UEAwwGUk9PVENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
-        CgKCAQEA1fikAbZAZTpH38zp9D6PfeR7IiIdT+MmI1XXv//56XgyJ0JZ5mfDhHEB
-        2yw2YG+qeHes+BeXv7g1uT8g6x7PTKmyUHYN+ei5zBdY+PzwgmCRRgzCt+R03yc2
-        Xr2ol1qW5SzvbGQ5PVX43q1TrUQ9FQH418fRx00cWqejxZPyrMYgIfo+wPQFvnOa
-        NgETtyBpgCPu7smEl3ODERzWSNkl8809dXp1U4xt95vMeeA2AgGNX1kSsdl+sGa5
-        +A68d/PHme189+UTJxyKsUQzan5Q8FOTFluNToEYQI1kvqH3e7sBAmNPud53Lno/
-        NE8xofWjtizbfeE7MetF1Hfa3zDLawIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAd
-        uuIwj9e6o6haMn2wLVJA1oY2ukLtieW/OtMcmmGnNewE5pNyVoiRAzWKolJHbkcs
-        QMrZyXXQwDIDSBJFJYASMakVkDElw529GrdgHYM1Vre2Iv49jj3nCuNn2IyI6JUF
-        rUfSIpiH4ORpUV6UsZrcP0P739phZAyyhn6O2Zar7xsyDdEyN6Uy8uWB0Gf+kyBf
-        xUVk5I39WE1wWc6PeieIOuaJzWEViiS5LTy2AJKb35P3qtpAi+HlgGcFISeqm1qn
-        Jh+kCbdj06Mcg1QZWElnkOky+l1kLXp+8XiG9FlxyD5Wqr/my4XA4KKIri8usW1l
-        4g1M5lokiyOCNYd/R4GP
+        MIIDbjCCAlagAwIBAgIUGiBvGo9YqJd0FFZ3q/fQMbczIw8wDQYJKoZIhvcNAQEL
+        BQAwMTEPMA0GA1UEAwwGQ0xJRU5UMR4wHAYDVQQFExUwMTIzNDU2Nzg5MDEyMzQ1
+        Njc4OTAwHhcNMjYwNTAxMDk1OTQ5WhcNMzYwNDI4MDk1OTQ5WjAxMQ8wDQYDVQQD
+        DAZDTElFTlQxHjAcBgNVBAUTFTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDCCASIwDQYJ
+        KoZIhvcNAQEBBQADggEPADCCAQoCggEBANdotbXhvJWVmlRFJBE97cwmHks+nweh
+        5aIal7I4cNV8JbZlY91pGwSxtiFBoliBv2iqS8xdqkMrxNRm4Nu6wkb4iQFJS4mx
+        Iv4oUSFM0Y0ISkDNkIVEfTyeLbm4J8heG8J3QqRGqv0GuDV90GVFB17XK91ef1Gy
+        r6+ZG+4L5uPct7hvjc9miWL2GZ+z5brOOgwE3TZbJEFj5S955qhgM/zejUBtgPcz
+        F9ErIdDct80x51WjqVLxzCGi2YbUvcUk253WRPhiD3Wf2MuZGSxgltMx87cj0uQd
+        S+vo96AIWoJNR/LI+pGNX3d45ZMKPsOK2I7E4lEXup0kZmbGuvDzc+MCAwEAAaN+
+        MHwwHQYDVR0OBBYEFC63kWhV6Zo+eMZ30/KYFGIM7khTMB8GA1UdIwQYMBaAFC63
+        kWhV6Zo+eMZ30/KYFGIM7khTMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0RBCIwIIIM
+        Y2xpZW50LmxvY2FsghBhcGlzaXgubG9jYWxob3N0MA0GCSqGSIb3DQEBCwUAA4IB
+        AQCc90dU1YwEDn+SOF1kn21QVUDVLUG6r3tu/l/ZCLYcfnetX2H7OcqY1T2u1zia
+        m10DEEwyN0VSwbBStCZ9xhPLAZQixjumtvZcR4AZtgg54XqvmUjEzkiLACBI3q8Z
+        L7Uw4pME5J/IJU26P6Vbpdljg6Lq9R0o77Z23GQW3eJ1re2mGfKWYwdzUNOcmhbF
+        h2SLql6F3sXODPRZK+WpVdKG9XPml8KDGQ/va4wlNX82h51/HF7AcBq9tKr4jIsD
+        kU0x0oMukNG7jy2dPjbpIzL1pGu770DayDDaGseitC5Mf591DpBDnJHgmQjzNQZJ
+        AhWuAks8bxaTvtL0pfMdxrB+
         -----END CERTIFICATE-----
       depth: 1
 
@@ -113,7 +118,7 @@ consumers:
   - username: testuser
     plugins:
       cert-auth:
-        cn: CLIENT
+        identifier: apisix.localhost
 
 
 routes:
@@ -137,6 +142,19 @@ routes:
       consumer-restriction: 
         whitelist: 
           - testuser
+    upstream_id: 1
+    status: 1
+
+  - name: upstream-test-cn-with-identifier
+    id: 3
+    uri: /test-cn-with-identifier
+    plugins:
+      cert-auth: {}
+      proxy-rewrite:
+        uri: /anything
+      consumer-restriction: 
+        whitelist: 
+          - certuser
     upstream_id: 1
     status: 1
 

@@ -1,11 +1,11 @@
 meta {
-  name: Testuser can call /headers
+  name: CN with identifier can call /test-cn-with-identifier
   type: http
-  seq: 3
+  seq: 5
 }
 
 get {
-  url: {{testuserBaseUrl}}/headers
+  url: {{certuserBaseUrl}}/test-cn-with-identifier
 }
 
 headers {
@@ -17,10 +17,10 @@ tests {
     expect(res.getStatus()).to.equal(200);
   });
 
-  test("consumer header is testuser", function() {
+  test("consumer header is certuser", function() {
     const body = res.getBody();
     const headers = (body && body.headers) || {};
     const consumer = headers["X-Consumer-Username"] || headers["x-consumer-username"];
-    expect(consumer).to.equal("testuser");
+    expect(consumer).to.equal("certuser");
   });
 }

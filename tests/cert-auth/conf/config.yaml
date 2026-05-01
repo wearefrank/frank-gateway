@@ -18,7 +18,14 @@ apisix:
 # Only plugins used by tests/cert-auth/apisix-standalone-config.yaml.
 plugins:
   - cert-auth
+  - proxy-rewrite
   - consumer-restriction
+
+nginx_config:
+  error_log_level: info
+  http:
+    custom_lua_shared_dict:
+      prometheus-cache: 10m
 
 deployment:
   role: data_plane
