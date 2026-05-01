@@ -1,31 +1,3 @@
-# Minimal APISIX runtime config for tests/cert-auth.
-# This file intentionally enables only what the cert-auth test routes use.
-
-apisix:
-  config_center: yaml
-  enable_admin: false
-  enable_control: false
-  node_listen:
-    - 9080
-  router:
-    ssl: radixtree_sni
-  ssl:
-    enable: true
-    listen:
-      - port: 9443
-    fallback_sni: "localhost"
-
-# Only plugins used in tests/cert-auth/apisix-standalone-config.yaml.
-plugins:
-  - cert-auth
-  - consumer-restriction
-
-deployment:
-  role: data_plane
-  role_data_plane:
-    config_provider: yaml# Minimal APISIX runtime config for tests/cert-auth.
-# Keep only overrides required for standalone YAML mode and TLS listener behavior.
-
 apisix:
   config_center: yaml
   enable_admin: false
@@ -40,8 +12,16 @@ apisix:
       - port: 9443
     # Needed for clients that do not send SNI consistently.
     fallback_sni: "localhost"
+  extra_lua_path: "/usr/local/apisix/custom-plugins/?.lua"                   # Extend lua_package_path to load third-party code.
+  extra_lua_cpath: "/usr/local/apisix/custom-plugin-libs/?.so"
+
+# Only plugins used by tests/cert-auth/apisix-standalone-config.yaml.
+plugins:
+  - cert-auth
+  - consumer-restriction
 
 deployment:
   role: data_plane
   role_data_plane:
-    config_provider: yaml#
+    config_provider: yaml
+
