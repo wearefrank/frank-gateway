@@ -1,0 +1,13 @@
+meta {
+  name: Testuser can call /headers
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{testuserBaseUrl}}/headers
+}
+
+headers {
+  accept: application/json
+}
