@@ -1,0 +1,26 @@
+meta {
+  name: Testuser can call /headers
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{testuserBaseUrl}}/headers
+}
+
+headers {
+  accept: application/json
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("consumer header is testuser", function() {
+    const body = res.getBody();
+    const headers = (body && body.headers) || {};
+    const consumer = headers["X-Consumer-Username"] || headers["x-consumer-username"];
+    expect(consumer).to.equal("testuser");
+  });
+}

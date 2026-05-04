@@ -1,0 +1,23 @@
+meta {
+  name: Certuser blocked on /headers
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{certuserBaseUrl}}/headers
+}
+
+headers {
+  accept: application/json
+}
+
+tests {
+  test("status is 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("has message body", function() {
+    expect(res.getBody()).to.have.property("message");
+  });
+}

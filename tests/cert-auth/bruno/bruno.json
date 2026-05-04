@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "name": "cert-auth",
+  "type": "collection",
+  "clientCertificates": {
+    "enabled": true,
+    "certs": [
+      {
+        "domain": "localhost:9443",
+        "type": "cert",
+        "certFilePath": "..\\certs\\test\\client\\certuser-new.pem",
+        "keyFilePath": "..\\certs\\test\\client\\certuser-new.key"
+      },
+      {
+        "domain": "apisix.localhost:9443",
+        "type": "pfx",
+        "pfxFilePath": "..\\certs\\test\\keystore\\client.p12",
+        "passphrase": ""
+      },
+      {
+        "domain": "apisix.localhost",
+        "type": "pfx",
+        "pfxFilePath": "..\\certs\\test\\keystore\\client.p12",
+        "passphrase": ""
+      }
+    ]
+  }
+}
