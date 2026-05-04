@@ -21,12 +21,9 @@ services:
     image: frank-gateway:local
     restart: always
     volumes:
-      - ./src:/usr/local/apisix/custom-plugins
-      # - ./conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
-      - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
-      - ./certs/test/:/usr/local/apisix/ssl/
+      - ../../src:/usr/local/apisix/custom-plugins
+      - ./apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
-      #  - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
     ports:
       - "9180:9180/tcp"
       - "9080:9080/tcp"
@@ -35,38 +32,12 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
-    env_file: ./.env
       
   httpbun:
     image: sharat87/httpbun:latest
     restart: always
-    ports:
-      - "80:80/tcp"
     networks:
       apisix:
-
-    
-  # prometheus:
-  #   image: prom/prometheus:v2.25.0
-  #   restart: always
-  #   volumes:
-  #     - ./conf/prometheus_conf/prometheus.yml:/etc/prometheus/prometheus.yml
-  #   ports:
-  #     - "9090:9090"
-  #   networks:
-  #     apisix:
-    
-  # grafana:
-  #   image: grafana/grafana:7.3.7
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - "./conf/grafana_conf/provisioning:/etc/grafana/provisioning"
-  #     - "./conf/grafana_conf/dashboards:/var/lib/grafana/dashboards"
-  #     - "./conf/grafana_conf/config/grafana.ini:/etc/grafana/grafana.ini"
-  #   networks:
-  #     apisix:
 
 networks:
   apisix:

@@ -57,6 +57,7 @@ The following plugins have been created:
 2) SOAP action router
 3) OIDC client
 4) Limit size
+5) Response extractor
 
 ### FSC 
 The FSC plugin:
@@ -85,3 +86,22 @@ Detailed documentation on the Generic OAuth Client plugin can be found here [her
 
 ### Limit size
 blocks either requests and or responses if the payload or entire request or response is larger than a pre-configured threshold.
+
+### Response extractor
+Extracts values from upstream JSON response bodies using [JSONPath](https://goessner.net/articles/JsonPath/) expressions and exposes them as APISIX request context variables for use by downstream plugins or log formats.
+
+The plugin is configured as a map of variable name → JSONPath expression. Each matched value is:
+- Stored in `ctx.extracted` (a Lua table, accessible by other plugins in the same request)
+- Stored as `ctx.var.extracted` (a JSON-encoded string, usable in `log_format`)
+- Stored individually as `ctx.var.<variable_name>` for direct access in log formats or other plugins
+
+Example configuration:
+```yaml
+response-extractor:
+  transaction_id: "$.transactionId"
+  status_code: "$.result.status"
+```
+
+This would make `$transaction_id` and `$status_code` available as APISIX variables for logging or further processing.
+
+> **Note:** The plugin only processes JSON responses (`application/json` or `+json`). Responses without a JSON body are silently skipped. The extractor buffers up to 1 MB of response body; larger responses are skipped to protect memory usage.

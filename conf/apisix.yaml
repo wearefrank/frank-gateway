@@ -1,7 +1,7 @@
 routes:
   - name: upstream-test
     id: 2
-    uri: /ip
+    uri: /any
     upstream_id: 1
     status: 1
 
@@ -9,7 +9,7 @@ upstreams:
   - name: httpbun
     id: 1
     nodes:
-      "httpbun.com": 1
+      "httpbun": 1
     type: roundrobin
 
 #END
