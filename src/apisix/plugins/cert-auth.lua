@@ -19,7 +19,7 @@ local consumer_schema = {
 }
 
 local _M = {
-	version = 0.1,
+	version = 0.2,
 	priority = 2401,
 	name = plugin_name,
 	type = "auth", -- This means authentication plugin
