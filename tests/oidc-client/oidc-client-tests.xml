@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="b2c3d4e5-6789-4bcd-cdef-012345678901" activeEnvironment="Default" name="OidcClientTests" soapui-version="5.9.0" abortOnError="false" runType="SEQUENTIAL" resourceRoot="" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="com.eviware.soapui.impl.wsdl.actions.iface.tools.soapui.TestRunnerAction@values-local"><![CDATA[<xml-fragment xmlns:con="http://eviware.com/soapui/config">
+  <con:entry key="Report Format(s)" value=""/>
+  <con:entry key="Host:Port" value=""/>
+  <con:entry key="Export JUnit Results" value="false"/>
+  <con:entry key="Export All" value="false"/>
+  <con:entry key="Save After" value="false"/>
+  <con:entry key="Add Settings" value="false"/>
+  <con:entry key="WSS Password Type" value=""/>
+  <con:entry key="TestSuite" value="&lt;all>"/>
+  <con:entry key="Endpoint" value=""/>
+  <con:entry key="Select Report Type" value=""/>
+  <con:entry key="System Properties" value=""/>
+  <con:entry key="Password" value=""/>
+  <con:entry key="Print Report" value="false"/>
+  <con:entry key="Open Report" value="false"/>
+  <con:entry key="Export JUnit Results with test properties" value="false"/>
+  <con:entry key="Global Properties" value=""/>
+  <con:entry key="Project Properties" value=""/>
+  <con:entry key="Project Password" value=""/>
+  <con:entry key="TestCase" value="&lt;all>"/>
+  <con:entry key="Username" value=""/>
+  <con:entry key="user-settings.xml Password" value=""/>
+  <con:entry key="TestRunner Path" value=""/>
+  <con:entry key="Environment" value="Default"/>
+  <con:entry key="Coverage Report" value="false"/>
+  <con:entry key="Enable UI" value="false"/>
+  <con:entry key="Root Folder" value=""/>
+  <con:entry key="Ignore Errors" value="false"/>
+  <con:entry key="Domain" value=""/>
+  <con:entry key="Tool Args" value=""/>
+  <con:entry key="Save Project" value="false"/>
+</xml-fragment>]]></con:setting>
+  </con:settings>
+
+  <con:interface xsi:type="con:RestService" id="c2d3e4f5-2222-4bbb-cccc-ddddeeeeffff" wadlVersion="http://wadl.dev.java.net/2009/02" name="oidc-client" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <con:settings/>
+    <con:definitionCache type="TEXT" rootPart=""/>
+    <con:endpoints>
+      <con:endpoint>http://localhost:9080</con:endpoint>
+    </con:endpoints>
+    <con:resource name="oidc-correct" path="/any/oidc-correct" id="ro000001-0001-4001-a001-000000000001">
+      <con:settings/>
+      <con:parameters/>
+      <con:method name="GET" id="mo000001-0001-4001-a001-000000000001" method="GET">
+        <con:settings/>
+        <con:parameters/>
+        <con:request name="Request 1" id="reqo0001-0001-4001-a001-000000000001" mediaType="application/json">
+          <con:settings/>
+          <con:endpoint>http://localhost:9080</con:endpoint>
+          <con:request/>
+          <con:originalUri>http://localhost:9080/any/oidc-correct</con:originalUri>
+          <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+          <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+          <con:jmsPropertyConfig/>
+          <con:parameters/>
+          <con:parameterOrder/>
+        </con:request>
+      </con:method>
+    </con:resource>
+    <con:resource name="oidc-wrong-id" path="/any/oidc-wrong-id" id="ro000002-0002-4002-a002-000000000002">
+      <con:settings/>
+      <con:parameters/>
+      <con:method name="GET" id="mo000002-0002-4002-a002-000000000002" method="GET">
+        <con:settings/>
+        <con:parameters/>
+        <con:request name="Request 1" id="reqo0002-0002-4002-a002-000000000002" mediaType="application/json">
+          <con:settings/>
+          <con:endpoint>http://localhost:9080</con:endpoint>
+          <con:request/>
+          <con:originalUri>http://localhost:9080/any/oidc-wrong-id</con:originalUri>
+          <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+          <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+          <con:jmsPropertyConfig/>
+          <con:parameters/>
+          <con:parameterOrder/>
+        </con:request>
+      </con:method>
+    </con:resource>
+    <con:resource name="oidc-wrong-secret" path="/any/oidc-wrong-secret" id="ro000003-0003-4003-a003-000000000003">
+      <con:settings/>
+      <con:parameters/>
+      <con:method name="GET" id="mo000003-0003-4003-a003-000000000003" method="GET">
+        <con:settings/>
+        <con:parameters/>
+        <con:request name="Request 1" id="reqo0003-0003-4003-a003-000000000003" mediaType="application/json">
+          <con:settings/>
+          <con:endpoint>http://localhost:9080</con:endpoint>
+          <con:request/>
+          <con:originalUri>http://localhost:9080/any/oidc-wrong-secret</con:originalUri>
+          <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+          <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+          <con:jmsPropertyConfig/>
+          <con:parameters/>
+          <con:parameterOrder/>
+        </con:request>
+      </con:method>
+    </con:resource>
+    <con:resource name="oidc-wrong-endpoint" path="/any/oidc-wrong-endpoint" id="ro000004-0004-4004-a004-000000000004">
+      <con:settings/>
+      <con:parameters/>
+      <con:method name="GET" id="mo000004-0004-4004-a004-000000000004" method="GET">
+        <con:settings/>
+        <con:parameters/>
+        <con:request name="Request 1" id="reqo0004-0004-4004-a004-000000000004" mediaType="application/json">
+          <con:settings/>
+          <con:endpoint>http://localhost:9080</con:endpoint>
+          <con:request/>
+          <con:originalUri>http://localhost:9080/any/oidc-wrong-endpoint</con:originalUri>
+          <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+          <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+          <con:jmsPropertyConfig/>
+          <con:parameters/>
+          <con:parameterOrder/>
+        </con:request>
+      </con:method>
+    </con:resource>
+  </con:interface>
+
+  <con:testSuite id="tso00001-0001-4001-a001-000000000001" name="oidc-client">
+    <con:settings/>
+    <con:runType>SEQUENTIAL</con:runType>
+    <con:testCase id="tco00001-0001-4001-a001-000000000001" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="token-injection" searchProperties="true">
+      <con:settings/>
+
+      <con:testStep type="restrequest" name="correct credentials -> 200 with Bearer token" id="stepo001-0001-4001-a001-000000000001">
+        <con:settings/>
+        <con:config service="oidc-client" resourcePath="/any/oidc-correct" methodName="GET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="correct credentials -> 200 with Bearer token" id="rro00001-0001-4001-a001-000000000001" mediaType="application/json">
+            <con:settings/>
+            <con:endpoint>http://localhost:9080</con:endpoint>
+            <con:request/>
+            <con:originalUri>http://localhost:9080/any/oidc-correct</con:originalUri>
+            <con:assertion type="Valid HTTP Status Codes" id="assertoa1-0001-4001-a001-000000000001" name="Valid HTTP Status Codes">
+              <con:configuration><codes>200</codes></con:configuration>
+            </con:assertion>
+            <con:assertion type="JsonPath Match" id="assertoa2-0001-4001-a001-000000000001" name="Authorization header present">
+              <con:configuration>
+                <path>$.headers.Authorization</path>
+                <content>Bearer*</content>
+                <allowWildcards>true</allowWildcards>
+                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                <ignoreComments>false</ignoreComments>
+              </con:configuration>
+            </con:assertion>
+            <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+
+      <con:testStep type="restrequest" name="wrong client id -> 401" id="stepo002-0002-4002-a002-000000000002">
+        <con:settings/>
+        <con:config service="oidc-client" resourcePath="/any/oidc-wrong-id" methodName="GET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="wrong client id -> 401" id="rro00002-0002-4002-a002-000000000002" mediaType="application/json">
+            <con:settings/>
+            <con:endpoint>http://localhost:9080</con:endpoint>
+            <con:request/>
+            <con:originalUri>http://localhost:9080/any/oidc-wrong-id</con:originalUri>
+            <con:assertion type="Valid HTTP Status Codes" id="assertoa3-0002-4002-a002-000000000002" name="Valid HTTP Status Codes">
+              <con:configuration><codes>401</codes></con:configuration>
+            </con:assertion>
+            <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+
+      <con:testStep type="restrequest" name="wrong client secret -> 401" id="stepo003-0003-4003-a003-000000000003">
+        <con:settings/>
+        <con:config service="oidc-client" resourcePath="/any/oidc-wrong-secret" methodName="GET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="wrong client secret -> 401" id="rro00003-0003-4003-a003-000000000003" mediaType="application/json">
+            <con:settings/>
+            <con:endpoint>http://localhost:9080</con:endpoint>
+            <con:request/>
+            <con:originalUri>http://localhost:9080/any/oidc-wrong-secret</con:originalUri>
+            <con:assertion type="Valid HTTP Status Codes" id="assertoa4-0003-4003-a003-000000000003" name="Valid HTTP Status Codes">
+              <con:configuration><codes>401</codes></con:configuration>
+            </con:assertion>
+            <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+
+      <con:testStep type="restrequest" name="wrong token endpoint -> 405" id="stepo004-0004-4004-a004-000000000004">
+        <con:settings/>
+        <con:config service="oidc-client" resourcePath="/any/oidc-wrong-endpoint" methodName="GET" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="wrong token endpoint -> 405" id="rro00004-0004-4004-a004-000000000004" mediaType="application/json">
+            <con:settings/>
+            <con:endpoint>http://localhost:9080</con:endpoint>
+            <con:request/>
+            <con:originalUri>http://localhost:9080/any/oidc-wrong-endpoint</con:originalUri>
+            <con:assertion type="Valid HTTP Status Codes" id="assertoa5-0004-4004-a004-000000000004" name="Valid HTTP Status Codes">
+              <con:configuration><codes>405</codes></con:configuration>
+            </con:assertion>
+            <con:credentials><con:authType>No Authorization</con:authType></con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+
+    </con:testCase>
+  </con:testSuite>
+
+</con:soapui-project>

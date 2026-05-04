@@ -1,0 +1,15 @@
+meta {
+  name: wrong token endpoint returns 404
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/any/jwt-wrong-endpoint
+}
+
+tests {
+  test("status is 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}

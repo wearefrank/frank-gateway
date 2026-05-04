@@ -1,0 +1,34 @@
+meta {
+  name: wrong SOAPAction header returns 403
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  SOAPAction: WrongAction
+  Content-Type: text/xml
+}
+
+body:xml {
+  <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+    <soapenv:Header/>
+    <soapenv:Body/>
+  </soapenv:Envelope>
+}
+
+tests {
+  test("status is 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("error message is Forbidden", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("message");
+    expect(body.message).to.equal("Forbidden: Invalid or missing SOAPAction.");
+  });
+}

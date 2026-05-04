@@ -1,4 +1,4 @@
-host: "soap.127.0.0.1.nip.io" 
+host: "localhost" 
 routes:
   - name: soapaction-test
     id: 1

@@ -1,4 +1,4 @@
-host: "127.0.0.1.nip.io"
+host: "localhost"
 
 routes:
   - name: post-limit-size-test

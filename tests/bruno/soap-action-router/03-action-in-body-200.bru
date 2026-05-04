@@ -1,0 +1,29 @@
+meta {
+  name: action in SOAP body returns 200
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <?xml version="1.0" encoding="UTF-8"?>
+  <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+    <soap:Body>
+      <Action>TestAction</Action>
+    </soap:Body>
+  </soap:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

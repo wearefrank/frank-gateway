@@ -21,11 +21,11 @@ services:
     image: frank-gateway:local
     restart: always
     volumes:
-      - ./src:/usr/local/apisix/custom-plugins
+      - ../../src:/usr/local/apisix/custom-plugins
       # - ./conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
-      - ./conf/apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ./apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./certs/test/:/usr/local/apisix/ssl/
-      - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml
       #  - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
     ports:
       - "9180:9180/tcp"
@@ -35,7 +35,6 @@ services:
       - "9443:9443/tcp"
     networks:
       apisix:
-    env_file: ./.env
       
   httpbun:
     image: sharat87/httpbun:latest

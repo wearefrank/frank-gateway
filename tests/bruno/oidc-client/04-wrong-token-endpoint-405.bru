@@ -1,0 +1,15 @@
+meta {
+  name: wrong token endpoint returns 405
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/any/oidc-wrong-endpoint
+}
+
+tests {
+  test("status is 405", function() {
+    expect(res.getStatus()).to.equal(405);
+  });
+}

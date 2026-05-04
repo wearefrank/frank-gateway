@@ -17,7 +17,7 @@
 name: frank-gateway-jwt-client-test # Name of the parent container
 services:
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:master
+    image: frank-gateway:local
     restart: always
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins

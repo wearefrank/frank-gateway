@@ -1,0 +1,22 @@
+meta {
+  name: POST body over limit returns 413
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/bytes/50
+  body: json
+}
+
+body:json {
+  {
+    "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }
+}
+
+tests {
+  test("status is 413", function() {
+    expect(res.getStatus()).to.equal(413);
+  });
+}
