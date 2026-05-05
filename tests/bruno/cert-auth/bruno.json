@@ -8,19 +8,25 @@
       {
         "domain": "localhost:9443",
         "type": "cert",
-        "certFilePath": "..\\..\\cert-auth\\certs\\test\\client\\certuser-new.pem",
-        "keyFilePath": "..\\..\\cert-auth\\certs\\test\\client\\certuser-new.key"
+        "certFilePath": "../../cert-auth/certs/test/client/certuser-new.pem",
+        "keyFilePath": "../../cert-auth/certs/test/client/certuser-new.key"
+      },
+      {
+        "domain": "host.docker.internal:9443",
+        "type": "cert",
+        "certFilePath": "../../cert-auth/certs/test/client/certuser-new.pem",
+        "keyFilePath": "../../cert-auth/certs/test/client/certuser-new.key"
       },
       {
         "domain": "apisix.localhost:9443",
         "type": "pfx",
-        "pfxFilePath": "..\\..\\cert-auth\\certs\\test\\keystore\\client.p12",
+        "pfxFilePath": "../../cert-auth/certs/test/keystore/client.p12",
         "passphrase": ""
       },
       {
         "domain": "apisix.localhost",
         "type": "pfx",
-        "pfxFilePath": "..\\..\\cert-auth\\certs\\test\\keystore\\client.p12",
+        "pfxFilePath": "../../cert-auth/certs/test/keystore/client.p12",
         "passphrase": ""
       }
     ]

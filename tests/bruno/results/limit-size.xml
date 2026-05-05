@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01-post-under-limit-200" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-05-05T09:05:03.695" hostname="docker-desktop" time="0.162">
+    <testcase name="status is 200" status="pass" classname="http://host.docker.internal:9080/bytes/50" time="0.162"/>
+  </testsuite>
+  <testsuite name="02-post-over-limit-413" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-05-05T09:05:03.696" hostname="docker-desktop" time="0.034">
+    <testcase name="status is 413" status="pass" classname="http://host.docker.internal:9080/bytes/50" time="0.034"/>
+  </testsuite>
+  <testsuite name="03-get-under-limit-200" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-05-05T09:05:03.696" hostname="docker-desktop" time="0.048">
+    <testcase name="status is 200" status="pass" classname="http://host.docker.internal:9080/limit-size/under" time="0.048"/>
+  </testsuite>
+  <testsuite name="04-get-over-limit-413" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-05-05T09:05:03.696" hostname="docker-desktop" time="0.039">
+    <testcase name="status is 413" status="pass" classname="http://host.docker.internal:9080/limit-size/over" time="0.039"/>
+  </testsuite>
+</testsuites>

@@ -18,7 +18,11 @@
 name: frank-gateway # Name of the parent container
 services:
   apisix:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
     image: frank-gateway:local
+    
     restart: always
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins
