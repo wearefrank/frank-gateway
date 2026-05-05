@@ -205,11 +205,13 @@ end
 -- Used to find who owns a given identifier or CN.
 local function find_consumer_by_field(field, value)
 	if type(value) ~= "string" or value == "" then
+		core.log.debug("[cert-auth] consumer lookup guard: invalid lookup value for field=", field)
 		return nil, nil, "invalid lookup value"
 	end
 
 	local consumer_conf = consumer_mod.plugin(plugin_name)
 	if not consumer_conf or type(consumer_conf.nodes) ~= "table" then
+		core.log.debug("[cert-auth] consumer lookup guard: missing consumer nodes for plugin")
 		return nil, nil, "Missing related consumer"
 	end
 
@@ -230,20 +232,21 @@ function _M.access(conf, ctx)
 
 	if not client_cert then
 		-- No certificate means we cannot identify the caller.
+		core.log.debug("[cert-auth] guard triggered: missing client certificate (ssl_client_raw_cert and ssl_client_cert empty)")
 		return 401, {message = "Client certificate required"}
 	end
 
 	local dns_sans, san_err = extract_dns_sans(client_cert)
 	if dns_sans then
-		core.log.info("[cert-auth] SAN object parse result count=", #dns_sans)
+		core.log.debug("[cert-auth] SAN object parse result count=", #dns_sans)
 		ctx.cert_auth_dns_sans = dns_sans
 		if #dns_sans > 0 then
-			core.log.info("[cert-auth] dns SANs: ", table.concat(dns_sans, ","))
+			core.log.debug("[cert-auth] dns SAN values present")
 		else
-			core.log.info("[cert-auth] no dNSName SAN present")
+			core.log.debug("[cert-auth] no dNSName SAN present")
 		end
 	else
-		core.log.info("[cert-auth] dns SAN extraction skipped: ", san_err)
+		core.log.debug("[cert-auth] dns SAN extraction skipped: ", san_err)
 	end
 
 	local identifier_candidates = {}
@@ -258,7 +261,7 @@ function _M.access(conf, ctx)
 	end
 
 	if full_dn then
-		core.log.info("Client CN: ", full_dn)
+		core.log.debug("[cert-auth] client DN present")
 
 		local serial = extract_dn_attr(full_dn, "[Ss][Ee][Rr][Ii][Aa][Ll][Nn][Uu][Mm][Bb][Ee][Rr]")
 		if serial then
@@ -266,15 +269,16 @@ function _M.access(conf, ctx)
 			identifier_candidates[#identifier_candidates + 1] = serial
 		end
 	else
-		core.log.warn("Client DN is nil. CN fallback will be skipped.")
+		core.log.debug("[cert-auth] guard triggered: client DN is nil, CN fallback skipped")
 	end
 
 	local cn = full_dn and extract_dn_attr(full_dn, "[Cc][Nn]") or nil
 	if cn then
-		core.log.info("Extracted CN: ", cn)
+		core.log.debug("[cert-auth] CN extracted")
 	end
 
 	if #identifier_candidates == 0 and not cn then
+		core.log.debug("[cert-auth] guard triggered: no identifier candidates and no CN extracted")
 		return 403, { message = "Failed to extract identifier or CN" }
 	end
 
@@ -283,7 +287,7 @@ function _M.access(conf, ctx)
 	-- Try each identifier variant until we find a matching consumer.
 	-- If nothing matches, fall back to the common name (CN) for older consumer configs.
 	for _, identifier in ipairs(identifier_candidates) do
-		core.log.info("Trying identifier: ", identifier)
+		core.log.debug("[cert-auth] trying next identifier candidate")
 		consumer, consumer_conf, err = find_consumer_by_field("identifier", identifier)
 		if consumer then
 			break
@@ -294,9 +298,9 @@ function _M.access(conf, ctx)
 		consumer, consumer_conf, err = find_consumer_by_field("cn", cn)
 	end
 
-    core.log.info("consumer: ", core.json.delay_encode(consumer))
+	core.log.debug("[cert-auth] consumer matched=", consumer and "yes" or "no")
     if not consumer then
-		core.log.warn("No consumer found for identifier/CN: ", err or "invalid identity")
+		core.log.debug("[cert-auth] guard triggered: no consumer matched; identifiers=", #identifier_candidates, ", has_cn=", cn and "yes" or "no", ", err=", err or "invalid identity")
 	    	return 403, {message = "No matching consumer for identifier or CN"}
     end
 

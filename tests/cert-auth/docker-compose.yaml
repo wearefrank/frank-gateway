@@ -15,10 +15,13 @@
 # limitations under the License.
 #
 
-name: frank-gateway # Name of the parent container
+name: frank-gateway-cert-auth-tests # Name of the parent container
 services:
   apisix:
     image: frank-gateway:local
+    build:
+      context: ../../
+      dockerfile: Dockerfile
     restart: always
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins

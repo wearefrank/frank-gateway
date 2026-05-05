@@ -8,9 +8,9 @@
 
 This directory contains certificate files used for cert-auth mTLS tests.
 
-- Certuser certificate: client/certuser-new.pem
-- Certuser private key: client/certuser-new.key
-- Testuser keystore: keystore/client.p12
+- Certuser certificate: certs/test/client/certuser-new.pem
+- Certuser private key: certs/test/client/certuser-new.key
+- Testuser keystore: certs/test/keystore/client.p12
 
 ## Quick start
 
@@ -37,15 +37,15 @@ Use the local environment and run the requests for certuser and testuser.
 Certuser test:
 
 ```shell
-openssl s_client -connect localhost:9443 -servername localhost -cert client/certuser-new.pem -key client/certuser-new.key
+openssl s_client -connect localhost:9443 -servername localhost -cert certs/test/client/certuser-new.pem -key certs/test/client/certuser-new.key
 ```
 
 Testuser test:
 
 ```shell
-openssl pkcs12 -in keystore/client.p12 -clcerts -nokeys -out keystore/testuser-cert.pem -passin pass:
-openssl pkcs12 -in keystore/client.p12 -nocerts -nodes -out keystore/testuser-key.pem -passin pass:
-openssl s_client -connect localhost:9443 -servername apisix.localhost -cert keystore/testuser-cert.pem -key keystore/testuser-key.pem
+openssl pkcs12 -in certs/test/keystore/client.p12 -clcerts -nokeys -out certs/test/keystore/testuser-cert.pem -passin pass:
+openssl pkcs12 -in certs/test/keystore/client.p12 -nocerts -nodes -out certs/test/keystore/testuser-key.pem -passin pass:
+openssl s_client -connect localhost:9443 -servername apisix.localhost -cert certs/test/keystore/testuser-cert.pem -key certs/test/keystore/testuser-key.pem
 ```
 
 
