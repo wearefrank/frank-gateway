@@ -30,7 +30,6 @@ if defined BRUNO_CLI_IMAGE set "BRUNO_CLI_IMAGE=%BRUNO_CLI_IMAGE:\"=%"
 if not defined BRUNO_CLI_IMAGE set "BRUNO_CLI_IMAGE=alpine/bruno"
 
 if defined BRUNO_DOCKER_NETWORK set "BRUNO_DOCKER_NETWORK=%BRUNO_DOCKER_NETWORK:\"=%"
-if not defined BRUNO_DOCKER_NETWORK set "BRUNO_DOCKER_NETWORK=host"
 
 if defined BRUNO_ENV set "BRUNO_ENV=%BRUNO_ENV:\"=%"
 if not defined BRUNO_ENV set "BRUNO_ENV=docker"
@@ -39,7 +38,11 @@ set "BRUNO_RESULTS_DIR=%REPO_ROOT%tests\bruno\results"
 if not exist "%BRUNO_RESULTS_DIR%" mkdir "%BRUNO_RESULTS_DIR%"
 
 echo [INFO] Using Bruno container runtime image: %BRUNO_CLI_IMAGE%
-echo [INFO] Bruno CLI Docker network: %BRUNO_DOCKER_NETWORK%
+if defined BRUNO_DOCKER_NETWORK (
+    echo [INFO] Bruno CLI Docker network: %BRUNO_DOCKER_NETWORK%
+) else (
+    echo [INFO] Bruno CLI Docker network: auto (suite network)
+)
 echo [INFO] Bruno environment: %BRUNO_ENV%
 
 set /a TOTAL=0
@@ -107,6 +110,13 @@ if errorlevel 1 (
 if defined RUN_ALL_TESTS_TRACE echo [TRACE] Containers started for %SUITE%
 
 set "CONTAINERS_STARTED=1"
+call :resolve_suite_runtime
+if errorlevel 1 (
+    echo [ERROR] Failed to resolve Docker network metadata for %SUITE%.
+    set "SUITE_FAILED=1"
+    goto :run_suite_finish
+)
+if defined RUN_ALL_TESTS_TRACE echo [TRACE] Resolved suite network !SUITE_DOCKER_NETWORK! and APISIX IP !APISIX_CONTAINER_IP! for %SUITE%
 if defined RUN_ALL_TESTS_TRACE echo [TRACE] Warm-up start for %SUITE%
 
 call :warm_up_suite "%SUITE%"
@@ -127,14 +137,11 @@ if errorlevel 1 (
 )
 
 :run_suite_finish
-if "%CONTAINERS_STARTED%"=="1" (
+if "%DIR_PUSHED%"=="1" (
     echo [INFO] Stopping containers...
     docker compose down --remove-orphans
     if errorlevel 1 echo [WARN] Failed to fully stop containers for %SUITE%.
-    if "%DIR_PUSHED%"=="1" popd
-) else (
-    if "%DIR_PUSHED%"=="1" popd
-    echo [INFO] Skipping container shutdown for %SUITE% because startup failed.
+    popd
 )
 
 if "%SUITE_FAILED%"=="1" (
@@ -159,11 +166,31 @@ goto :eof
 
 :run_bruno_suite
 set "BRUNO_SUITE=%~1"
+set "ACTIVE_BRUNO_NETWORK=%BRUNO_DOCKER_NETWORK%"
+if not defined ACTIVE_BRUNO_NETWORK set "ACTIVE_BRUNO_NETWORK=!SUITE_DOCKER_NETWORK!"
+if not defined ACTIVE_BRUNO_NETWORK exit /b 1
 
-docker run --rm --network "%BRUNO_DOCKER_NETWORK%" --add-host "apisix.localhost:host-gateway" --add-host "host.docker.internal:host-gateway" -v "%REPO_ROOT_DOCKER%:/workspace" -w "/workspace/tests/bruno/%BRUNO_SUITE%" "%BRUNO_CLI_IMAGE%" run . -r --env "%BRUNO_ENV%" --insecure --reporter-junit "/workspace/tests/bruno/results/%BRUNO_SUITE%.xml"
+docker run --rm --network "!ACTIVE_BRUNO_NETWORK!" --add-host "apisix.localhost:!APISIX_CONTAINER_IP!" --add-host "host.docker.internal:!APISIX_CONTAINER_IP!" -v "%REPO_ROOT_DOCKER%:/workspace" -w "/workspace/tests/bruno/%BRUNO_SUITE%" "%BRUNO_CLI_IMAGE%" run . -r --env "%BRUNO_ENV%" --insecure --reporter-junit "/workspace/tests/bruno/results/%BRUNO_SUITE%.xml"
 if errorlevel 1 exit /b 1
 
 goto :eof
+
+:resolve_suite_runtime
+set "SUITE_DOCKER_NETWORK="
+set "APISIX_CONTAINER_ID="
+set "APISIX_CONTAINER_IP="
+for /f %%i in ('docker compose ps -q apisix 2^>nul') do set "APISIX_CONTAINER_ID=%%i"
+if not defined APISIX_CONTAINER_ID exit /b 1
+for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "$container = docker inspect '%APISIX_CONTAINER_ID%' | ConvertFrom-Json; $network = $container[0].NetworkSettings.Networks.PSObject.Properties | Select-Object -First 1; if (-not $network) { exit 1 }; [Console]::WriteLine($network.Name); [Console]::WriteLine($network.Value.IPAddress)"`) do (
+    if not defined SUITE_DOCKER_NETWORK (
+        set "SUITE_DOCKER_NETWORK=%%i"
+    ) else (
+        set "APISIX_CONTAINER_IP=%%i"
+    )
+)
+if not defined SUITE_DOCKER_NETWORK exit /b 1
+if not defined APISIX_CONTAINER_IP exit /b 1
+exit /b 0
 
 :warm_up_suite
 set "WARMUP_SUITE=%~1"
@@ -174,36 +201,36 @@ goto :eof
 
 :warm_up_keycloak
 echo [INFO] Waiting for Keycloak readiness (%WARMUP_SUITE%)...
-call :wait_http_ok "http://localhost:9081/realms/fg-testing/.well-known/openid-configuration" 30
+call :wait_http_ok_docker "http://keycloak:9081/realms/fg-testing/.well-known/openid-configuration" 30
 if errorlevel 1 exit /b 1
-call :wait_token_ready "http://localhost:9081/realms/fg-testing/protocol/openid-connect/token" "oidc-test-client" "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx" 30
+call :wait_token_ready_docker "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token" "oidc-test-client" "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx" 30
 if errorlevel 1 exit /b 1
 goto :eof
 
-:wait_http_ok
+:wait_http_ok_docker
 set "WAIT_URL=%~1"
 set "WAIT_TRIES=%~2"
 set /a WAIT_I=0
 
-:wait_http_loop
+:wait_http_loop_docker
 set /a WAIT_I+=1
-powershell -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 3 -Uri '%WAIT_URL%'; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { exit 0 } else { exit 1 } } catch { exit 1 }" >nul 2>nul
+docker run --rm --network "!SUITE_DOCKER_NETWORK!" alpine:3.20 sh -c "wget -q -O /dev/null --timeout=3 '%WAIT_URL%'" >nul 2>nul
 if not errorlevel 1 exit /b 0
 if !WAIT_I! geq %WAIT_TRIES% exit /b 1
 timeout /t 2 /nobreak >nul
-goto :wait_http_loop
+goto :wait_http_loop_docker
 
-:wait_token_ready
+:wait_token_ready_docker
 set "TOKEN_URL=%~1"
 set "TOKEN_CLIENT_ID=%~2"
 set "TOKEN_CLIENT_SECRET=%~3"
 set "TOKEN_TRIES=%~4"
 set /a TOKEN_I=0
 
-:wait_token_loop
+:wait_token_loop_docker
 set /a TOKEN_I+=1
-powershell -NoProfile -Command "try { $body = 'client_id=' + [uri]::EscapeDataString('%TOKEN_CLIENT_ID%') + '&client_secret=' + [uri]::EscapeDataString('%TOKEN_CLIENT_SECRET%') + '&grant_type=client_credentials'; $r = Invoke-WebRequest -UseBasicParsing -TimeoutSec 4 -Method Post -ContentType 'application/x-www-form-urlencoded' -Body $body -Uri '%TOKEN_URL%'; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { exit 0 } else { exit 1 } } catch { if ($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -lt 500) { exit 0 } else { exit 1 } }" >nul 2>nul
+docker run --rm --network "!SUITE_DOCKER_NETWORK!" alpine:3.20 sh -c "wget -q -O /dev/null --timeout=4 --header='Content-Type: application/x-www-form-urlencoded' --post-data='client_id=%TOKEN_CLIENT_ID%&client_secret=%TOKEN_CLIENT_SECRET%&grant_type=client_credentials' '%TOKEN_URL%'" >nul 2>nul
 if not errorlevel 1 exit /b 0
 if !TOKEN_I! geq %TOKEN_TRIES% exit /b 1
 timeout /t 2 /nobreak >nul
-goto :wait_token_loop
+goto :wait_token_loop_docker

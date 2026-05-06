@@ -32,10 +32,7 @@ services:
       - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml
       #  - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml  # You can write your own custom (deployment specific) config based on config-default.yaml
     ports:
-      - "9180:9180/tcp"
       - "9080:9080/tcp"
-      - "9091:9091/tcp"
-      - "9092:9092/tcp"
       - "9443:9443/tcp"
     networks:
       apisix:
@@ -44,8 +41,6 @@ services:
   httpbun:
     image: sharat87/httpbun:latest
     restart: always
-    ports:
-      - "80:80/tcp"
     networks:
       apisix:
 

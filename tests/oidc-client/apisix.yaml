@@ -24,7 +24,7 @@ services:
       openid-connect-client:
         use_cache: false
         grant_type: "client_credentials"
-        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
+        token_endpoint: "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token"
         client_id: "oidc-test-client"
         client_secret: "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx"
         
@@ -35,7 +35,7 @@ services:
       openid-connect-client:
         use_cache: false
         grant_type: "client_credentials"
-        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
+        token_endpoint: "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token"
         client_id: "fout"
         client_secret: "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx"
 
@@ -46,7 +46,7 @@ services:
       openid-connect-client:
         use_cache: false
         grant_type: "client_credentials"
-        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/token"
+        token_endpoint: "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token"
         client_id: "oidc-test-client"
         client_secret: "fout"
 
@@ -57,7 +57,7 @@ services:
       openid-connect-client:
         use_cache: false
         grant_type: "client_credentials"
-        token_endpoint: "http://host.docker.internal:9081/realms/fg-testing/protocol/openid-connect/fout"
+        token_endpoint: "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/fout"
         client_id: "oidc-test-client"
         client_secret: "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx"
         
@@ -67,5 +67,5 @@ upstreams:
     desc: "echo API"
     type: roundrobin
     nodes:
-        "host.docker.internal:80": 1
+        "httpbun:80": 1
 #END
