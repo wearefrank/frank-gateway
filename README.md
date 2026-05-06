@@ -52,7 +52,7 @@ The following plugins have been created:
 1) FSC
 2) SOAP action router
 3) OIDC client
-4) Generic Oauth client
+4) Generic OAuth client
 5) Limit size
 6) Response extractor
 7) Cert Auth
@@ -70,7 +70,21 @@ Detailed documentation on the FSC plugin and how to run and test the FSC plugin 
 APISIX can create routing rules based on HTTP headers. However, within SOAP the specific operation is determined by the SOAP action, this SOAP action can either be in a HTTP header, Content-Type header or body.
 The plugin can extract the SOAP action and trigger the router enabling the possibility to create routes per SOAP action.
 
-Detailed documentation on the SOAP action router can be found [here](deployment-examples/docker-compose/README.md)
+Detailed documentation on the SOAP action router and Postman test collection can be found [here](deployment-examples/docker-compose/README.md)
+
+## Testing
+
+### Postman tests
+For manual API validation you can use the collection in `tests/bruno/bruno.json` (with suite requests under `tests/bruno/*`).
+
+### Local test run (all suites)
+For local automated testing across all plugin suites, run:
+
+```bat
+run-all-tests.bat
+```
+
+This script starts each test suite environment, executes the Bruno tests, and writes JUnit reports to `tests/bruno/results`.
 
 ### OIDC client
 APISIX has existing OpenID connect and JWT plugins, but these plugins are for protecting routes. In these plugins the clients of APISIX need to authenticate and APISIX checks the access tokens.
@@ -125,4 +139,4 @@ Detailed documentation on the Frank Sender plugin can be found [here](docs/frank
 APISIX has existing authentication plugins for validating incoming tokens, but this plugin is focused on outbound authentication.
 The JWT Client plugin enables the Frank!Gateway to request a JWT access token from an external IDP, cache it, and add it as a Bearer token on upstream requests.
 
-Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/jwt-client/jwt-client-tests.xml).
+Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/bruno/jwt-client).
