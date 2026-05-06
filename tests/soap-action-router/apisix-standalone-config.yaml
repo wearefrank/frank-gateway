@@ -1,4 +1,3 @@
-host: "localhost" 
 routes:
   - name: soapaction-test
     id: 1

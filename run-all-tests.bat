@@ -68,12 +68,12 @@ echo Failed: %FAILED%
 if defined PASSED_LIST (
     echo Passed suites: !PASSED_LIST!
 ) else (
-    echo Passed suites: (none)
+    echo Passed suites: ^(none^)
 )
 if defined FAILED_LIST (
     echo Failed suites: !FAILED_LIST!
 ) else (
-    echo Failed suites: (none)
+    echo Failed suites: ^(none^)
 )
 echo ========================================
 
