@@ -1,5 +1,7 @@
 # FCS requires mTLS for connections to the Inway.
 
+These keys exist to set up your own FSC environment for testing
+
 'All keys and certificates in this directory are for testing purposes only. These should never be used in a live production environment!!!'
 
 The keys and certificates where created using the following commands:

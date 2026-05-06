@@ -31,10 +31,6 @@ The Frank!Gateway can be built using the following command:
 docker build --build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') -t frank-api-gateway .
 ```
 
-The accompanying dashboard can be built with the following command:
-```shell
-docker build -f dashboard/Dockerfile --build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') -t frank-api-dashboard .
-``` 
 
 ### Deployment configurations & examples
 The directory `deployment-examples` contains four deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
@@ -56,8 +52,12 @@ The following plugins have been created:
 1) FSC
 2) SOAP action router
 3) OIDC client
-4) Limit size
-5) Response extractor
+4) Generic OAuth client
+5) Limit size
+6) Response extractor
+7) Cert Auth
+8) Frank sender 
+9) JWT client 
 
 ### FSC 
 The FSC plugin:
@@ -70,7 +70,21 @@ Detailed documentation on the FSC plugin and how to run and test the FSC plugin 
 APISIX can create routing rules based on HTTP headers. However, within SOAP the specific operation is determined by the SOAP action, this SOAP action can either be in a HTTP header, Content-Type header or body.
 The plugin can extract the SOAP action and trigger the router enabling the possibility to create routes per SOAP action.
 
-Detailed documentation on the SOAP action router can be found [here](deployment-examples/docker-compose/README.md)
+Detailed documentation on the SOAP action router and Postman test collection can be found [here](deployment-examples/docker-compose/README.md)
+
+## Testing
+
+### Postman tests
+For manual API validation you can use the collection in `tests/bruno/bruno.json` (with suite requests under `tests/bruno/*`).
+
+### Local test run (all suites)
+For local automated testing across all plugin suites, run:
+
+```bat
+run-all-tests.bat
+```
+
+This script starts each test suite environment, executes the Bruno tests, and writes JUnit reports to `tests/bruno/results`.
 
 ### OIDC client
 APISIX has existing OpenID connect and JWT plugins, but these plugins are for protecting routes. In these plugins the clients of APISIX need to authenticate and APISIX checks the access tokens.
@@ -105,3 +119,24 @@ response-extractor:
 This would make `$transaction_id` and `$status_code` available as APISIX variables for logging or further processing.
 
 > **Note:** The plugin only processes JSON responses (`application/json` or `+json`). Responses without a JSON body are silently skipped. The extractor buffers up to 1 MB of response body; larger responses are skipped to protect memory usage.
+
+### Cert Auth 
+
+APISIX supports TLS, but by default this is mainly used for server-side TLS termination.
+The Cert Auth plugin enables mutual TLS (mTLS) client authentication, allowing APISIX to identify consumers based on certificate attributes such as Common Name (CN) or SAN identifier.
+
+Detailed documentation on the Cert Auth plugin and local setup can be found [here](docs/cert-auth-plugin/README.MD).
+
+### Frank Sender 
+
+The Frank Sender plugin forwards the incoming request to a configured Frank endpoint first, reads the response body, and replaces the original in-flight request body with that response before continuing to the configured upstream.
+This enables request transformation and mapping logic to be centralized in a Frank service.
+
+Detailed documentation on the Frank Sender plugin can be found [here](docs/frank-sender/README.md).
+
+### Jwt Client 
+
+APISIX has existing authentication plugins for validating incoming tokens, but this plugin is focused on outbound authentication.
+The JWT Client plugin enables the Frank!Gateway to request a JWT access token from an external IDP, cache it, and add it as a Bearer token on upstream requests.
+
+Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/bruno/jwt-client).

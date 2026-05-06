@@ -1,0 +1,31 @@
+meta {
+  name: action in Content-Type SOAP 1.2 returns 200
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: application/soap+xml; charset=utf-8; action="TestAction"
+}
+
+body:xml {
+  <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:example">
+    <soapenv:Header/>
+    <soapenv:Body>
+      <urn:MyAction>
+        <Action>value1</Action>
+      </urn:MyAction>
+    </soapenv:Body>
+  </soapenv:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

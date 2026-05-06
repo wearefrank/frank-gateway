@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="ef1de79c-3dfd-4fbb-bf13-fd8f8218f58a" activeEnvironment="Default" name="FrankSenderTests" soapui-version="5.9.0" abortOnError="false" runType="SEQUENTIAL" resourceRoot="" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="com.eviware.soapui.impl.wsdl.actions.iface.tools.soapui.TestRunnerAction@values-local"><![CDATA[<xml-fragment xmlns:con="http://eviware.com/soapui/config">
+  <con:entry key="Report Format(s)" value=""/>
+  <con:entry key="Host:Port" value=""/>
+  <con:entry key="Export JUnit Results" value="false"/>
+  <con:entry key="Export All" value="false"/>
+  <con:entry key="Save After" value="false"/>
+  <con:entry key="Add Settings" value="false"/>
+  <con:entry key="WSS Password Type" value=""/>
+  <con:entry key="TestSuite" value="&lt;all>"/>
+  <con:entry key="Endpoint" value=""/>
+  <con:entry key="Select Report Type" value=""/>
+  <con:entry key="System Properties" value=""/>
+  <con:entry key="Password" value=""/>
+  <con:entry key="Print Report" value="false"/>
+  <con:entry key="Open Report" value="false"/>
+  <con:entry key="Export JUnit Results with test properties" value="false"/>
+  <con:entry key="Global Properties" value=""/>
+  <con:entry key="Project Properties" value=""/>
+  <con:entry key="Project Password" value=""/>
+  <con:entry key="TestCase" value="&lt;all>"/>
+  <con:entry key="Username" value=""/>
+  <con:entry key="user-settings.xml Password" value=""/>
+  <con:entry key="TestRunner Path" value=""/>
+  <con:entry key="Environment" value="Default"/>
+  <con:entry key="Coverage Report" value="false"/>
+  <con:entry key="Enable UI" value="false"/>
+  <con:entry key="Root Folder" value=""/>
+  <con:entry key="Ignore Errors" value="false"/>
+  <con:entry key="Domain" value=""/>
+  <con:entry key="Tool Args" value=""/>
+  <con:entry key="Save Project" value="false"/>
+</xml-fragment>]]></con:setting>
+  </con:settings>
+
+  <con:interface xsi:type="con:RestService" id="51133431-c120-4c17-bff2-1c129443ec87" wadlVersion="http://wadl.dev.java.net/2009/02" name="frank-sender" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <con:description>Tests for frank-sender plugin routing behavior.</con:description>
+    <con:settings/>
+    <con:definitionCache type="TEXT" rootPart=""/>
+    <con:endpoints>
+      <con:endpoint>http://localhost:9080</con:endpoint>
+    </con:endpoints>
+    <con:resource name="frank-sender" path="/frank-sender" id="350faf78-6ffd-43c2-af8c-8420078c2065">
+      <con:settings/>
+      <con:parameters/>
+      <con:method name="Method 1" id="5ecc9f06-887c-4ed6-b17a-e0f892ff91d3" method="GET">
+        <con:settings/>
+        <con:parameters/>
+        <con:request name="Request 1" id="3c81509b-4fb2-421a-8284-15f3feba8d29" mediaType="application/json">
+          <con:settings>
+            <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+          </con:settings>
+          <con:endpoint>http://localhost:9080</con:endpoint>
+          <con:request/>
+          <con:originalUri>http://localhost:9080/frank-sender</con:originalUri>
+          <con:credentials>
+            <con:authType>No Authorization</con:authType>
+          </con:credentials>
+          <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+          <con:jmsPropertyConfig/>
+          <con:parameters/>
+          <con:parameterOrder/>
+        </con:request>
+      </con:method>
+    </con:resource>
+  </con:interface>
+
+  <con:testSuite id="cb74886f-e8ce-4635-9a57-e181eb7e5fc1" name="frank-sender">
+    <con:settings/>
+    <con:runType>SEQUENTIAL</con:runType>
+    <con:testCase id="c20de061-3db9-4b31-a8dd-c626f2650f18" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="header-routing" searchProperties="true">
+      <con:settings/>
+
+      <con:testStep type="restrequest" name="consumer1 -> Consumer 1!" id="058627f4-b2d9-484b-9f37-510541e8ef5e">
+        <con:settings/>
+        <con:config service="frank-sender" resourcePath="/frank-sender" methodName="Method 1" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="consumer1 -> Consumer 1!" id="42d11f64-7c98-4aa3-8ea8-5dcf6ee5aafb" mediaType="application/json">
+            <con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="consumer" value="consumer1" xmlns="http://eviware.com/soapui/config"/></con:setting>
+            </con:settings>
+            <con:endpoint>http://localhost:9080</con:endpoint>
+            <con:request/>
+            <con:originalUri>http://localhost:9080/frank-sender</con:originalUri>
+            <con:assertion type="Valid HTTP Status Codes" id="953319ba-ecf9-4f7c-8be8-95e44c3fd4d1" name="Valid HTTP Status Codes">
+              <con:configuration>
+                <codes>200</codes>
+              </con:configuration>
+            </con:assertion>
+            <con:assertion type="JsonPath Match" id="6c03ec8c-13c6-4465-92fa-60c6c7f73095" name="JsonPath Match">
+              <con:configuration>
+                <path>data</path>
+                <content>Consumer 1!</content>
+                <allowWildcards>false</allowWildcards>
+                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                <ignoreComments>false</ignoreComments>
+              </con:configuration>
+            </con:assertion>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+
+      <con:testStep type="restrequest" name="nope -> Not consumer 1!" id="76ceeca5-fb5c-416d-8df7-5d79b60f9f17">
+        <con:settings/>
+        <con:config service="frank-sender" resourcePath="/frank-sender" methodName="Method 1" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="nope -> Not consumer 1!" id="8ca507ad-6d93-4fc0-b51d-51fbe5e4b34f" mediaType="application/json">
+            <con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="consumer" value="nope" xmlns="http://eviware.com/soapui/config"/></con:setting>
+            </con:settings>
+            <con:endpoint>http://localhost:9080</con:endpoint>
+            <con:request/>
+            <con:originalUri>http://localhost:9080/frank-sender</con:originalUri>
+            <con:assertion type="Valid HTTP Status Codes" id="f8c114f9-f916-43a0-bac6-9cc8a4ff6e7e" name="Valid HTTP Status Codes">
+              <con:configuration>
+                <codes>200</codes>
+              </con:configuration>
+            </con:assertion>
+            <con:assertion type="JsonPath Match" id="cab6d1fc-8cec-47dd-ad8e-3d3de86a8c30" name="JsonPath Match">
+              <con:configuration>
+                <path>data</path>
+                <content>Not consumer 1!</content>
+                <allowWildcards>false</allowWildcards>
+                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                <ignoreComments>false</ignoreComments>
+              </con:configuration>
+            </con:assertion>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+
+      <con:testStep type="restrequest" name="no header -> Not consumer 1!" id="71272d7d-2770-4ef3-8319-dca7a6039fe1">
+        <con:settings/>
+        <con:config service="frank-sender" resourcePath="/frank-sender" methodName="Method 1" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="no header -> Not consumer 1!" id="f620f4f9-d34a-49f3-8baa-4a52e214c607" mediaType="application/json">
+            <con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+            </con:settings>
+            <con:endpoint>http://localhost:9080</con:endpoint>
+            <con:request/>
+            <con:originalUri>http://localhost:9080/frank-sender</con:originalUri>
+            <con:assertion type="Valid HTTP Status Codes" id="790ca997-156e-4e0d-b0f3-e6e1e0fda830" name="Valid HTTP Status Codes">
+              <con:configuration>
+                <codes>200</codes>
+              </con:configuration>
+            </con:assertion>
+            <con:assertion type="JsonPath Match" id="52f47be0-a0e3-42df-b20e-7e90b8f5f8a2" name="JsonPath Match">
+              <con:configuration>
+                <path>data</path>
+                <content>Not consumer 1!</content>
+                <allowWildcards>false</allowWildcards>
+                <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+                <ignoreComments>false</ignoreComments>
+              </con:configuration>
+            </con:assertion>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters/>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+
+      <con:properties/>
+    </con:testCase>
+    <con:properties/>
+  </con:testSuite>
+
+  <con:properties/>
+  <con:wssContainer/>
+  <con:oAuth2ProfileContainer/>
+  <con:oAuth1ProfileContainer/>
+  <con:sensitiveInformation/>
+</con:soapui-project>

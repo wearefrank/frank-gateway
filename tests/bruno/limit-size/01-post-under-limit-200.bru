@@ -1,0 +1,22 @@
+meta {
+  name: POST body under limit returns 200
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/bytes/50
+  body: json
+}
+
+body:json {
+  {
+    "data": "small"
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

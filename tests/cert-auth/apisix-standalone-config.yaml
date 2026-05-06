@@ -8,6 +8,7 @@ ssls:
     snis:
       - "localhost"
       - "apisix.localhost"
+      - "host.docker.internal"
     cert: |
       -----BEGIN CERTIFICATE-----
       MIID6zCCAtOgAwIBAgIUezhX1iAagImIE8m6wxqQdr/pzmkwDQYJKoZIhvcNAQEL

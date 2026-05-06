@@ -9,12 +9,20 @@
 		</Receiver>
 
 
-		<Pipeline firstPipe="RoutingPipe">
+		<Pipeline firstPipe="ExtractConsumerHeader">
+			<XsltPipe
+				name="ExtractConsumerHeader"
+				getInputFromFixedValue="&lt;dummy/&gt;"
+				xpathExpression="$consumer"
+				storeResultInSessionKey="consumerHeader">
+				<Param name="consumer" sessionKey="headers" xpathExpression="/headers/header[@name='consumer']/text()"/>
+				<Forward name="success" path="RoutingPipe"/>
+			</XsltPipe>
+
 			<!-- Route based on the 'consumer' header value -->
-			<IfPipe name="RoutingPipe" 
-					getInputFromSessionKey="headers"
-					xpathExpression="normalize-space(/headers/header[@name='consumer']) = 'consumer1'"
-				>				
+			<IfPipe name="RoutingPipe"
+					getInputFromSessionKey="consumerHeader"
+					expressionValue="consumer1">
 				<Forward name="then" path="Consumer1Process" />
 				<Forward name="else" path="NoConsumerProcess" />
 			</IfPipe>
@@ -25,7 +33,9 @@
 			</EchoPipe>
 
 			<!-- Process for any other consumer -->
-			<EchoPipe name="NoConsumerProcess" getInputFromFixedValue="Not consumer 1!"/>
+			<EchoPipe name="NoConsumerProcess" getInputFromFixedValue="Not consumer 1!">
+				<Forward name="success" path="READY"/>
+			</EchoPipe>
 		</Pipeline>
 	</Adapter>
 </Configuration>

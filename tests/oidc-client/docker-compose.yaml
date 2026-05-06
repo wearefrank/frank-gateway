@@ -17,17 +17,17 @@
 name: frank-gateway-oidc-client-test # Name of the parent container
 services:
   apisix:
-    image: ghcr.io/wearefrank/frank-gateway:master
+    image: frank-gateway:local
+    build:
+      context: ../../
+      dockerfile: Dockerfile
     restart: always
     volumes:
       - ../../src:/usr/local/apisix/custom-plugins #Load local plugins
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml #Load local routes, upstreams, etc. specific for this plugin
       - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml #Load generic apisix configuration
     ports:
-      - "9180:9180/tcp"
       - "9080:9080/tcp"
-      - "9091:9091/tcp"
-      - "9092:9092/tcp"
       - "9443:9443/tcp"
     networks:
       apisix:
@@ -35,8 +35,6 @@ services:
   httpbun:
     image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
     restart: always
-    ports:
-      - "80:80/tcp"
     networks:
       apisix:
 
@@ -49,8 +47,6 @@ services:
       KC_HTTP_PORT: 9081
       KEYCLOAK_ADMIN: admin_real
       KEYCLOAK_ADMIN_PASSWORD: admin_real
-    ports:
-      - "9081:9081"
     networks:
       apisix:
 

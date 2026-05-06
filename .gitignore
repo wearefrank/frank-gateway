@@ -11,3 +11,5 @@ keycloak/
 
 soapui/Files/SoapUI-x64-5.8.0.sh
 soapui/reports/
+
+tests/bruno/results/

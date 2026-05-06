@@ -1,0 +1,39 @@
+meta {
+  name: SOAPAction header matching TestAction returns 200
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  SOAPAction: TestAction
+  Content-Type: text/xml
+}
+
+body:xml {
+  <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:example">
+    <soapenv:Header/>
+    <soapenv:Body>
+      <urn:MyAction>
+        <Action>value1</Action>
+      </urn:MyAction>
+    </soapenv:Body>
+  </soapenv:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("SOAPAction forwarded to upstream", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("headers");
+    const sa = body.headers["Soapaction"] || body.headers["SOAPAction"] || body.headers["soapaction"];
+    expect(sa).to.equal("TestAction");
+  });
+}

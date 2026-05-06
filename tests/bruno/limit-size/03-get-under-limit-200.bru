@@ -1,0 +1,15 @@
+meta {
+  name: GET response under limit returns 200
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/limit-size/under
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

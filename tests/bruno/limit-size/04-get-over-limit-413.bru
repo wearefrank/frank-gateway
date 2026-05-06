@@ -1,0 +1,15 @@
+meta {
+  name: GET response over limit returns 413
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/limit-size/over
+}
+
+tests {
+  test("status is 413", function() {
+    expect(res.getStatus()).to.equal(413);
+  });
+}

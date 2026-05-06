@@ -29,7 +29,7 @@ docker compose up -d --force-recreate
 
 ## Bruno
 
-You can also run these tests with the Bruno collection in tests/cert-auth/bruno.
+You can also run these tests with the Bruno collection in tests/bruno/cert-auth.
 Use the local environment and run the requests for certuser and testuser.
 
 ## Commands

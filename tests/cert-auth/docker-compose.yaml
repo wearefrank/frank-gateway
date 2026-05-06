@@ -28,10 +28,7 @@ services:
       - ./apisix-standalone-config.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml
     ports:
-      - "9180:9180/tcp"
       - "9080:9080/tcp"
-      - "9091:9091/tcp"
-      - "9092:9092/tcp"
       - "9443:9443/tcp"
     networks:
       apisix:
