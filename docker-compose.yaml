@@ -18,6 +18,8 @@
 name: frank-gateway # Name of the parent container
 services:
   apisix:
+    build:
+      context: .
     image: ghcr.io/wearefrank/frank-gateway:master
     restart: always
     volumes:
