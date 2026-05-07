@@ -21,7 +21,7 @@ services:
     build:
       context: ../../
       dockerfile: Dockerfile
-    image: frank-gateway:local
+    image: ghcr.io/wearefrank/frank-gateway:master
     
     restart: always
     volumes:
