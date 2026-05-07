@@ -105,10 +105,11 @@ blocks either requests and or responses if the payload or entire request or resp
 ### Response extractor
 Extracts values from upstream JSON response bodies using [JSONPath](https://goessner.net/articles/JsonPath/) expressions and exposes them as APISIX request context variables for use by downstream plugins or log formats.
 
-The plugin is configured as a map of variable name → JSONPath expression. Each matched value is:
-- Stored in `ctx.extracted` (a Lua table, accessible by other plugins in the same request)
-- Stored as `ctx.var.extracted` (a JSON-encoded string, usable in `log_format`)
-- Stored individually as `ctx.var.<variable_name>` for direct access in log formats or other plugins
+The plugin is configured as a map of variable name → JSONPath expression. JSONPath results are always arrays. Each matched value is exposed as:
+- `ctx.extracted` — a Lua table containing all results, accessible by other plugins in the same request
+- `ctx.var.extracted` — a JSON-encoded string of all results, usable in `log_format`
+- `ctx.var.<variable_name>` — a native Lua array table for each variable, usable by downstream plugins
+- `ctx.var.<variable_name>_json` — a JSON-encoded string of each variable's result, for use in log formats or plugins that require a string
 
 Example configuration:
 ```yaml
@@ -117,9 +118,9 @@ response-extractor:
   status_code: "$.result.status"
 ```
 
-This would make `$transaction_id` and `$status_code` available as APISIX variables for logging or further processing.
+This would make `$transaction_id`, `$transaction_id_json`, `$status_code`, and `$status_code_json` available as APISIX variables for logging or further processing.
 
-> **Note:** The plugin only processes JSON responses (`application/json` or `+json`). Responses without a JSON body are silently skipped. The extractor buffers up to 1 MB of response body; larger responses are skipped to protect memory usage.
+> **Note:** The plugin attempts to JSON-decode the full response body. If decoding fails, all configured variables are set to empty arrays and processing continues silently.
 
 ### Cert Auth 
 
