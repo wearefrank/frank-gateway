@@ -1,0 +1,166 @@
+# cert-auth test APISIX standalone config
+# This file is bind-mounted by tests/cert-auth/docker-compose.yaml to:
+#   /usr/local/apisix/conf/apisix.yaml
+# Keep server/client test certificates here for deterministic local mTLS tests.
+
+ssls:
+  - id: 1
+    snis:
+      - "localhost"
+      - "apisix.localhost"
+      - "host.docker.internal"
+    cert: |
+      -----BEGIN CERTIFICATE-----
+      MIID6zCCAtOgAwIBAgIUezhX1iAagImIE8m6wxqQdr/pzmkwDQYJKoZIhvcNAQEL
+      BQAwdjELMAkGA1UEBhMCTkwxFTATBgNVBAgMDFp1aWQtSG9sbGFuZDESMBAGA1UE
+      BwwJUm90dGVyZGFtMQ8wDQYDVQQKDAZBUElTSVgxFDASBgNVBAsMC0luZm9ybWF0
+      aWNhMRUwEwYDVQQDDAxhcGlzaXgubG9jYWwwHhcNMjYwNTA1MDkyOTM1WhcNMzYw
+      NTAyMDkyOTM1WjB2MQswCQYDVQQGEwJOTDEVMBMGA1UECAwMWnVpZC1Ib2xsYW5k
+      MRIwEAYDVQQHDAlSb3R0ZXJkYW0xDzANBgNVBAoMBkFQSVNJWDEUMBIGA1UECwwL
+      SW5mb3JtYXRpY2ExFTATBgNVBAMMDGFwaXNpeC5sb2NhbDCCASIwDQYJKoZIhvcN
+      AQEBBQADggEPADCCAQoCggEBANyPRinpZ+3kP0aR6joLBXRAtrOiVUmRBKKAzJmQ
+      DCfzhY+IMP07fbGCUoe0BF4iVZJPo01MACBQGmVxrqwgRE7TW/OPCI0QRpwZ03g6
+      pVBGF/qBt1llJke2BkNvEiFl7xiP7sUxz9DjGOGhwuR+2VfH8sJEDFOoT5RJL+tc
+      +EkTulwtaHuRiVyLIMJ7x+u7JgQuc/qws2VwNocRDkjYOOcJUrskSctH2yScRnyf
+      q2KHOyeQD8IH0Z9y4fu95qE82d9s8nmKtFQXL7jouexLBEPcdNS1Et7qFkWEf/1/
+      73H6zHxBMMnuLZgG59/dak9j6TQA0zqlmffxEpBFI48cUs0CAwEAAaNxMG8wLAYD
+      VR0RBCUwI4IJbG9jYWxob3N0ghBhcGlzaXgubG9jYWxob3N0hwR/AAABMAsGA1Ud
+      DwQEAwIFoDATBgNVHSUEDDAKBggrBgEFBQcDATAdBgNVHQ4EFgQUlctz3OUb2ixV
+      o63JMytBTBDPBDIwDQYJKoZIhvcNAQELBQADggEBAAOFRPaUdQfrYsMqC7o4Ox7p
+      xdzL12AYHMuIJ0GLhtewXUXdRJiiaUyGa9DkEiCapf7Wv58jy8jYfAaONiT/mWwU
+      +Q2TYsX9zySfxCN6fvrvZhGk2fd1ZhLvDbNqIO3iURUDQdfsHthd1Kldcx+XQmzH
+      NVe8aMSGAS+PE1NmA8DoyuTFTAJQfEce5i4wJgR771ohJzAutTDEEZj911LQ5L8y
+      BmUDDHelOdoQy4LN5tXjQtFptwiiFNU1OFyddksYEDsem6yCadW7s+Nq9ZG/MGUa
+      gNR0nDrNBMN2F8JRTKN5KYDMN2znKsJKH7x7GrI2TZdzQFjw4bIEjQO7PEZGyq4=
+      -----END CERTIFICATE-----
+    key: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDcj0Yp6Wft5D9G
+      keo6CwV0QLazolVJkQSigMyZkAwn84WPiDD9O32xglKHtAReIlWST6NNTAAgUBpl
+      ca6sIERO01vzjwiNEEacGdN4OqVQRhf6gbdZZSZHtgZDbxIhZe8Yj+7FMc/Q4xjh
+      ocLkftlXx/LCRAxTqE+USS/rXPhJE7pcLWh7kYlciyDCe8fruyYELnP6sLNlcDaH
+      EQ5I2DjnCVK7JEnLR9sknEZ8n6tihzsnkA/CB9GfcuH7veahPNnfbPJ5irRUFy+4
+      6LnsSwRD3HTUtRLe6hZFhH/9f+9x+sx8QTDJ7i2YBuff3WpPY+k0ANM6pZn38RKQ
+      RSOPHFLNAgMBAAECggEADL944XVvZPFUk+5dRfdlnGNyJpNQenpNNNxHbG0bkBfp
+      RWjB1h0hEHMKdJ6mbaTD4pCY98qCVlvIOXVMOyrOmpS+TjybP1YBvXDZB2xc/4pc
+      RUXH6bzo18EQ/xxKxWSSy3i5kasQSnqZxqQhc4X+Z25eh7UZq6CBNaj+QfcOFbZt
+      90VAsKr0sGO0OR2K844TIXEnJ3xVSfaOEBkGSX2sYc1LBlGQt/cP1TMkVS+jynab
+      RP3c1tUzIuWnCqY7CqD3nX5+r0VaQ55q2IjJPgEuX06N3MQszqCufyYKxmh8TtDy
+      PXPLQKk/+ZPNCLQbjE1w8qUGj1wUGJEPE0zJzgdCqQKBgQDzwwpx2tCzPquxW164
+      rS4zgk0Bq7vrKIg5jSHYzksJQ/HsC8yp/+PU/vhDC2Ywfqn7NjEuJa65ur5dLiNw
+      N0UPXUTha4sYveXiyH2OeiLe4EgyLFGyLWSE3ObHceriiJFGGOqPmlvlGqyHmXho
+      C5qH+JgW8UGfFesm+Kh4ULJeyQKBgQDnogahuePZPdpB5zvIbWPCdclefGJgzdxH
+      EjPB55Dq2aXBK+RrlwdKc1Fya4szezlbEigQ1SehS4TwSQgTT/+aW6BnToyeNR0f
+      qVzc3zacj8ztx5S8mmuXOJWSLCu2feGYHOzwIE2UxlXsyTnvhaoJu+jKxL5Hq5dY
+      KFEtSVjB5QKBgQDipRtmByT7NC8hZaopneQSQnnlLs838+TNVfr9gbnk8IbUiZgP
+      DHzCwxsEA2pNdsgHajjKBoFx8T8klkye/tS4V2k/CuY26AICHZYYTllzzydxdyGy
+      wF/w5Q+yq6nQXVhty6b0RHpjB60ZG0oHu5pACJUo58Ky7wdIofTKgYWHeQKBgCch
+      +HzaKuRIztbTegYidPglbh/IY9Z28QAQ0y2vMYx7uMUp5S1IFrM9SEVMZfgMmWQJ
+      bTtqx4c4ev0dWX/pxAUP9cl+O8N+tazjsAygqVlJ8hU54qb6b7LcnGhVjg0Gt1Y7
+      jMwEqRa5a0rVtDQDIPcECBA5rOvu0WLTbON5wMUBAoGBAIDREpvj/eHBbYnmoVwo
+      gqnAdVyQkUixGFD0l7N4i8N5NGGfcUKmbYiTDCUXnrhhdRAD6HQn7bp59un8gqLF
+      ev9vg0hz3yxeKW1MDg3nvRD6fItKx0GrfOwiaEDpm4xCtFiow4I7wBrTk6kL5dbq
+      DaSZ1nvrL3NYZLDWohxuf/v0
+      -----END PRIVATE KEY-----
+    client:
+      ca: |
+        -----BEGIN CERTIFICATE-----
+        MIIDMDCCAhigAwIBAgIUAa7N9uZQP5DVk1JK5f9PIlETcm4wDQYJKoZIhvcNAQEL
+        BQAwFjEUMBIGA1UEAwwLc3NsLmJ1bHQuYnowHhcNMjYwNTAxMDk1OTQ5WhcNMzYw
+        NDI4MDk1OTQ5WjAWMRQwEgYDVQQDDAtzc2wuYnVsdC5iejCCASIwDQYJKoZIhvcN
+        AQEBBQADggEPADCCAQoCggEBANiboEwWho101ccnQa5m/Izqv37QaE2shQVR0vgS
+        zX7svOlO3IM/gm76nkYv855ISSXEF9LLk7NxeHaty6/uFXt9+DE2utVLhgm3uJRc
+        CoC9sRMx9g3dMDwT/+sl/RGKib3ktwhTa7dwvktY2lbplnD4tILG9Ki/1CZ2LlbD
+        Dh4hmk0ZyYSBHaR5YL9QcpAP1dPaoAZA2wdVNoBDakm5BNkLfKXh2kyqgLSH7yhT
+        Go2eCZAIKBIAJ6sLvWfQra2BXV4DORorTM60aw4G87ScTfOPhhVRGt0upFQbUZjL
+        2ADv/wtWrja+fC5hUiCNyXEirnGS83FyQ4k8F9624AVEWEcCAwEAAaN2MHQwHQYD
+        VR0OBBYEFN/YawjF42qigV2LQMKCPSEoHSs3MB8GA1UdIwQYMBaAFN/YawjF42qi
+        gV2LQMKCPSEoHSs3MA8GA1UdEwEB/wQFMAMBAf8wIQYDVR0RBBowGIILc3NsLmJ1
+        bHQuYnqCCWxvY2FsaG9zdDANBgkqhkiG9w0BAQsFAAOCAQEAEV7esvdjcjKP+Y6G
+        HG4w7Q2PS5lyTh99meXrrxxaUsdrcGaL1jgV7pT/gAYfhjHXVPOWhQ0HD3qu1dSy
+        tCjHnr0EQjTF0JF8VOvOUHlBu2gQNj6IwOc6h7/NeAt9bcevGf6Fp6WIMlmrzeAd
+        ZMyBubxtqiqBv8vvWhrCUo8B2t/+Y/ftcCGgLlHDjxU1xJ8BZW9bEJ4lZZkttyUd
+        Bnjyk5IUZMWlwd9a2rQraDhgxHr7KXJdtkMe7WvlCV1iVm/1QML+FTyQENgJIn21
+        ReYDmNfOw05w85fhkb8rBmJUv2zq9KF/pIOacSkAMF9/3zLoBgU2LK4ItNLlBUpw
+        jwOuzw==
+        -----END CERTIFICATE-----
+        -----BEGIN CERTIFICATE-----
+        MIIDbjCCAlagAwIBAgIUGiBvGo9YqJd0FFZ3q/fQMbczIw8wDQYJKoZIhvcNAQEL
+        BQAwMTEPMA0GA1UEAwwGQ0xJRU5UMR4wHAYDVQQFExUwMTIzNDU2Nzg5MDEyMzQ1
+        Njc4OTAwHhcNMjYwNTAxMDk1OTQ5WhcNMzYwNDI4MDk1OTQ5WjAxMQ8wDQYDVQQD
+        DAZDTElFTlQxHjAcBgNVBAUTFTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDCCASIwDQYJ
+        KoZIhvcNAQEBBQADggEPADCCAQoCggEBANdotbXhvJWVmlRFJBE97cwmHks+nweh
+        5aIal7I4cNV8JbZlY91pGwSxtiFBoliBv2iqS8xdqkMrxNRm4Nu6wkb4iQFJS4mx
+        Iv4oUSFM0Y0ISkDNkIVEfTyeLbm4J8heG8J3QqRGqv0GuDV90GVFB17XK91ef1Gy
+        r6+ZG+4L5uPct7hvjc9miWL2GZ+z5brOOgwE3TZbJEFj5S955qhgM/zejUBtgPcz
+        F9ErIdDct80x51WjqVLxzCGi2YbUvcUk253WRPhiD3Wf2MuZGSxgltMx87cj0uQd
+        S+vo96AIWoJNR/LI+pGNX3d45ZMKPsOK2I7E4lEXup0kZmbGuvDzc+MCAwEAAaN+
+        MHwwHQYDVR0OBBYEFC63kWhV6Zo+eMZ30/KYFGIM7khTMB8GA1UdIwQYMBaAFC63
+        kWhV6Zo+eMZ30/KYFGIM7khTMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0RBCIwIIIM
+        Y2xpZW50LmxvY2FsghBhcGlzaXgubG9jYWxob3N0MA0GCSqGSIb3DQEBCwUAA4IB
+        AQCc90dU1YwEDn+SOF1kn21QVUDVLUG6r3tu/l/ZCLYcfnetX2H7OcqY1T2u1zia
+        m10DEEwyN0VSwbBStCZ9xhPLAZQixjumtvZcR4AZtgg54XqvmUjEzkiLACBI3q8Z
+        L7Uw4pME5J/IJU26P6Vbpdljg6Lq9R0o77Z23GQW3eJ1re2mGfKWYwdzUNOcmhbF
+        h2SLql6F3sXODPRZK+WpVdKG9XPml8KDGQ/va4wlNX82h51/HF7AcBq9tKr4jIsD
+        kU0x0oMukNG7jy2dPjbpIzL1pGu770DayDDaGseitC5Mf591DpBDnJHgmQjzNQZJ
+        AhWuAks8bxaTvtL0pfMdxrB+
+        -----END CERTIFICATE-----
+      depth: 1
+
+
+consumers:
+  - username: certuser
+    plugins:
+      cert-auth:
+        cn: ssl.bult.bz
+  - username: testuser
+    plugins:
+      cert-auth:
+        identifier: apisix.localhost
+
+
+routes:
+  - name: gateway-test
+    id: 1
+    uri: /anything
+    plugins:
+      cert-auth: {}
+      consumer-restriction: 
+        whitelist: 
+          - certuser
+    upstream_id: 1
+    status: 1
+
+
+  - name: upstream-test
+    id: 2
+    uri: /headers
+    plugins:
+      cert-auth: {}
+      consumer-restriction: 
+        whitelist: 
+          - testuser
+    upstream_id: 1
+    status: 1
+
+  - name: upstream-test-cn-with-identifier
+    id: 3
+    uri: /test-cn-with-identifier
+    plugins:
+      cert-auth: {}
+      proxy-rewrite:
+        uri: /anything
+      consumer-restriction: 
+        whitelist: 
+          - certuser
+    upstream_id: 1
+    status: 1
+
+upstreams:
+  - name: httpbun
+    id: 1
+    nodes:
+      "httpbun:80": 1
+    type: roundrobin
+
+#END

@@ -1,0 +1,62 @@
+meta {
+  name: allow BRP write with role and scope
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{authzenBaseUrl}}/v1/data/authzen/evaluation
+  body: json
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+}
+
+body:json {
+  {
+    "input": {
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "properties": {
+          "organization": "urn:nl:gov:rotterdam",
+          "assurance_level": "high",
+          "roles": ["municipality_caseworker"],
+          "scopes": ["brp:read", "brp:write"]
+        }
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "properties": {
+          "sensitivity": "high"
+        }
+      },
+      "action": {
+        "name": "write"
+      },
+      "context": {
+        "properties": {
+          "purpose": "uitvoering-wettelijke-taak",
+          "channel": "mtls",
+          "loa": "high"
+        }
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("decision is allow for write", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("result");
+    expect(body.result).to.have.property("decision", true);
+    expect(body.result).to.have.property("policy_id", "nl-gov-authzen-v1");
+  });
+}

@@ -1,0 +1,63 @@
+meta {
+  name: deny BRP write without brp:write scope
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{authzenBaseUrl}}/v1/data/authzen/evaluation
+  body: json
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+}
+
+body:json {
+  {
+    "input": {
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "properties": {
+          "organization": "urn:nl:gov:rotterdam",
+          "assurance_level": "high",
+          "roles": ["municipality_caseworker"],
+          "scopes": ["brp:read"]
+        }
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "properties": {
+          "sensitivity": "high"
+        }
+      },
+      "action": {
+        "name": "write"
+      },
+      "context": {
+        "properties": {
+          "purpose": "uitvoering-wettelijke-taak",
+          "channel": "mtls",
+          "loa": "high"
+        }
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("decision is deny for missing write scope", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("result");
+    expect(body.result).to.have.property("decision", false);
+    expect(body.result).to.have.property("reason");
+    expect(body.result.reason).to.contain("write");
+  });
+}

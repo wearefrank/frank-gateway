@@ -1,0 +1,63 @@
+meta {
+  name: deny BRP read on invalid purpose
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{authzenBaseUrl}}/v1/data/authzen/evaluation
+  body: json
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+}
+
+body:json {
+  {
+    "input": {
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "properties": {
+          "organization": "urn:nl:gov:rotterdam",
+          "assurance_level": "substantial",
+          "roles": ["municipality_caseworker"],
+          "scopes": ["brp:read"]
+        }
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "properties": {
+          "sensitivity": "high"
+        }
+      },
+      "action": {
+        "name": "read"
+      },
+      "context": {
+        "properties": {
+          "purpose": "marketing",
+          "channel": "mtls",
+          "loa": "substantial"
+        }
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("decision is deny with reason", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("result");
+    expect(body.result).to.have.property("decision", false);
+    expect(body.result).to.have.property("reason");
+    expect(body.result.reason).to.contain("purpose");
+  });
+}
