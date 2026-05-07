@@ -61,9 +61,6 @@ local function extract_all(conf, data)
 end
 
 local function expose_results(ctx, results)
-    ctx.extracted = results
-    ctx.var.extracted = core.json.encode(results)
-
     for var_name, value in pairs(results) do
         -- Keep native tables in ctx.var so downstream loggers can encode
         -- them as structured JSON instead of escaped JSON strings.
