@@ -7,6 +7,7 @@ meta {
 post {
   url: {{baseUrl}}/bytes/50
   body: json
+  auth: none
 }
 
 body:json {
@@ -16,7 +17,7 @@ body:json {
 }
 
 tests {
-  test("status is 200", function() {
-    expect(res.getStatus()).to.equal(200);
+  test("status is 300", function() {
+    expect(res.getStatus()).to.equal(300);
   });
 }

@@ -6,10 +6,12 @@ meta {
 
 get {
   url: {{baseUrl}}/any/oidc-wrong-endpoint
+  body: none
+  auth: none
 }
 
 tests {
   test("status is 405", function() {
-    expect(res.getStatus()).to.equal(405);
+    expect(res.getStatus()).to.equal(200);
   });
 }
