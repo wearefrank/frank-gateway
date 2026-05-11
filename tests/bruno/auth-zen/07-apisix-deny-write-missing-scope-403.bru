@@ -1,0 +1,42 @@
+meta {
+  name: [APISIX] deny BRP write - read-only JWT, missing write scope
+  type: http
+  seq: 7
+}
+
+docs {
+  EXPECTED behaviour once the auth-zen APISIX plugin is implemented.
+
+  The plugin should:
+    1. Extract the subject from the Bearer JWT (scopes only contains "brp:read").
+    2. Map the HTTP method (PUT) to action "write".
+    3. Receive a deny decision from the policy agent because the subject lacks the "brp:write" scope.
+    4. Return HTTP 403 to the client without forwarding to the upstream.
+
+  The JWT payload used here decodes to:
+    { "sub": "municipality-case-api", "organization": "urn:nl:gov:rotterdam",
+      "assurance_level": "high", "roles": ["municipality_caseworker"],
+      "scopes": ["brp:read"] }
+}
+
+put {
+  url: {{baseUrl}}/anything
+  body: json
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtdW5pY2lwYWxpdHktY2FzZS1hcGkiLCJvcmdhbml6YXRpb24iOiJ1cm46bmw6Z292OnJvdHRlcmRhbSIsImFzc3VyYW5jZV9sZXZlbCI6ImhpZ2giLCJyb2xlcyI6WyJtdW5pY2lwYWxpdHlfY2FzZXdvcmtlciJdLCJzY29wZXMiOlsiYnJwOnJlYWQiXX0.signature-placeholder
+  x-purpose: uitvoering-wettelijke-taak
+}
+
+body:json {
+  {}
+}
+
+tests {
+  test("status is 403 - missing brp:write scope denied by policy agent", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+}

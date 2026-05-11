@@ -113,48 +113,18 @@ consumers:
     plugins:
       cert-auth:
         cn: ssl.bult.bz
-  - username: testuser
-    plugins:
-      cert-auth:
-        identifier: apisix.localhost
 
 
 routes:
   - name: gateway-test
     id: 1
     uri: /anything
-    plugins:
-      cert-auth: {}
-      consumer-restriction: 
-        whitelist: 
-          - certuser
     upstream_id: 1
     status: 1
-
-
-  - name: upstream-test
-    id: 2
-    uri: /headers
     plugins:
-      cert-auth: {}
-      consumer-restriction: 
-        whitelist: 
-          - testuser
-    upstream_id: 1
-    status: 1
+      auth-zen:
+        agent: "frank-gateway-tests"
 
-  - name: upstream-test-cn-with-identifier
-    id: 3
-    uri: /test-cn-with-identifier
-    plugins:
-      cert-auth: {}
-      proxy-rewrite:
-        uri: /anything
-      consumer-restriction: 
-        whitelist: 
-          - certuser
-    upstream_id: 1
-    status: 1
 
 upstreams:
   - name: httpbun

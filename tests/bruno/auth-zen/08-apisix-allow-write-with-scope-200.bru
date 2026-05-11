@@ -1,0 +1,42 @@
+meta {
+  name: [APISIX] allow BRP write - JWT with read and write scope
+  type: http
+  seq: 8
+}
+
+docs {
+  EXPECTED behaviour once the auth-zen APISIX plugin is implemented.
+
+  The plugin should:
+    1. Extract the subject from the Bearer JWT (scopes: ["brp:read", "brp:write"]).
+    2. Map the HTTP method (PUT) to action "write".
+    3. Receive an allow decision from the policy agent.
+    4. Forward the request to the upstream and return its response to the client.
+
+  The JWT payload used here decodes to:
+    { "sub": "municipality-case-api", "organization": "urn:nl:gov:rotterdam",
+      "assurance_level": "high", "roles": ["municipality_caseworker"],
+      "scopes": ["brp:read", "brp:write"] }
+}
+
+put {
+  url: {{baseUrl}}/anything
+  body: json
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtdW5pY2lwYWxpdHktY2FzZS1hcGkiLCJvcmdhbml6YXRpb24iOiJ1cm46bmw6Z292OnJvdHRlcmRhbSIsImFzc3VyYW5jZV9sZXZlbCI6ImhpZ2giLCJyb2xlcyI6WyJtdW5pY2lwYWxpdHlfY2FzZXdvcmtlciJdLCJzY29wZXMiOlsiYnJwOnJlYWQiLCJicnA6d3JpdGUiXX0.signature-placeholder
+  x-purpose: uitvoering-wettelijke-taak
+}
+
+body:json {
+  {}
+}
+
+tests {
+  test("status is 200 - request forwarded to upstream", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

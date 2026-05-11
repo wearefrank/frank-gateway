@@ -15,11 +15,11 @@ apisix:
   extra_lua_path: "/usr/local/apisix/custom-plugins/?.lua"                   # Extend lua_package_path to load third-party code.
   extra_lua_cpath: "/usr/local/apisix/custom-plugin-libs/?.so"
 
-# Only plugins used by tests/cert-auth/apisix-standalone-config.yaml.
+
 plugins:
-  - cert-auth
   - proxy-rewrite
   - consumer-restriction
+  - auth-zen
 
 nginx_config:
   error_log_level: info

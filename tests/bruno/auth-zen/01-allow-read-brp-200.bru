@@ -4,6 +4,12 @@ meta {
   seq: 1
 }
 
+docs {
+  NOTE: This test calls the AuthZEN policy agent (OPA) directly — it does NOT test the APISIX auth-zen plugin.
+  Its purpose is to verify that the policy logic itself is correct before the plugin integration is tested.
+  See tests 05–09 for expected APISIX plugin behaviour.
+}
+
 post {
   url: {{authzenBaseUrl}}/v1/data/authzen/evaluation
   body: json

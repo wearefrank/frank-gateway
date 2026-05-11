@@ -1,0 +1,37 @@
+meta {
+  name: [APISIX] allow BRP read - valid JWT, valid purpose
+  type: http
+  seq: 5
+}
+
+docs {
+  EXPECTED behaviour once the auth-zen APISIX plugin is implemented.
+
+  The plugin should:
+    1. Extract the subject from the Bearer JWT (sub, organization, assurance_level, roles, scopes).
+    2. Map the HTTP method (GET) to action "read" and the request path to the resource.
+    3. Call the AuthZEN policy agent with the full evaluation input.
+    4. Forward the request to the upstream when the decision is "allow".
+
+  The JWT payload used here decodes to:
+    { "sub": "municipality-case-api", "organization": "urn:nl:gov:rotterdam",
+      "assurance_level": "substantial", "roles": ["municipality_caseworker"],
+      "scopes": ["brp:read"] }
+}
+
+get {
+  url: {{baseUrl}}/anything
+  body: none
+}
+
+headers {
+  accept: application/json
+  authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtdW5pY2lwYWxpdHktY2FzZS1hcGkiLCJvcmdhbml6YXRpb24iOiJ1cm46bmw6Z292OnJvdHRlcmRhbSIsImFzc3VyYW5jZV9sZXZlbCI6InN1YnN0YW50aWFsIiwicm9sZXMiOlsibXVuaWNpcGFsaXR5X2Nhc2V3b3JrZXIiXSwic2NvcGVzIjpbImJycDpyZWFkIl19.signature-placeholder
+  x-purpose: uitvoering-wettelijke-taak
+}
+
+tests {
+  test("status is 200 - request forwarded to upstream", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
