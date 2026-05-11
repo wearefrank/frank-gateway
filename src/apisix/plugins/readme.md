@@ -51,7 +51,7 @@ Add relevant requests and tests to the Bruno collection.
 
 You do not need to cover every edge case, but include at least:
 
-- A happy path
+- A happy scenario
 - A failure path
 
 For an auth plugin, for example:
