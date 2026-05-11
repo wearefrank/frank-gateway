@@ -5,19 +5,13 @@ meta {
 }
 
 docs {
-  EXPECTED behaviour once the auth-zen APISIX plugin is implemented.
-
-  The plugin should:
-    1. Detect that no Authorization header (or other supported credential) is present.
-    2. Reject the request immediately without calling the policy agent.
-    3. Return HTTP 401 to the client.
-
-  This tests the "no subject" edge case: the plugin cannot build an AuthZEN evaluation
-  input without a subject identity, so authentication is required before authorisation.
+  This test targets /authzen/no-auth, a route protected with key-auth in
+  tests/auth-zen/apisix-standalone-config.yaml.
+  No API key is sent, so APISIX must return 401.
 }
 
 get {
-  url: {{baseUrl}}/anything
+  url: {{baseUrl}}/authzen/no-auth
   body: none
 }
 

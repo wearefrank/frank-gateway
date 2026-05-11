@@ -108,23 +108,164 @@ ssls:
       depth: 1
 
 
-consumers:
-  - username: certuser
-    plugins:
-      cert-auth:
-        cn: ssl.bult.bz
-
 
 routes:
-  - name: gateway-test
+  - name: authzen-read-allow
     id: 1
-    uri: /anything
+    uri: /authzen/read/allow
+    methods:
+      - GET
     upstream_id: 1
     status: 1
     plugins:
       auth-zen:
-        agent: "frank-gateway-tests"
+        host: "http://authzen-policy-agent:8180"
+        policy: "authzen/evaluation"
+        body:
+          subject:
+            type: "service-account"
+            id: "municipality-case-api"
+            properties:
+              organization: "urn:nl:gov:rotterdam"
+              assurance_level: "substantial"
+              roles:
+                - "municipality_caseworker"
+              scopes:
+                - "brp:read"
+          resource:
+            type: "brp-record"
+            id: "bsn:999991234"
+            properties:
+              sensitivity: "high"
+          action:
+            name: "read"
+          context:
+            purpose: "uitvoering-wettelijke-taak"
+            channel: "mtls"
+            loa: "substantial"
+      proxy-rewrite:
+        uri: "/anything"
 
+  - name: authzen-read-deny-purpose
+    id: 2
+    uri: /authzen/read/deny-purpose
+    methods:
+      - GET
+    upstream_id: 1
+    status: 1
+    plugins:
+      auth-zen:
+        host: "http://authzen-policy-agent:8180"
+        policy: "authzen/evaluation"
+        body:
+          subject:
+            type: "service-account"
+            id: "municipality-case-api"
+            properties:
+              organization: "urn:nl:gov:rotterdam"
+              assurance_level: "substantial"
+              roles:
+                - "municipality_caseworker"
+              scopes:
+                - "brp:read"
+          resource:
+            type: "brp-record"
+            id: "bsn:999991234"
+            properties:
+              sensitivity: "high"
+          action:
+            name: "read"
+          context:
+            purpose: "marketing"
+            channel: "mtls"
+            loa: "substantial"
+
+  - name: authzen-write-deny-scope
+    id: 3
+    uri: /authzen/write/deny-scope
+    methods:
+      - PUT
+    upstream_id: 1
+    status: 1
+    plugins:
+      auth-zen:
+        host: "http://authzen-policy-agent:8180"
+        policy: "authzen/evaluation"
+        body:
+          subject:
+            type: "service-account"
+            id: "municipality-case-api"
+            properties:
+              organization: "urn:nl:gov:rotterdam"
+              assurance_level: "high"
+              roles:
+                - "municipality_caseworker"
+              scopes:
+                - "brp:read"
+          resource:
+            type: "brp-record"
+            id: "bsn:999991234"
+            properties:
+              sensitivity: "high"
+          action:
+            name: "write"
+          context:
+            purpose: "uitvoering-wettelijke-taak"
+            channel: "mtls"
+            loa: "high"
+      proxy-rewrite:
+        uri: "/anything"
+
+  - name: authzen-write-allow
+    id: 4
+    uri: /authzen/write/allow
+    methods:
+      - PUT
+    upstream_id: 1
+    status: 1
+    plugins:
+      auth-zen:
+        host: "http://authzen-policy-agent:8180"
+        policy: "authzen/evaluation"
+        body:
+          subject:
+            type: "service-account"
+            id: "municipality-case-api"
+            properties:
+              organization: "urn:nl:gov:rotterdam"
+              assurance_level: "high"
+              roles:
+                - "municipality_caseworker"
+              scopes:
+                - "brp:read"
+                - "brp:write"
+          resource:
+            type: "brp-record"
+            id: "bsn:999991234"
+            properties:
+              sensitivity: "high"
+          action:
+            name: "write"
+          context:
+            purpose: "uitvoering-wettelijke-taak"
+            channel: "mtls"
+            loa: "high"
+
+  - name: authzen-no-auth-required
+    id: 5
+    uri: /authzen/no-auth
+    methods:
+      - GET
+    upstream_id: 1
+    status: 1
+    plugins:
+      key-auth: {}
+
+consumers:
+  - username: authzen-test-client
+    plugins:
+      key-auth:
+        key: authzen-test-key
 
 upstreams:
   - name: httpbun

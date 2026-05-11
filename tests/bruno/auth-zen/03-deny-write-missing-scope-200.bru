@@ -44,11 +44,14 @@ body:json {
         "name": "write"
       },
       "context": {
-        "properties": {
-          "purpose": "uitvoering-wettelijke-taak",
-          "channel": "mtls",
-          "loa": "high"
-        }
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "high",
+        "time": "2026-05-11T11:02:00Z",
+        "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        "tracestate": "congo=t61rcWkgMzE",
+        "mim": "https://example.org/mim/authzen/v1",
+        "ld-context": "https://example.org/contexts/authzen-v1.jsonld"
       }
     }
   }
@@ -61,9 +64,10 @@ tests {
 
   test("decision is deny for missing write scope", function() {
     const body = res.getBody();
-    expect(body).to.have.property("result");
-    expect(body.result).to.have.property("decision", false);
-    expect(body.result).to.have.property("reason");
-    expect(body.result.reason).to.contain("write");
+    expect(body).to.have.property("decision", false);
+    expect(body).to.have.property("context");
+    expect(body.context).to.have.property("reason_admin");
+    expect(body.context.reason_admin).to.have.property("403");
+    expect(body.context.reason_admin["403"]).to.contain("write");
   });
 }

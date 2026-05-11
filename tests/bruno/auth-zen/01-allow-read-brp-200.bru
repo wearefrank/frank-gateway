@@ -4,15 +4,10 @@ meta {
   seq: 1
 }
 
-docs {
-  NOTE: This test calls the AuthZEN policy agent (OPA) directly — it does NOT test the APISIX auth-zen plugin.
-  Its purpose is to verify that the policy logic itself is correct before the plugin integration is tested.
-  See tests 05–09 for expected APISIX plugin behaviour.
-}
-
 post {
   url: {{authzenBaseUrl}}/v1/data/authzen/evaluation
   body: json
+  auth: none
 }
 
 headers {
@@ -44,11 +39,14 @@ body:json {
         "name": "read"
       },
       "context": {
-        "properties": {
-          "purpose": "uitvoering-wettelijke-taak",
-          "channel": "mtls",
-          "loa": "substantial"
-        }
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "substantial",
+        "time": "2026-05-11T11:00:00Z",
+        "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        "tracestate": "congo=t61rcWkgMzE",
+        "mim": "https://example.org/mim/authzen/v1",
+        "ld-context": "https://example.org/contexts/authzen-v1.jsonld"
       }
     }
   }
@@ -58,11 +56,18 @@ tests {
   test("status is 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("decision is allow", function() {
     const body = res.getBody();
-    expect(body).to.have.property("result");
-    expect(body.result).to.have.property("decision", true);
-    expect(body.result).to.have.property("policy_id", "nl-gov-authzen-v1");
+    expect(body).to.have.property("decision", true);
+    expect(body).to.have.property("context");
+    expect(body.context).to.have.property("metadata");
+    expect(body.context.metadata).to.have.property("policy_id", "nl-gov-authzen-v1");
   });
+}
+
+docs {
+  NOTE: This test calls the AuthZEN policy agent (OPA) directly — it does NOT test the APISIX auth-zen plugin.
+  Its purpose is to verify that the policy logic itself is correct before the plugin integration is tested.
+  See tests 05–09 for expected APISIX plugin behaviour.
 }

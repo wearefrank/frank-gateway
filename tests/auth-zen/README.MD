@@ -1,6 +1,6 @@
 # AuthZEN NL-gov Policy Agent (Test Setup)
 
-This folder contains an AuthZEN-style NL-gov policy agent based on the standard Open Policy Agent (OPA) container image.
+This folder contains an testing setup for the AuthZEN-style NL-gov plugin 
 
 ## What you get
 
@@ -108,4 +108,4 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8180/v1/data/authzen/evalua
 
 - From within the compose network, use `http://authzen-policy-agent:8180/v1/data/authzen/evaluation`.
 - Bruno requests are available in `tests/bruno/auth-zen`.
-- OPA policy source is `tests/auth-zen/policy-agent/opa/authzen.rego`.
+- Python policy source is `tests/auth-zen/policy-agent/python/authzen_server.py`.

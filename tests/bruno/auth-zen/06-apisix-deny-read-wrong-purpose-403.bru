@@ -5,22 +5,12 @@ meta {
 }
 
 docs {
-  EXPECTED behaviour once the auth-zen APISIX plugin is implemented.
-
-  The plugin should:
-    1. Extract the subject from the Bearer JWT.
-    2. Build the AuthZEN evaluation input with purpose "marketing" (invalid for BRP access).
-    3. Receive a deny decision from the policy agent.
-    4. Return HTTP 403 to the client without forwarding to the upstream.
-
-  The JWT payload used here decodes to:
-    { "sub": "municipality-case-api", "organization": "urn:nl:gov:rotterdam",
-      "assurance_level": "substantial", "roles": ["municipality_caseworker"],
-      "scopes": ["brp:read"] }
+  This test targets the scenario route configured in tests/auth-zen/apisix-standalone-config.yaml.
+  Route /authzen/read/deny-purpose sends purpose "marketing" and should be denied by policy.
 }
 
 get {
-  url: {{baseUrl}}/anything
+  url: {{baseUrl}}/authzen/read/deny-purpose
   body: none
 }
 

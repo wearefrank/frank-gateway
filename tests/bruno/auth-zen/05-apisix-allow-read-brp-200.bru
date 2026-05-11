@@ -5,22 +5,12 @@ meta {
 }
 
 docs {
-  EXPECTED behaviour once the auth-zen APISIX plugin is implemented.
-
-  The plugin should:
-    1. Extract the subject from the Bearer JWT (sub, organization, assurance_level, roles, scopes).
-    2. Map the HTTP method (GET) to action "read" and the request path to the resource.
-    3. Call the AuthZEN policy agent with the full evaluation input.
-    4. Forward the request to the upstream when the decision is "allow".
-
-  The JWT payload used here decodes to:
-    { "sub": "municipality-case-api", "organization": "urn:nl:gov:rotterdam",
-      "assurance_level": "substantial", "roles": ["municipality_caseworker"],
-      "scopes": ["brp:read"] }
+  This test targets the scenario route configured in tests/auth-zen/apisix-standalone-config.yaml.
+  Route /authzen/read/allow sends a valid AuthZEN input and should be forwarded to upstream.
 }
 
 get {
-  url: {{baseUrl}}/anything
+  url: {{baseUrl}}/authzen/read/allow
   body: none
 }
 

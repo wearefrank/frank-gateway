@@ -18,8 +18,11 @@ apisix:
 
 plugins:
   - proxy-rewrite
+  - key-auth
   - consumer-restriction
+  - opa
   - auth-zen
+ 
 
 nginx_config:
   error_log_level: info

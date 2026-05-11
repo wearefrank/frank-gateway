@@ -5,22 +5,12 @@ meta {
 }
 
 docs {
-  EXPECTED behaviour once the auth-zen APISIX plugin is implemented.
-
-  The plugin should:
-    1. Extract the subject from the Bearer JWT (scopes: ["brp:read", "brp:write"]).
-    2. Map the HTTP method (PUT) to action "write".
-    3. Receive an allow decision from the policy agent.
-    4. Forward the request to the upstream and return its response to the client.
-
-  The JWT payload used here decodes to:
-    { "sub": "municipality-case-api", "organization": "urn:nl:gov:rotterdam",
-      "assurance_level": "high", "roles": ["municipality_caseworker"],
-      "scopes": ["brp:read", "brp:write"] }
+  This test targets the scenario route configured in tests/auth-zen/apisix-standalone-config.yaml.
+  Route /authzen/write/allow includes brp:write scope and should be forwarded to upstream.
 }
 
 put {
-  url: {{baseUrl}}/anything
+  url: {{baseUrl}}/authzen/write/allow
   body: json
 }
 

@@ -34,15 +34,14 @@ services:
       apisix:
 
   authzen-policy-agent:
-    image: openpolicyagent/opa:0.68.0
+    image: python:3.12-alpine
     restart: always
     command:
-      - "run"
-      - "--server"
-      - "--addr=0.0.0.0:8180"
-      - "/policy"
+      - "python"
+      - "-u"
+      - "/app/authzen_server.py"
     volumes:
-      - ./policy-agent/opa:/policy:ro
+      - ./policy-agent/python:/app:ro
     ports:
       - "8180:8180/tcp"
     networks:

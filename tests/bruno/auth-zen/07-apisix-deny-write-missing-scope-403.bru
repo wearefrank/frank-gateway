@@ -5,22 +5,12 @@ meta {
 }
 
 docs {
-  EXPECTED behaviour once the auth-zen APISIX plugin is implemented.
-
-  The plugin should:
-    1. Extract the subject from the Bearer JWT (scopes only contains "brp:read").
-    2. Map the HTTP method (PUT) to action "write".
-    3. Receive a deny decision from the policy agent because the subject lacks the "brp:write" scope.
-    4. Return HTTP 403 to the client without forwarding to the upstream.
-
-  The JWT payload used here decodes to:
-    { "sub": "municipality-case-api", "organization": "urn:nl:gov:rotterdam",
-      "assurance_level": "high", "roles": ["municipality_caseworker"],
-      "scopes": ["brp:read"] }
+  This test targets the scenario route configured in tests/auth-zen/apisix-standalone-config.yaml.
+  Route /authzen/write/deny-scope omits brp:write scope and should be denied by policy.
 }
 
 put {
-  url: {{baseUrl}}/anything
+  url: {{baseUrl}}/authzen/write/deny-scope
   body: json
 }
 
