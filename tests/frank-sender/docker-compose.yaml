@@ -18,7 +18,7 @@
 name: frank-gateway-frank-sender-tests # Name of the parent container
 services:
   apisix:
-    image: frank-gateway:local
+    image: ghcr.io/wearefrank/frank-gateway:master
     build:
       context: ../../
       dockerfile: Dockerfile

@@ -4,6 +4,10 @@ ARG BUILD_DATE
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL based-on="Apache APISIX 3.14.1 Ubuntu"
 
+# Overlay patched APISIX plugins from the local patches folder.
+# Files with the same path/name in /usr/local/apisix/apisix/plugins are replaced.
+COPY patches/ /usr/local/apisix/apisix/plugins/
+
 COPY src /usr/local/apisix/custom-plugins
 COPY conf/config.yaml /usr/local/apisix/conf/config.yaml
 
