@@ -7,7 +7,7 @@ Create a single dedicated test environment that can be used for:
 - Automated testing pipelines
 - Local development
 
-To do this, create a folder under `tests` with the plugin name. Include a `Dockerfile` and the relevant configuration files.
+To do this, create a folder under `tests` using the plugin name. Include a `docker-compose.yaml` and the relevant configuration files.
 
 ## 2. Add a Bruno collection
 
