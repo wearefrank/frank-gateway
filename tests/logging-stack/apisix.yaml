@@ -1,0 +1,24 @@
+routes:
+  - id: 1
+    name: upstream-test
+    uri: /*
+    upstream_id: 1
+    status: 1
+    plugins:
+      loki-logger:
+        log_format:
+          Hello: "World!"
+        endpoint_addrs:
+          - http://alloy:3101
+        log_labels:
+          gateway: frank-gateway
+          source: apisix-route-headers
+
+upstreams:
+  - name: httpbun
+    id: 1
+    nodes:
+      "httpbun": 1
+    type: roundrobin
+
+#END
