@@ -57,6 +57,7 @@ call :run_suite generic-oauth
 call :run_suite jwt-client
 call :run_suite limit-size
 call :run_suite oidc-client
+call :run_suite opa
 call :run_suite soap-action-router
 
 echo.

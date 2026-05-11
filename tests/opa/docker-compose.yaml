@@ -1,0 +1,39 @@
+name: frank-gateway-opa-test
+services:
+  apisix:
+    image: ghcr.io/wearefrank/frank-gateway:master
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - ../../src:/usr/local/apisix/custom-plugins
+      - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml
+    ports:
+      - "9080:9080/tcp"
+      - "9443:9443/tcp"
+    networks:
+      apisix:
+
+  httpbun:
+    image: sharat87/httpbun:fd75552c42e61cf61e578e4459da372754596f08
+    restart: always
+    networks:
+      apisix:
+
+  opa:
+    image: openpolicyagent/opa:0.70.0
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+      - "/policies"
+    volumes:
+      - ./policies:/policies:ro
+    networks:
+      apisix:
+
+networks:
+  apisix:
+    driver: bridge
