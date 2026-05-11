@@ -54,7 +54,7 @@ You do not need to cover every edge case, but include at least:
 - A happy scenario
 - A failure scenario
 
-For an auth plugin, for example:
+For example, for an auth plugin:
 
 - No token -> returns `403`
 - Unauthorized token -> returns `403`
