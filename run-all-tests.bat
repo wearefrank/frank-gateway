@@ -101,7 +101,7 @@ set "DIR_PUSHED=1"
 if defined RUN_ALL_TESTS_TRACE echo [TRACE] Entered tests\%SUITE%
 
 echo [INFO] Starting containers...
-docker compose up -d --force-recreate
+docker compose up -d --build --force-recreate
 if errorlevel 1 (
     echo [ERROR] Failed to start containers for %SUITE%.
     set "SUITE_FAILED=1"
@@ -169,11 +169,16 @@ set "BRUNO_SUITE=%~1"
 set "ACTIVE_BRUNO_NETWORK=%BRUNO_DOCKER_NETWORK%"
 if not defined ACTIVE_BRUNO_NETWORK set "ACTIVE_BRUNO_NETWORK=!SUITE_DOCKER_NETWORK!"
 if not defined ACTIVE_BRUNO_NETWORK exit /b 1
+set "BRUNO_WORKDIR=/workspace/tests/bruno/%BRUNO_SUITE%"
+set "BRUNO_JUNIT=/workspace/tests/bruno/results/%BRUNO_SUITE%.xml"
 
-docker run --rm --network "!ACTIVE_BRUNO_NETWORK!" --add-host "apisix.localhost:!APISIX_CONTAINER_IP!" --add-host "host.docker.internal:!APISIX_CONTAINER_IP!" -v "%REPO_ROOT_DOCKER%:/workspace" -w "/workspace/tests/bruno/%BRUNO_SUITE%" "%BRUNO_CLI_IMAGE%" run . -r --env "%BRUNO_ENV%" --insecure --reporter-junit "/workspace/tests/bruno/results/%BRUNO_SUITE%.xml"
-if errorlevel 1 exit /b 1
+setlocal DisableDelayedExpansion
+docker run --rm --network "%ACTIVE_BRUNO_NETWORK%" --add-host "apisix.localhost:%APISIX_CONTAINER_IP%" --add-host "host.docker.internal:%APISIX_CONTAINER_IP%" -v "%REPO_ROOT_DOCKER%:/workspace" -w "%BRUNO_WORKDIR%" "%BRUNO_CLI_IMAGE%" run . -r --env "%BRUNO_ENV%" --insecure --reporter-junit "%BRUNO_JUNIT%"
+set "BRUNO_EXIT=%ERRORLEVEL%"
+endlocal & set "BRUNO_EXIT=%BRUNO_EXIT%"
 
-goto :eof
+if not "%BRUNO_EXIT%"=="0" exit /b 1
+exit /b 0
 
 :resolve_suite_runtime
 set "SUITE_DOCKER_NETWORK="
