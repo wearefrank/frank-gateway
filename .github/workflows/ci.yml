@@ -9,8 +9,6 @@ on:
   pull_request:
     branches:
       - master
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -108,3 +106,158 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  bruno-tests:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Bruno test suites (non-blocking)
+        shell: bash
+        run: |
+          set -u
+
+          REPO_ROOT="${GITHUB_WORKSPACE}"
+          BRUNO_CLI_IMAGE="alpine/bruno"
+          BRUNO_ENV="docker"
+          mkdir -p "${REPO_ROOT}/tests/bruno/results"
+
+          failed_suites=()
+          discovered_suites=()
+
+          while IFS= read -r compose_file; do
+            suite="$(basename "$(dirname "$compose_file")")"
+            bruno_collection="${REPO_ROOT}/tests/bruno/${suite}/bruno.json"
+
+            if [ -f "$bruno_collection" ]; then
+              discovered_suites+=("$suite")
+            else
+              echo "[INFO] Skipping suite ${suite}: missing Bruno collection ${bruno_collection}."
+            fi
+          done < <(find "${REPO_ROOT}/tests" -mindepth 2 -maxdepth 2 -type f -name docker-compose.yaml | sort)
+
+          if [ "${#discovered_suites[@]}" -eq 0 ]; then
+            echo "[WARN] No Bruno suites discovered."
+            exit 0
+          fi
+
+          echo "[INFO] Discovered suites: ${discovered_suites[*]}"
+
+          wait_http_ok_docker() {
+            local network="$1"
+            local url="$2"
+            local tries="$3"
+            local i=0
+            while [ "$i" -lt "$tries" ]; do
+              if docker run --rm --network "$network" alpine:3.20 sh -c "wget -q -O /dev/null --timeout=3 '$url'" >/dev/null 2>&1; then
+                return 0
+              fi
+              i=$((i + 1))
+              sleep 2
+            done
+            return 1
+          }
+
+          wait_token_ready_docker() {
+            local network="$1"
+            local token_url="$2"
+            local client_id="$3"
+            local client_secret="$4"
+            local tries="$5"
+            local i=0
+            while [ "$i" -lt "$tries" ]; do
+              if docker run --rm --network "$network" alpine:3.20 sh -c "wget -q -O /dev/null --timeout=4 --header='Content-Type: application/x-www-form-urlencoded' --post-data='client_id=$client_id&client_secret=$client_secret&grant_type=client_credentials' '$token_url'" >/dev/null 2>&1; then
+                return 0
+              fi
+              i=$((i + 1))
+              sleep 2
+            done
+            return 1
+          }
+
+          for suite in "${discovered_suites[@]}"; do
+            echo ""
+            echo "===== Bruno suite: ${suite} ====="
+
+            pushd "${REPO_ROOT}/tests/${suite}" >/dev/null
+
+            suite_failed=0
+
+            if ! docker compose up -d --build --force-recreate; then
+              echo "[ERROR] Failed to start containers for ${suite}."
+              suite_failed=1
+            fi
+
+            if [ "$suite_failed" -eq 0 ]; then
+              apisix_container_id="$(docker compose ps -q apisix)"
+              if [ -z "$apisix_container_id" ]; then
+                echo "[ERROR] Could not resolve APISIX container for ${suite}."
+                suite_failed=1
+              else
+                suite_network="$(docker inspect "$apisix_container_id" --format '{{range $k, $v := .NetworkSettings.Networks}}{{printf "%s" $k}}{{end}}')"
+                apisix_ip="$(docker inspect "$apisix_container_id" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')"
+
+                if [ -z "$suite_network" ] || [ -z "$apisix_ip" ]; then
+                  echo "[ERROR] Could not resolve Docker network metadata for ${suite}."
+                  suite_failed=1
+                fi
+              fi
+            fi
+
+            if [ "$suite_failed" -eq 0 ] && { [ "$suite" = "generic-oauth" ] || [ "$suite" = "oidc-client" ]; }; then
+              echo "[INFO] Waiting for Keycloak readiness (${suite})..."
+              if ! wait_http_ok_docker "$suite_network" "http://keycloak:9081/realms/fg-testing/.well-known/openid-configuration" 30; then
+                echo "[ERROR] Keycloak OpenID configuration endpoint not ready for ${suite}."
+                suite_failed=1
+              fi
+            fi
+
+            if [ "$suite_failed" -eq 0 ] && { [ "$suite" = "generic-oauth" ] || [ "$suite" = "oidc-client" ]; }; then
+              if ! wait_token_ready_docker "$suite_network" "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token" "oidc-test-client" "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx" 30; then
+                echo "[ERROR] Keycloak token endpoint not ready for ${suite}."
+                suite_failed=1
+              fi
+            fi
+
+            if [ "$suite_failed" -eq 0 ]; then
+              if ! docker run --rm \
+                --network "$suite_network" \
+                --add-host "apisix.localhost:$apisix_ip" \
+                --add-host "host.docker.internal:$apisix_ip" \
+                -v "${REPO_ROOT}:/workspace" \
+                -w "/workspace/tests/bruno/${suite}" \
+                "$BRUNO_CLI_IMAGE" run . -r --env "$BRUNO_ENV" --insecure --reporter-junit "/workspace/tests/bruno/results/${suite}.xml"; then
+                echo "[ERROR] Bruno execution failed for ${suite}."
+                suite_failed=1
+              fi
+            fi
+
+            docker compose down --remove-orphans || true
+            popd >/dev/null
+
+            if [ "$suite_failed" -eq 1 ]; then
+              failed_suites+=("$suite")
+            fi
+          done
+
+          if [ "${#failed_suites[@]}" -gt 0 ]; then
+            echo ""
+            echo "[RESULT] Failed suites: ${failed_suites[*]}"
+            exit 1
+          fi
+
+          echo ""
+          echo "[RESULT] All Bruno suites passed."
+
+      - name: Upload Bruno JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bruno-junit-results
+          path: tests/bruno/results/*.xml
+          if-no-files-found: warn
