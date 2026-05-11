@@ -1,0 +1,22 @@
+routes:
+  - id: 1
+    name: upstream-test
+    uri: /*
+    upstream_id: 1
+    status: 1
+    plugins:
+      response-extractor:
+        ip: "$.headers['X-Real-Ip']"
+      file-logger: 
+        path: /usr/local/apisix/logs/response.log
+        log_format:
+          ip: $ip
+
+upstreams:
+  - name: httpbun
+    id: 1
+    nodes:
+      "httpbun": 1
+    type: roundrobin
+
+#END

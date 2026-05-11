@@ -1,0 +1,50 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: frank-gateway-response-extractor-test # Name of the parent container
+services:
+  apisix:
+    image: ghcr.io/wearefrank/frank-gateway:master
+    restart: always
+    volumes:
+      - ../../src:/usr/local/apisix/custom-plugins
+      - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ../../conf/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ./logs:/usr/local/apisix/logs
+    ports:
+      - "9180:9180/tcp"
+      - "9080:9080/tcp"
+      - "9091:9091/tcp"
+      - "9092:9092/tcp"
+      - "9443:9443/tcp"
+    networks:
+      apisix:
+      
+  httpbun:
+    image: sharat87/httpbun:8cb6c4f90cf49eb4509e7ae699c27b9f85f383c5
+    restart: always
+    ports:
+      - "80:80/tcp"
+    networks:
+      apisix:
+
+volumes:
+  opa_backup:
+
+networks:
+  apisix:
+    driver: bridge
