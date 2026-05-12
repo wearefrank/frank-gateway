@@ -89,9 +89,9 @@ local consumer_schema = {}
 
 local _M = {
     version = 0.1,
-    priority = 1999, -- needs to occur before opa plugin
+    priority = 1999, 
     name = plugin_name,
-    type = "auth",   -- marks this as an authentication plugin, so APISIX knows it must pick a consumer
+    type = "auth",   
     schema = schema,
     consumer_schema = consumer_schema
 }
