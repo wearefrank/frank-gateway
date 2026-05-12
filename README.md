@@ -58,6 +58,11 @@ The following plugins have been created:
 7) Cert Auth
 8) Frank sender 
 9) JWT client
+10) AuthZen NLGOV
+
+### Patches: 
+The following standard plugins in Apisix have patches applied to them:
+1) Opa 
 
 
 ## Testing
@@ -141,3 +146,21 @@ APISIX has existing authentication plugins for validating incoming tokens, but t
 The JWT Client plugin enables the Frank!Gateway to request a JWT access token from an external IDP, cache it, and add it as a Bearer token on upstream requests.
 
 Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/bruno/jwt-client).
+
+### Authzen NLGOV
+
+The Authzen NLGOV plugin integrates APISIX with an AuthZEN-style policy decision point for Dutch government-style authorization checks.
+It is intended for cases where access decisions depend on structured context such as subject identity, organization, role/scope, requested action, resource sensitivity, and legal/operational purpose.
+
+In this repository, requests are enriched with authorization context and evaluated by a policy agent before APISIX forwards traffic to upstream services.
+This enables centralized, policy-driven authorization for scenarios such as BRP read/write access with explicit deny reasons.
+
+Current test coverage includes:
+- Allow/deny decisions for BRP read use cases
+- Deny decisions for invalid purpose
+- Deny decisions for missing write scope
+- Allow decisions for valid write scope
+
+Local setup and policy-agent details are documented in [tests/auth-zen/README.MD](tests/auth-zen/README.MD).
+Bruno integration tests can be found in [tests/bruno/auth-zen](tests/bruno/auth-zen).
+

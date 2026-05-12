@@ -110,149 +110,106 @@ ssls:
 
 
 routes:
-  - name: authzen-read-allow
+  - name: authzen-brp-dynamic
     id: 1
-    uri: /authzen/read/allow
+    uri: /authzen/brp
     methods:
       - GET
-    upstream_id: 1
-    status: 1
-    plugins:
-      auth-zen:
-        host: "http://authzen-policy-agent:8180"
-        policy: "authzen/evaluation"
-        body:
-          subject:
-            type: "service-account"
-            id: "municipality-case-api"
-            properties:
-              organization: "urn:nl:gov:rotterdam"
-              assurance_level: "substantial"
-              roles:
-                - "municipality_caseworker"
-              scopes:
-                - "brp:read"
-          resource:
-            type: "brp-record"
-            id: "bsn:999991234"
-            properties:
-              sensitivity: "high"
-          action:
-            name: "read"
-          context:
-            purpose: "uitvoering-wettelijke-taak"
-            channel: "mtls"
-            loa: "substantial"
-      proxy-rewrite:
-        uri: "/anything"
-
-  - name: authzen-read-deny-purpose
-    id: 2
-    uri: /authzen/read/deny-purpose
-    methods:
-      - GET
-    upstream_id: 1
-    status: 1
-    plugins:
-      auth-zen:
-        host: "http://authzen-policy-agent:8180"
-        policy: "authzen/evaluation"
-        body:
-          subject:
-            type: "service-account"
-            id: "municipality-case-api"
-            properties:
-              organization: "urn:nl:gov:rotterdam"
-              assurance_level: "substantial"
-              roles:
-                - "municipality_caseworker"
-              scopes:
-                - "brp:read"
-          resource:
-            type: "brp-record"
-            id: "bsn:999991234"
-            properties:
-              sensitivity: "high"
-          action:
-            name: "read"
-          context:
-            purpose: "marketing"
-            channel: "mtls"
-            loa: "substantial"
-
-  - name: authzen-write-deny-scope
-    id: 3
-    uri: /authzen/write/deny-scope
-    methods:
       - PUT
     upstream_id: 1
     status: 1
     plugins:
-      auth-zen:
-        host: "http://authzen-policy-agent:8180"
-        policy: "authzen/evaluation"
-        body:
-          subject:
-            type: "service-account"
-            id: "municipality-case-api"
-            properties:
-              organization: "urn:nl:gov:rotterdam"
-              assurance_level: "high"
-              roles:
-                - "municipality_caseworker"
-              scopes:
-                - "brp:read"
-          resource:
-            type: "brp-record"
-            id: "bsn:999991234"
-            properties:
-              sensitivity: "high"
-          action:
-            name: "write"
-          context:
-            purpose: "uitvoering-wettelijke-taak"
-            channel: "mtls"
-            loa: "high"
-      proxy-rewrite:
-        uri: "/anything"
+      serverless-pre-function: #This is to be changed later to use a new request-extractor plugin, working similairly to the response extractor but now for the incoming request 
+        phase: rewrite
+        functions:
+          - |
+            return function(conf, ctx)
+              local cjson = require("cjson.safe")
+              ngx.req.read_body()
+              local raw = ngx.req.get_body_data()
+              if not raw or raw == "" then
+                return
+              end
 
-  - name: authzen-write-allow
-    id: 4
-    uri: /authzen/write/allow
-    methods:
-      - PUT
-    upstream_id: 1
-    status: 1
-    plugins:
+              local payload = cjson.decode(raw)
+              if type(payload) ~= "table" then
+                return
+              end
+
+              local authz = payload.authorization
+              if type(authz) ~= "table" then
+                return
+              end
+
+              local subject = authz.subject
+              local resource = authz.resource
+              local context = authz.context
+
+              if type(subject) ~= "table" then
+                subject = {}
+              end
+              if type(resource) ~= "table" then
+                resource = {}
+              end
+              if type(context) ~= "table" then
+                context = {}
+              end
+
+              local function set_var(name, value)
+                if value ~= nil then
+                  ctx.var[name] = value
+                end
+              end
+
+              set_var("authz_token", payload.token)
+              set_var("authz_action_name", authz.action)
+
+              set_var("authz_subject_type", subject.type)
+              set_var("authz_subject_id", subject.id)
+              set_var("authz_subject_org", subject.organization)
+              set_var("authz_assurance_level", subject.assurance_level)
+              set_var("authz_subject_roles", subject.roles)
+              set_var("authz_subject_scopes", subject.scopes)
+
+              set_var("authz_resource_type", resource.type)
+              set_var("authz_resource_id", resource.id)
+              set_var("authz_resource_sensitivity", resource.sensitivity)
+              set_var("authz_requested_fields", payload.requested_field)
+
+              set_var("authz_purpose", context.purpose)
+              set_var("authz_channel", context.channel)
+              set_var("authz_loa", context.loa)
+            end
       auth-zen:
         host: "http://authzen-policy-agent:8180"
-        policy: "authzen/evaluation"
+        X_Request_Id: "$authz_token"
         body:
           subject:
-            type: "service-account"
-            id: "municipality-case-api"
+            type: "$authz_subject_type"
+            id: "$authz_subject_id"
             properties:
-              organization: "urn:nl:gov:rotterdam"
-              assurance_level: "high"
-              roles:
-                - "municipality_caseworker"
-              scopes:
-                - "brp:read"
-                - "brp:write"
+              organization: "$authz_subject_org"
+              assurance_level: "$authz_assurance_level"
+              roles: "$authz_subject_roles"
+              scopes: "$authz_subject_scopes"
           resource:
-            type: "brp-record"
-            id: "bsn:999991234"
+            type: "$authz_resource_type"
+            id: "$authz_resource_id"
             properties:
-              sensitivity: "high"
+              sensitivity: "$authz_resource_sensitivity"
+              fields: "$authz_requested_fields"
           action:
-            name: "write"
+            name: "$authz_action_name"
           context:
-            purpose: "uitvoering-wettelijke-taak"
-            channel: "mtls"
-            loa: "high"
+            purpose: "$authz_purpose"
+            channel: "$authz_channel"
+            loa: "$authz_loa"
+      proxy-rewrite:
+        method: "POST"
+        uri: "/anything"
 
   - name: authzen-no-auth-required
-    id: 5
+    id: 2
     uri: /authzen/no-auth
     methods:
       - GET

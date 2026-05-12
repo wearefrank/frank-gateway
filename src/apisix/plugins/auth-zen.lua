@@ -19,21 +19,30 @@ local schema = {
             type = "object",
             properties = {
                 subject = {
-                    type = { type = "string", minLength = 1 },
-                    id = { type = "string", minLength = 1 },
-                    properties = { type = "object" },
+                    type = "object",
+                    properties = {
+                        type = { type = "string", minLength = 1 },
+                        id = { type = "string", minLength = 1 },
+                        properties = { type = "object" },
+                    },
                     required = { "type", "id" },
                 },
                 resource = {
-                    type = { type = "string", minLength = 1 },
-                    id = { type = "string", minLength = 1 },
-                    properties = { type = "object" },
+                    type = "object",
+                    properties = {
+                        type = { type = "string", minLength = 1 },
+                        id = { type = "string", minLength = 1 },
+                        properties = { type = "object" },
+                    },
                     required = { "type", "id" },
                 },
                 action = {
-                    type = { type = "string", minLength = 1 },
-                    name = { type = "string", minLength = 1 },
-                    properties = { type = "object" },
+                    type = "object",
+                    properties = {
+                        type = { type = "string", minLength = 1 },
+                        name = { type = "string", minLength = 1 },
+                        properties = { type = "object" },
+                    },
                     required = { "name" },
                 },
                 context = {
@@ -94,10 +103,44 @@ function _M.check_schema(conf)
     return core.schema.check(schema, conf)
 end
 
+local function resolve_placeholders(value, ctx)
+    local value_type = type(value)
+
+    if value_type == "string" then
+        local var_name = value:match("^%$([%w_]+)$")
+        if var_name then
+            return ctx.var[var_name]
+        end
+
+        return (value:gsub("%$([%w_]+)", function(name)
+            local resolved = ctx.var[name]
+            if resolved == nil then
+                return "$" .. name
+            end
+            return tostring(resolved)
+        end))
+    end
+
+    if value_type ~= "table" then
+        return value
+    end
+
+    local out = {}
+    for k, v in pairs(value) do
+        local resolved = resolve_placeholders(v, ctx)
+        if resolved ~= nil then
+            out[k] = resolved
+        end
+    end
+
+    return out
+end
+
 function _M.access(conf, ctx)
+    local request_body = resolve_placeholders(conf.body, ctx)
     local params = {
         method = "POST",
-        body = core.json.encode(conf.body),
+        body = core.json.encode(request_body),
         headers = {
             ["Content-Type"] = "application/json",
         },
@@ -113,7 +156,10 @@ function _M.access(conf, ctx)
         end
     end
     if conf.X_Request_Id then
-        params.headers["X-Request-ID"] = conf.X_Request_Id
+        local request_id = resolve_placeholders(conf.X_Request_Id, ctx)
+        if request_id ~= nil then
+            params.headers["X-Request-ID"] = tostring(request_id)
+        end
     end
 
 
@@ -139,7 +185,6 @@ function _M.access(conf, ctx)
         core.log.error("unexpected status code from AuthZEN: ", res.status, " body: ", res.body)
         return res.status, res.body -- Not sure if these should be returned, might reveal too much?
     end
-
     -- parse the results of the decision
     local data, decode_err = core.json.decode(res.body)
     if not data then
@@ -171,7 +216,6 @@ function _M.access(conf, ctx)
 
         return 403
     end
-
     if type(result_headers) == "table" and conf.send_headers_upstream then
         for _, name in ipairs(conf.send_headers_upstream) do
             local value = result_headers[name]

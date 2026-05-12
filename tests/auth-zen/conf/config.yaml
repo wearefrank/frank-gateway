@@ -17,6 +17,7 @@ apisix:
 
 
 plugins:
+  - serverless-pre-function
   - proxy-rewrite
   - key-auth
   - consumer-restriction
