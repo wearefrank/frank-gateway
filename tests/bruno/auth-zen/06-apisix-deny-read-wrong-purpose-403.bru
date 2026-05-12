@@ -1,27 +1,71 @@
 meta {
-  name: [APISIX] deny BRP read - valid JWT, invalid purpose
+  name: [APISIX] deny BRP read for marketing purpose
   type: http
   seq: 6
 }
 
-docs {
-  This test targets the scenario route configured in tests/auth-zen/apisix-standalone-config.yaml.
-  Route /authzen/read/deny-purpose sends purpose "marketing" and should be denied by policy.
-}
-
 get {
-  url: {{baseUrl}}/authzen/read/deny-purpose
-  body: none
+  url: {{baseUrl}}/authzen/brp
+  body: json
+  auth: none
 }
 
 headers {
+  content-type: application/json
   accept: application/json
-  authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtdW5pY2lwYWxpdHktY2FzZS1hcGkiLCJvcmdhbml6YXRpb24iOiJ1cm46bmw6Z292OnJvdHRlcmRhbSIsImFzc3VyYW5jZV9sZXZlbCI6InN1YnN0YW50aWFsIiwicm9sZXMiOlsibXVuaWNpcGFsaXR5X2Nhc2V3b3JrZXIiXSwic2NvcGVzIjpbImJycDpyZWFkIl19.signature-placeholder
-  x-purpose: marketing
+  x-request-id: req-rotterdam-20260512-0002
+}
+
+body:json {
+  {
+    "case_id": "ROT-CASE-2026-0043",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["residential_address"],
+    "token": "trace-rotterdam-20260512-0002",
+    "business_reason": "targeted-marketing-campaign",
+    "authorization": {
+      "action": "read",
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "organization": "urn:nl:gov:rotterdam",
+        "assurance_level": "substantial",
+        "roles": ["municipality_caseworker"],
+        "scopes": ["brp:read"]
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "sensitivity": "high"
+      },
+      "context": {
+        "purpose": "marketing",
+        "channel": "mtls",
+        "loa": "substantial"
+      }
+    }
+  }
 }
 
 tests {
   test("status is 403 - policy agent denied the request", function() {
     expect(res.getStatus()).to.equal(403);
   });
+
+  test("policy denial includes purpose-related context", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("reason_admin");
+    expect(body.reason_admin).to.have.property("403");
+    expect(body.reason_admin["403"]).to.contain("purpose");
+    expect(body).to.have.property("reason_user");
+    expect(body.reason_user).to.have.property("403");
+  });
+}
+
+docs {
+  Real-world deny scenario: BRP access requested for a marketing use case.
+  The route is configured with a non-allowed purpose and must return 403 with
+  policy context explaining the denial.
 }

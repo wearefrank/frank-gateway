@@ -169,7 +169,7 @@ class AuthzenHandler(BaseHTTPRequestHandler):
         self._json_response(404, {"error": "not found"})
 
     def do_POST(self):
-        if self.path != "/v1/data/authzen/evaluation":
+        if self.path != "/access/v1/evaluation": 
             self._json_response(404, {"error": "not found"})
             return
 

@@ -1,32 +1,74 @@
 meta {
-  name: [APISIX] deny BRP write - read-only JWT, missing write scope
+  name: [APISIX] deny BRP write without write scope
   type: http
   seq: 7
 }
 
-docs {
-  This test targets the scenario route configured in tests/auth-zen/apisix-standalone-config.yaml.
-  Route /authzen/write/deny-scope omits brp:write scope and should be denied by policy.
-}
-
 put {
-  url: {{baseUrl}}/authzen/write/deny-scope
+  url: {{baseUrl}}/authzen/brp
   body: json
 }
 
 headers {
   content-type: application/json
   accept: application/json
-  authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtdW5pY2lwYWxpdHktY2FzZS1hcGkiLCJvcmdhbml6YXRpb24iOiJ1cm46bmw6Z292OnJvdHRlcmRhbSIsImFzc3VyYW5jZV9sZXZlbCI6ImhpZ2giLCJyb2xlcyI6WyJtdW5pY2lwYWxpdHlfY2FzZXdvcmtlciJdLCJzY29wZXMiOlsiYnJwOnJlYWQiXX0.signature-placeholder
-  x-purpose: uitvoering-wettelijke-taak
+  x-request-id: req-rotterdam-20260512-0003
 }
 
 body:json {
-  {}
+  {
+    "case_id": "ROT-CASE-2026-0044",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["residential_address"],
+    "token": "trace-rotterdam-20260512-0003",
+    "mutation": {
+      "address": {
+        "street": "Nieuwe Binnenweg",
+        "house_number": "123",
+        "postal_code": "3015AA",
+        "city": "Rotterdam"
+      }
+    },
+    "authorization": {
+      "action": "write",
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "organization": "urn:nl:gov:rotterdam",
+        "assurance_level": "high",
+        "roles": ["municipality_caseworker"],
+        "scopes": ["brp:read"]
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "sensitivity": "high"
+      },
+      "context": {
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "high"
+      }
+    }
+  }
 }
 
 tests {
   test("status is 403 - missing brp:write scope denied by policy agent", function() {
     expect(res.getStatus()).to.equal(403);
   });
+
+  test("policy denial includes write-scope reason", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("reason_admin");
+    expect(body.reason_admin).to.have.property("403");
+    expect(body.reason_admin["403"]).to.contain("write");
+  });
+}
+
+docs {
+  Real-world deny scenario: address mutation requested by an integration client
+  that lacks write scope. APISIX must block the call before it reaches upstream.
 }

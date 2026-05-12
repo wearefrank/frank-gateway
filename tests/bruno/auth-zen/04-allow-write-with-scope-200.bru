@@ -4,15 +4,10 @@ meta {
   seq: 4
 }
 
-docs {
-  NOTE: This test calls the AuthZEN policy agent (OPA) directly — it does NOT test the APISIX auth-zen plugin.
-  Its purpose is to verify that the policy logic itself is correct before the plugin integration is tested.
-  See tests 05–09 for expected APISIX plugin behaviour.
-}
-
 post {
-  url: {{authzenBaseUrl}}/v1/data/authzen/evaluation
+  url: {{authzenBaseUrl}}/access/v1/evaluation
   body: json
+  auth: none
 }
 
 headers {
@@ -61,7 +56,7 @@ tests {
   test("status is 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("decision is allow for write", function() {
     const body = res.getBody();
     expect(body).to.have.property("decision", true);
@@ -69,4 +64,10 @@ tests {
     expect(body.context).to.have.property("metadata");
     expect(body.context.metadata).to.have.property("policy_id", "nl-gov-authzen-v1");
   });
+}
+
+docs {
+  NOTE: This test calls the AuthZEN policy agent (OPA) directly — it does NOT test the APISIX auth-zen plugin.
+  Its purpose is to verify that the policy logic itself is correct before the plugin integration is tested.
+  See tests 05–09 for expected APISIX plugin behaviour.
 }

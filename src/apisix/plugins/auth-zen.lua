@@ -10,37 +10,30 @@ local schema = {
             type = "string",
             minLength = 1,
         },
-        policy = {
+        endpoint = {
             type = "string",
             minLength = 1,
+            default = "/access/v1/evaluation",
         },
         body = {
             type = "object",
             properties = {
                 subject = {
-                    type = "object",
-                    properties = {
-                        type = { type = "string", minLength = 1 },
-                        id = { type = "string", minLength = 1 },
-                        properties = { type = "object" },
-                    },
+                    type = { type = "string", minLength = 1 },
+                    id = { type = "string", minLength = 1 },
+                    properties = { type = "object" },
                     required = { "type", "id" },
                 },
                 resource = {
-                    type = "object",
-                    properties = {
-                        type = { type = "string", minLength = 1 },
-                        id = { type = "string", minLength = 1 },
-                        properties = { type = "object" },
-                    },
+                    type = { type = "string", minLength = 1 },
+                    id = { type = "string", minLength = 1 },
+                    properties = { type = "object" },
                     required = { "type", "id" },
                 },
                 action = {
-                    type = "object",
-                    properties = {
-                        name = { type = "string", minLength = 1 },
-                        properties = { type = "object" },
-                    },
+                    type = { type = "string", minLength = 1 },
+                    name = { type = "string", minLength = 1 },
+                    properties = { type = "object" },
                     required = { "name" },
                 },
                 context = {
@@ -56,17 +49,27 @@ local schema = {
         },
         ssl_verify = {
             type = "boolean",
-            default = false,
+            default = true,
+        },
+        send_headers_to_authzen = {
+            type = "array",
+            minItems = 1,
+            items = {
+                type = "string"
+            },
+            description = "list of headers to pass to AuthZEN in request"
         },
         send_headers_upstream = {
             type = "array",
+            minItems = 1,
             items = {
-                type = "string",
-                minLength = 1,
+                type = "string"
             },
+            description = "list of headers to pass to upstream in request"
         },
+        X_Request_Id = { type = "string" }, -- optional header to pass to authZen, put in the config so the generation of it can be outsourced to another plugin if needed
     },
-    required = { "host", "policy", "body" }
+    required = { "host", "body" }
 }
 
 
@@ -92,34 +95,49 @@ function _M.check_schema(conf)
 end
 
 function _M.access(conf, ctx)
-    -- local body = helper.build_opa_input(conf, ctx, "http") --TO BE UPDATED
-
     local params = {
         method = "POST",
         body = core.json.encode(conf.body),
         headers = {
             ["Content-Type"] = "application/json",
         },
-        -- keepalive = conf.keepalive,
-        -- ssl_verify = conf.ssl_verify
+        timeout = conf.timeout,
+        ssl_verify = conf.ssl_verify
     }
+    if conf.send_headers_to_authzen then
+        for _, name in ipairs(conf.send_headers_to_authzen) do
+            local value = core.request.header(ctx, name)
+            if value then
+                params.headers[name] = value
+            end
+        end
+    end
+    if conf.X_Request_Id then
+        params.headers["X-Request-ID"] = conf.X_Request_Id
+    end
 
-    -- if conf.keepalive then
-    --     params.keepalive_timeout = conf.keepalive_timeout
-    --     params.keepalive_pool = conf.keepalive_pool
-    -- end
 
-    local endpoint = conf.host .. "/v1/data/" .. conf.policy
+    local endpoint = conf.host .. conf.endpoint --Not sure if this endpoint structure might need to be changed
 
     local httpc = http.new()
-    httpc:set_timeout(conf.timeout)
+
 
     local res, err = httpc:request_uri(endpoint, params)
 
-    -- block by default when decision is unavailable
+    -- block by default when response is unavailable
     if not res then
         core.log.error("failed to process AuthZEN decision, err: ", err)
         return 403
+    end
+
+    local req_id = res.headers["x-request-id"]
+    if req_id then
+        core.response.set_header("X-Request-ID", req_id)
+    end
+
+    if res.status ~= 200 then
+        core.log.error("unexpected status code from AuthZEN: ", res.status, " body: ", res.body)
+        return res.status, res.body -- Not sure if these should be returned, might reveal too much?
     end
 
     -- parse the results of the decision
@@ -142,38 +160,16 @@ function _M.access(conf, ctx)
     end
 
     local decision = data.decision
-    local result_headers = data.headers
+    local result_headers = res.headers
 
     if not decision then
-        if type(result_headers) == "table" then
-            core.response.set_header(result_headers)
+    
+
+        if data.context and type(data.context) == "table" then
+            return 403, data.context
         end
 
-        local status_code = 403
-        if type(data.status_code) == "number" then
-            status_code = data.status_code
-        end
-
-        local reason = nil
-        if data.reason then
-            reason = type(data.reason) == "table"
-                and core.json.encode(data.reason)
-                or data.reason
-        elseif type(data.context) == "table" then
-            local user_reason = data.context.reason_user
-            if type(user_reason) == "table" and user_reason["403"] then
-                reason = user_reason["403"]
-            end
-
-            if not reason then
-                local admin_reason = data.context.reason_admin
-                if type(admin_reason) == "table" and admin_reason["403"] then
-                    reason = admin_reason["403"]
-                end
-            end
-        end
-
-        return status_code, reason
+        return 403
     end
 
     if type(result_headers) == "table" and conf.send_headers_upstream then

@@ -1,32 +1,85 @@
 meta {
-  name: [APISIX] allow BRP write - JWT with read and write scope
+  name: [APISIX] allow BRP write for address correction case
   type: http
   seq: 8
 }
 
-docs {
-  This test targets the scenario route configured in tests/auth-zen/apisix-standalone-config.yaml.
-  Route /authzen/write/allow includes brp:write scope and should be forwarded to upstream.
-}
-
 put {
-  url: {{baseUrl}}/authzen/write/allow
+  url: {{baseUrl}}/authzen/brp
   body: json
 }
 
 headers {
   content-type: application/json
   accept: application/json
-  authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtdW5pY2lwYWxpdHktY2FzZS1hcGkiLCJvcmdhbml6YXRpb24iOiJ1cm46bmw6Z292OnJvdHRlcmRhbSIsImFzc3VyYW5jZV9sZXZlbCI6ImhpZ2giLCJyb2xlcyI6WyJtdW5pY2lwYWxpdHlfY2FzZXdvcmtlciJdLCJzY29wZXMiOlsiYnJwOnJlYWQiLCJicnA6d3JpdGUiXX0.signature-placeholder
-  x-purpose: uitvoering-wettelijke-taak
+  x-request-id: req-rotterdam-20260512-0004
 }
 
 body:json {
-  {}
+  {
+    "case_id": "ROT-CASE-2026-0045",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["residential_address"],
+    "token": "trace-rotterdam-20260512-0004",
+    "mutation": {
+      "address": {
+        "street": "Coolsingel",
+        "house_number": "1",
+        "postal_code": "3012AD",
+        "city": "Rotterdam"
+      }
+    },
+    "authorization": {
+      "action": "write",
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "organization": "urn:nl:gov:rotterdam",
+        "assurance_level": "high",
+        "roles": ["municipality_caseworker"],
+        "scopes": ["brp:read", "brp:write"]
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "sensitivity": "high"
+      },
+      "context": {
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "high"
+      }
+    }
+  }
 }
 
 tests {
   test("status is 200 - request forwarded to upstream", function() {
     expect(res.getStatus()).to.equal(200);
   });
+
+  test("upstream receives write payload", function() {
+    const body = res.getBody();
+    let echoed = body.json;
+
+    if (!echoed && typeof body.data === "string" && body.data.length > 0) {
+      try {
+        echoed = JSON.parse(body.data);
+      } catch (e) {
+        echoed = null;
+      }
+    }
+
+    expect(echoed).to.be.an("object");
+    expect(echoed.case_id).to.equal("ROT-CASE-2026-0045");
+    expect(echoed.mutation.address.city).to.equal("Rotterdam");
+  });
+}
+
+docs {
+  Real-world allow scenario: municipality updates a citizen address during an
+  active case with sufficient authorization. APISIX should authorize and forward
+  the complete mutation payload to upstream.
 }
