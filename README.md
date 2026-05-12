@@ -12,13 +12,7 @@ The main characteristics of Apache APISIX are:
 - Pluggable configuration based on a rich plugin ecosystem
 - Top ranked for performance
 
-The Frank API Gateway is a superset of Apache APISIX.
-- Improved functionality for SOAP services
-    - Routing based on SOAP action
-    - Analytics based on SOAP action
-- FSC NLX Inway
-    - Can act as a Inway in a FSC NLX group
-    - Can combine the FSC NLX Inway with different APISIX plugins 
+The Frank API Gateway is a superset of Apache APISIX with custom plugins.
 
 ## Layout & Structure
 This repository contains two components:
@@ -149,18 +143,14 @@ Example configuration and tests for the JWT Client plugin can be found [here](te
 
 ### Authzen NLGOV
 
-The Authzen NLGOV plugin integrates APISIX with an AuthZEN-style policy decision point for Dutch government-style authorization checks.
+The Authzen NLGOV plugin integrates APISIX with an AuthZEN-style policy decision point for Dutch government-style authorization checks. It specifically implements the Access evaluation API.
+https://logius-standaarden.github.io/authzen-nlgov
+
 It is intended for cases where access decisions depend on structured context such as subject identity, organization, role/scope, requested action, resource sensitivity, and legal/operational purpose.
 
-In this repository, requests are enriched with authorization context and evaluated by a policy agent before APISIX forwards traffic to upstream services.
-This enables centralized, policy-driven authorization for scenarios such as BRP read/write access with explicit deny reasons.
 
-Current test coverage includes:
-- Allow/deny decisions for BRP read use cases
-- Deny decisions for invalid purpose
-- Deny decisions for missing write scope
-- Allow decisions for valid write scope
+Local setup and policy-agent details are documented in [docs/authzen/readme.md](docs/auth-zen/README.MD).
 
-Local setup and policy-agent details are documented in [tests/auth-zen/README.MD](tests/auth-zen/README.MD).
+test setup details are documented in [tests/auth-zen/README.MD](tests/auth-zen/README.MD).
 Bruno integration tests can be found in [tests/bruno/auth-zen](tests/bruno/auth-zen).
 

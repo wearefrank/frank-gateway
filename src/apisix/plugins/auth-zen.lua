@@ -211,7 +211,7 @@ function _M.access(conf, ctx)
     
 
         if data.context and type(data.context) == "table" then
-            return 403, data.context
+            return 403, data.context --TODO Add return context
         end
 
         return 403
