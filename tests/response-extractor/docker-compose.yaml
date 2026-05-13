@@ -44,8 +44,8 @@ services:
 
   lua-unit-test:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../../
+      dockerfile: spec/Dockerfile
     volumes:
       - ../../:/frank-gateway
     working_dir: /frank-gateway
