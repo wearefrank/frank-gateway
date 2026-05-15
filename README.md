@@ -98,6 +98,12 @@ A flexible and custom version of the OIDC client plugin allowing you to define y
 
 Detailed documentation on the Generic OAuth Client plugin can be found here [here](docs/generic-oauth-plugin/readme.md)
 
+### Merge-config script
+The `scripts/merge.lua` script merges multiple APISIX YAML configuration files from a watch directory into a single `apisix.yaml`. It runs continuously in the background (activated with `MERGE_CONFIGURATIONS=true`) and regenerates the output whenever a file changes. It also detects and reports duplicate route IDs and names across files.
+
+Detailed documentation and the test suite can be found [here](tests/merge-config/README.MD)
+
+
 
 ### Limit size
 blocks either requests and or responses if the payload or entire request or response is larger than a pre-configured threshold.

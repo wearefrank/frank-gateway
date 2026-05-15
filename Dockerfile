@@ -42,8 +42,8 @@ RUN apt-get update && apt-get install -y \
     lua5.1 \
     luarocks \
     build-essential \
-    libyaml-dev \
-    luarocks
+    libyaml-dev
+    
 RUN luarocks install luafilesystem && \
     luarocks install lyaml
 

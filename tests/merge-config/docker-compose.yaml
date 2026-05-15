@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-name: frank-gateway-cert-auth-tests # Name of the parent container
+name: frank-gateway-merge-config-tests # Name of the parent container
 services:
   apisix:
     image: frank-gateway:local
@@ -29,9 +29,10 @@ services:
       - ./mergeconfigs:/usr/local/apisix/conf/mergeconfigs
     ports:
       - "9080:9080/tcp"
-      - "9443:9443/tcp"
     networks:
       apisix:
+    environment:
+      MERGE_CONFIGURATIONS: "true"
       
   httpbun:
     image: sharat87/httpbun:latest

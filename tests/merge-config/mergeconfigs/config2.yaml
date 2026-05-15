@@ -1,32 +1,14 @@
-# cert-auth test APISIX standalone config
-# This file is bind-mounted by tests/cert-auth/docker-compose.yaml to:
-#   /usr/local/apisix/conf/apisix.yaml
-# Keep server/client test certificates here for deterministic local mTLS tests.
+# merge-config test – config2
+# Defines routes owned by "service B"; shares the upstream from config1.
 
 routes:
-  - name: upstream-test
-    id: 2
-    uri: /headers
-    plugins:
-      cert-auth: {}
-      consumer-restriction: 
-        whitelist: 
-          - testuser
+  - id: 2
+    name: route-from-config2
+    uri: /from-config2
     upstream_id: 1
     status: 1
-
-  - name: upstream-test-cn-with-identifier
-    id: 3
-    uri: /test-cn-with-identifier
     plugins:
-      cert-auth: {}
       proxy-rewrite:
         uri: /anything
-      consumer-restriction: 
-        whitelist: 
-          - certuser
-    upstream_id: 1
-    status: 1
-
 
 #END

@@ -1,53 +1,73 @@
-# mTLS Test Certificates for APISIX Standalone
-
-> Important:
-> All keys and certificates in this directory are for testing and development only.
-> Never use them in production.
+# Merge-config test suite
 
 ## Overview
 
-This directory contains certificate files used for cert-auth mTLS tests.
+This test suite verifies the `scripts/merge.lua` configuration merge script.
 
-- Certuser certificate: certs/test/client/certuser-new.pem
-- Certuser private key: certs/test/client/certuser-new.key
-- Testuser keystore: certs/test/keystore/client.p12
+The merge script watches `conf/mergeconfigs/` for YAML files, merges their
+APISIX sections (routes, upstreams, consumers, …) into a single
+`conf/apisix.yaml`, and re-runs every 2 seconds when a file changes.
+
+### Test fixtures (`mergeconfigs/`)
+
+| File | Purpose |
+|------|---------|
+| `config1.yaml` | Defines the shared `httpbun` upstream and a route on `/from-config1` |
+| `config2.yaml` | Defines a second route on `/from-config2` that reuses the upstream from config1 |
+
+APISIX is configured with `MERGE_CONFIGURATIONS=true`, so the merge script
+runs automatically in the background when the container starts.
 
 ## Quick start
 
-Build the Frank Gateway image from repository root:
+Build the Frank Gateway image from the repository root (only needed once or after code changes):
 
 ```shell
 docker build -t frank-gateway:local .
 ```
 
-Start the cert-auth test stack:
+Start the merge-config test stack:
 
 ```shell
-cd tests/cert-auth
-docker compose up -d --force-recreate
+cd tests/merge-config
+docker compose up -d --build --force-recreate
 ```
 
-## Bruno
+## Bruno tests
 
-You can also run these tests with the Bruno collection in tests/bruno/cert-auth.
-Use the local environment and run the requests for certuser and testuser.
+The Bruno collection lives in `tests/bruno/merge-config`.
 
-## Commands
-
-Certuser test:
+Run manually with Bruno CLI:
 
 ```shell
-openssl s_client -connect localhost:9443 -servername localhost -cert certs/test/client/certuser-new.pem -key certs/test/client/certuser-new.key
+docker run --rm \
+  --network frank-gateway-merge-config-tests_apisix \
+  --add-host host.docker.internal:<apisix-container-ip> \
+  -v $(pwd):/workspace \
+  -w /workspace/tests/bruno/merge-config \
+  alpine/bruno run . -r --env docker
 ```
 
-Testuser test:
+Or use `run-all-tests.bat` from the repository root to run all suites
+including merge-config automatically.
+
+### Tests
+
+| File | Scenario | Expected |
+|------|----------|----------|
+| `01-route-from-config1-200.bru` | `GET /from-config1` | 200 – route defined in config1 is reachable |
+| `02-route-from-config2-200.bru` | `GET /from-config2` | 200 – route defined in config2 is reachable |
+| `03-unknown-route-404.bru` | `GET /not-a-route` | 404 – undefined path is rejected |
+
+## Standalone script test
+
+`test-only-script.yaml` runs the merge script in isolation (no APISIX) and
+writes the merged output to `output/apisix.yaml`.  Useful for inspecting the
+merge result without standing up the full stack:
 
 ```shell
-openssl pkcs12 -in certs/test/keystore/client.p12 -clcerts -nokeys -out certs/test/keystore/testuser-cert.pem -passin pass:
-openssl pkcs12 -in certs/test/keystore/client.p12 -nocerts -nodes -out certs/test/keystore/testuser-key.pem -passin pass:
-openssl s_client -connect localhost:9443 -servername apisix.localhost -cert certs/test/keystore/testuser-cert.pem -key certs/test/keystore/testuser-key.pem
+docker compose -f tests/merge-config/test-only-script.yaml up --build
 ```
 
-
-
+The generated file is written to `tests/merge-config/output/apisix.yaml`.
 
