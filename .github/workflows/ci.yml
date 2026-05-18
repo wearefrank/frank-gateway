@@ -116,16 +116,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build unit test runner image
-        run: docker build -f spec/Dockerfile -t frank-gateway-unit-tests .
+      - name: Install Lua and Busted
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.1 luarocks
+          sudo luarocks install busted
 
       - name: Run Busted unit tests in /spec
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}:/frank-gateway" \
-            -w /frank-gateway \
-            frank-gateway-unit-tests \
-            busted spec
+        run: busted spec
 
   bruno-tests:
     runs-on: ubuntu-latest
