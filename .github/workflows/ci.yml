@@ -107,6 +107,26 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build unit test runner image
+        run: docker build -f spec/Dockerfile -t frank-gateway-unit-tests .
+
+      - name: Run Busted unit tests in /spec
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/frank-gateway" \
+            -w /frank-gateway \
+            frank-gateway-unit-tests \
+            busted spec
+
   bruno-tests:
     runs-on: ubuntu-latest
     continue-on-error: true
