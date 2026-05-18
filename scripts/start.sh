@@ -12,4 +12,4 @@ fi
 
 echo "[Frank Gateway] Starting APISIX..."
 
-exec apisix start
+exec /usr/local/bin/scripts/entrypoint.sh docker-start

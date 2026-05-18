@@ -101,6 +101,8 @@ Detailed documentation on the Generic OAuth Client plugin can be found here [her
 ### Merge-config script
 The `scripts/merge.lua` script merges multiple APISIX YAML configuration files from a watch directory into a single `apisix.yaml`. It runs continuously in the background (activated with `MERGE_CONFIGURATIONS=true`) and regenerates the output whenever a file changes. It also detects and reports duplicate route IDs and names across files.
 
+Unfortunately, this only works in a standalone docker container. For a kubernetes setup you will have to merge files manually. This can be done by downloading the script under scripts/merge.lua and running this locally on your computer. 
+
 Detailed documentation and the test suite can be found [here](tests/merge-config/README.MD)
 
 
