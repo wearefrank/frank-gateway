@@ -45,6 +45,10 @@ The `docker-compose deployment` does contain the `improved SOAP functionality` m
 - kind-ingress -> deploys APISIX as a Kubernetes ingress on a local cluster using Kind [instructions](deployment-examples/kind-ingress/README.md)
 - rancher -> deploys APISIX as a Kubernetes ingress on the WAF rancher cluster [instructions](deployment-examples/rancher/README.md)
 
+### Custom apisixmerge script
+Our custom merge apisix script offers the possibility to merge multiple apisix configurations files into one functional configuration file. This allows for functional seperation beyond apisix's normal possibilities.
+
+
 ### Custom plugins
 Custom plugins have been created for the Frank!Gateway enhancing the functionality.
 
