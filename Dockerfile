@@ -48,3 +48,4 @@ RUN luarocks install luafilesystem && \
     luarocks install lyaml
 
 ENTRYPOINT ["/usr/local/bin/scripts/start.sh"]
+CMD ["docker-start"]
