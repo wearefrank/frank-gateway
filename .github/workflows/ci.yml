@@ -12,9 +12,9 @@ on:
       - master
       - main
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+#   cancel-in-progress: true
 
 env:
   # Use docker.io for Docker Hub if empty
