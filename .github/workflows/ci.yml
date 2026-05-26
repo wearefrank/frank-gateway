@@ -107,6 +107,24 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Lua and Busted
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.1 luarocks
+          sudo luarocks install busted
+
+      - name: Run Busted unit tests in /spec
+        run: busted spec
+
   bruno-tests:
     runs-on: ubuntu-latest
     continue-on-error: true

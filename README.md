@@ -77,6 +77,13 @@ The following plugins have been created:
 
 ## Testing
 
+### Unit testing plugins
+
+Plugin logic is tested with [Busted](https://lunarmodules.github.io/busted/), a Lua unit testing framework, running inside a minimal Docker container. All spec files live in the `spec/` folder at the repository root alongside a shared `Dockerfile` that sets up the test runner.
+
+
+---
+
 ### Postman tests
 For manual API validation you can use the collection in `tests/bruno/bruno.json` (with suite requests under `tests/bruno/*`).
 
