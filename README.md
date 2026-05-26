@@ -73,6 +73,7 @@ The following plugins have been created:
 7) Cert Auth
 8) Frank sender 
 9) JWT client
+10) OPA
 
 
 ## Testing
@@ -163,3 +164,11 @@ APISIX has existing authentication plugins for validating incoming tokens, but t
 The JWT Client plugin enables the Frank!Gateway to request a JWT access token from an external IDP, cache it, and add it as a Bearer token on upstream requests.
 
 Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/bruno/jwt-client).
+
+### OPA
+
+This project uses the APISIX OPA plugin for authorization decisions via Open Policy Agent.
+The only project-specific customization is support for the `with_body` attribute, so request bodies can be forwarded to OPA input.
+All other OPA plugin behavior follows standard APISIX logic.
+
+An example local test setup for the `with_body` behavior is available in [tests/opa](tests/opa), with a sample Rego policy in [tests/opa/policies/example-authz.rego](tests/opa/policies/example-authz.rego).
