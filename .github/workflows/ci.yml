@@ -6,9 +6,11 @@ name: Continuous Integration
 # documentation.
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - master
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
