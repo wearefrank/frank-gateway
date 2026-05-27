@@ -47,6 +47,27 @@ docker build --build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') -t fr
 | Storage  | 1+ GB container image + logs             |
 
 
+### Versioning and Release strategy
+
+Versioning & Release Strategy
+
+This project follows Semantic Versioning (SemVer) using Git tags:
+```
+MAJOR.MINOR.PATCH
+```
+Example:
+```
+v1.2.3
+```
+We strive to release a new major version every 3 months, with nightly releases whenever new changes have been made.
+
+Nightly releases are tagged with nightly, with version tags based upon build numbers
+
+Example:
+```
+nightly-102
+```
+
 ### Deployment configurations & examples
 The directory `deployment-examples` contains four deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
 The goal of these deployment examples is for experimenting with Apache APISIX in different deployment approaches.
