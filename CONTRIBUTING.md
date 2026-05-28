@@ -266,6 +266,13 @@ The JWT Client plugin enables the Frank!Gateway to request a JWT access token fr
 
 Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/bruno/jwt-client).
 
+### OPA
+
+This project uses the APISIX OPA plugin for authorization decisions via Open Policy Agent.
+The only project-specific customization is support for the `with_body` attribute, so request bodies can be forwarded to OPA input.
+All other OPA plugin behavior follows standard APISIX logic.
+
+An example local test setup for the `with_body` behavior is available in [tests/opa](tests/opa), with a sample Rego policy in [tests/opa/policies/example-authz.rego](tests/opa/policies/example-authz.rego).
 
 # CI/CD Flow
 

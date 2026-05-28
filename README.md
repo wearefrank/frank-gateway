@@ -86,4 +86,5 @@ The following plugins have been created:
 7) Cert Auth
 8) Frank sender 
 9) JWT client
+10) OPA
 
