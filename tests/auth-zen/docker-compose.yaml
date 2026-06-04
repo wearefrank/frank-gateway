@@ -47,7 +47,22 @@ services:
     networks:
       apisix:
 
-      
+  open-ftv-pdp:
+    image: "registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/eam/pdp:2.2.3"
+    restart: always
+    volumes:
+      - ./open-ftv/policies:/tmp/policies
+    environment:
+      PDP_POLICIES_LANGUAGE: rego
+      PDP_POLICIES_STORE: /tmp/policies
+      PDP_POLICIES_STORE_RECURSIVE: true
+      PDP_AUTHENTICATION_TYPE: none
+    ports:
+      - 8443:8443
+      - 8080:8080
+    networks:
+      apisix:
+
   httpbun:
     image: sharat87/httpbun:latest
     restart: always
