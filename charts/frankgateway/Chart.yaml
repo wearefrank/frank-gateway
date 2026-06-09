@@ -1,0 +1,21 @@
+annotations:
+  artifacthub.io/prerelease: "false"
+apiVersion: v2
+appVersion: 3.16.0
+description: Helm chart for Frank Gateway on APISIX standalone mode
+icon: https://apache.org/logos/res/apisix/apisix.png
+maintainers:
+- name: tao12345666333 (apisix)
+- email: alinsran@apache.org
+  name: AlinsRan(apisix)
+- email: nic443@apache.org
+  name: nic-6443(apisix)
+- email: bzp2010@apache.org
+  name: bzp2010(apisix)
+- email: juzhiyuan@api7.ai
+  name: juzhiyuan(apisix)  
+name: frankgateway
+sources:
+- https://github.com/wearefrank/frank-gateway
+type: application
+version: 2.14.1

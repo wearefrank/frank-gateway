@@ -1,0 +1,11 @@
+{{- if ne .Values.apisix.deployment.mode "standalone" -}}
+{{- fail "This chart only supports APISIX standalone mode. Set apisix.deployment.mode=standalone." -}}
+{{- end -}}
+
+{{- if .Values.etcd.enabled -}}
+{{- fail "This chart is standalone-only and does not deploy etcd. Set etcd.enabled=false." -}}
+{{- end -}}
+
+{{- if (index .Values "ingress-controller" "enabled") -}}
+{{- fail "This chart is standalone-only and does not deploy APISIX ingress-controller. Set ingress-controller.enabled=false." -}}
+{{- end -}}

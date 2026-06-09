@@ -1,4 +1,6 @@
-charts/
+charts/*
+!charts/frankgateway/
+!charts/frankgateway/**
 
 # exclude everything
 logs/*

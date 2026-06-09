@@ -1,0 +1,86 @@
+# Example overrides for Frank Gateway standalone mode.
+# Use with:
+# helm install my-frankgateway ./charts/frankgateway -f ./charts/frankgateway/values.standalone-example.yaml
+
+image:
+  repository: frank-api-gateway
+  tag: latest
+  pullPolicy: IfNotPresent
+
+apisix:
+  deployment:
+    mode: standalone
+    role: data_plane
+    standalone:
+      config: |
+        routes:
+          - id: 1001
+            name: soap-route
+            uri: /soap/myservice
+            plugins:
+              soap-action-router:
+                match_action: "TestAction"
+              proxy-rewrite:
+                uri: /anything/soap
+            upstream_id: 2001
+            status: 1
+
+          - id: 1002
+            name: response-extractor-route
+            uri: /extract/*
+            plugins:
+              response-extractor:
+                request_id: "$.headers['X-Request-Id']"
+            upstream_id: 2001
+            status: 1
+
+          - id: 1003
+            name: frank-sender-route
+            uri: /frank-sender
+            plugins:
+              frank-sender:
+                frank_endpoint: http://frank.default.svc.cluster.local:8080/api/frank-test
+              proxy-rewrite:
+                uri: /anything/frank-sender
+            upstream_id: 2001
+            status: 1
+
+        services:
+          - id: 3001
+            name: generic-oauth-example
+            upstream_id: 2001
+            plugins:
+              generic-oauth-client:
+                use_cache: true
+                token_endpoint: http://keycloak.default.svc.cluster.local:8080/realms/example/protocol/openid-connect/token
+                client_id_field_name: client_id
+                client_id_value: change-me-client-id
+                custom_parameters:
+                  client_secret: change-me-client-secret
+                  grant_type: client_credentials
+
+          - id: 3002
+            name: jwt-client-example
+            upstream_id: 2001
+            plugins:
+              jwt-client:
+                use_cache: true
+                token_endpoint: http://json-idp.default.svc.cluster.local:8080/token
+                client_id_field_name: client_id
+                client_id_value: change-me-jwt-client-id
+                custom_parameters:
+                  client_secret: change-me-jwt-client-secret
+                  grant_type: client_credentials
+
+        upstreams:
+          - id: 2001
+            name: echo-upstream
+            type: roundrobin
+            nodes:
+              "httpbin.default.svc.cluster.local:80": 1
+
+etcd:
+  enabled: false
+
+ingress-controller:
+  enabled: false
