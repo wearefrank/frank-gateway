@@ -186,7 +186,7 @@ Plugin logic is tested with [Busted](https://lunarmodules.github.io/busted/), a 
 
 ---
 
-### Postman tests
+### Bruno tests
 For manual API validation you can use the collection in `tests/bruno/bruno.json` (with suite requests under `tests/bruno/*`).
 
 ### Local test run (all suites)
