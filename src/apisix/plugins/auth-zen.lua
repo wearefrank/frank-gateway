@@ -124,7 +124,7 @@ local schema = {
             },
             description = "list of headers to pass to upstream in request"
         },
-        X_Request_Id = { type = "string" }, -- optional header to pass to authZen, put in the config so the generation of it can be outsourced to another plugin if needed
+        x_request_id = { type = "string" }, -- optional header to pass to authZen, put in the config so the generation of it can be outsourced to another plugin if needed
     },
     required = { "host", "body" }
 }
@@ -218,13 +218,17 @@ end
 
 function _M.access(conf, ctx)
     local request_body = resolve_placeholders(conf.body, ctx)
+    local body_ok, body_err = core.schema.check(schema.properties.body, request_body) -- validate the resolved body against the schema
+    if not body_ok then
+        core.log.error("resolved AuthZEN request body is invalid (missing or unset placeholder?): ", body_err)
+        return 500
+    end
     local params = {
         method = "POST",
         body = core.json.encode(request_body),
         headers = {
             ["Content-Type"] = "application/json",
         },
-        timeout = conf.timeout,
         ssl_verify = conf.ssl_verify
     }
     if conf.send_headers_to_authzen then
@@ -235,8 +239,8 @@ function _M.access(conf, ctx)
             end
         end
     end
-    if conf.X_Request_Id then
-        local request_id = resolve_placeholders(conf.X_Request_Id, ctx)
+    if conf.x_request_id then
+        local request_id = resolve_placeholders(conf.x_request_id, ctx)
         if request_id ~= nil then
             params.headers["X-Request-ID"] = tostring(request_id)
         end
@@ -277,11 +281,12 @@ function _M.access(conf, ctx)
         end
     end
 
-
-    local endpoint = conf.host .. conf.endpoint --Not sure if this endpoint structure might need to be changed
+    local host = conf.host:gsub("/+$", "")          -- remove trailing slashes from host if any
+    local path = conf.endpoint:gsub("^/*", "/")     -- Also ensure endpoint starts with a single slash
+    local endpoint = host .. path
 
     local httpc = http.new()
-
+    httpc:set_timeout(conf.timeout)
 
     local res, err = httpc:request_uri(endpoint, params)
 
@@ -298,7 +303,7 @@ function _M.access(conf, ctx)
 
     if res.status ~= 200 then
         core.log.error("unexpected status code from AuthZEN: ", res.status, " body: ", res.body)
-        return res.status, res.body -- Not sure if these should be returned, might reveal too much?
+        return res.status
     end
     -- parse the results of the decision
     local data, decode_err = core.json.decode(res.body)
@@ -323,12 +328,9 @@ function _M.access(conf, ctx)
     local result_headers = res.headers
 
     if not decision then
-    
-
         if data.context and type(data.context) == "table" then
             return 403, data.context --TODO Add return context
         end
-
         return 403
     end
     if type(result_headers) == "table" and conf.send_headers_upstream then
