@@ -1,0 +1,41 @@
+meta {
+  name: body allow true returns 200
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/any/opa-auth
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "allow": true,
+    "subject": "body-user"
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("upstream receives x-opa-user header", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("headers");
+
+    const headers = body.headers;
+    const key = Object.keys(headers).find(function(k) {
+      return k.toLowerCase() === "x-opa-user";
+    });
+
+    expect(key).to.not.equal(undefined);
+    expect(String(headers[key])).to.equal("body-user");
+  });
+}

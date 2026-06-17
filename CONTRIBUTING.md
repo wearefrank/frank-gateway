@@ -1,100 +1,192 @@
-# frank-api-gateway
+# Contributing
 
-The Frank API Gateway is based on Apache APISIX, see https://apisix.apache.org/ for an introduction to Apache APISIX.
+This project uses:
 
-The main characteristics of Apache APISIX are:
-- Fully Open Source – part of the Apache foundation as a top level project with large contributor base
-- Run everywhere (including ARM64)
-    - Bare metal
-    - Kubernetes
-    - Cloud
-    - VM
-- Pluggable configuration based on a rich plugin ecosystem
-- Top ranked for performance
+* Conventional Commits
+* Semantic Versioning
+* semantic-release
+* Automated GitHub Releases
+* Automated Docker Publishing
 
-The Frank API Gateway is a superset of Apache APISIX.
-- Improved functionality for SOAP services
-    - Routing based on SOAP action
-    - Analytics based on SOAP action
-- FSC NLX Inway
-    - Can act as a Inway in a FSC NLX group
-    - Can combine the FSC NLX Inway with different APISIX plugins 
+Please read this document before opening a Pull Request.
 
-## Layout & Structure
-This repository contains two components:
-1) deployment configurations & examples which can be found on the directory `deployment-examples`
-2) source code for custom plugins
+---
 
-### Building the images
-The Frank!Gateway can be built using the following command:
-```shell
-docker build --build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') -t frank-api-gateway .
-```
+# Branching Strategy
 
-### Minimum requirements
-**Minimum:**
-| Resource | Minimum                            |
-| -------- | ---------------------------------- |
-| CPU      | 1 vCPU                             |
-| Memory   | 256–512 MB RAM                     |
-| Storage  | 1+ GB container image + logs       |
+The primary development branch is:
 
-**Recommended:**
-| Resource | Recommended                        |
-| -------- | ---------------------------------------- |
-| CPU      | 2 vCPU                                   |
-| Memory   | 1–2 GB RAM                               |
-| Storage  | 1+ GB container image + logs             |
+master
 
+Unless instructed otherwise, all Pull Requests should target the `master` branch.
 
-### Versioning and Release strategy
+---
 
-Versioning & Release Strategy
+# Release Automation
 
-This project follows Semantic Versioning (SemVer):
-```
-MAJOR.MINOR.PATCH
-```
-Example:
-```
-v1.2.3
-```
+Releases are fully automated using `semantic-release`.
 
-### Deployment configurations & examples
-The directory `deployment-examples` contains four deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
-The goal of these deployment examples is for experimenting with Apache APISIX in different deployment approaches.
+Versions are calculated automatically based on Pull Request titles.
 
-Without any prior Apache APISIX experience it is recommended to start with the `docker-compose` deployment-example since this is the easiest one to get started.
+Do NOT manually:
 
-The `docker-compose deployment` does contain the `improved SOAP functionality` mentioned above. 
+* Create Git tags
+* Create GitHub releases
+* Modify release versions
 
-- docker-compose -> deploys APISIX via Docker compose [instructions](deployment-examples/docker-compose/README.md)
-- kind -> deploys APISIX in normal mode on a local Kubernetes cluster using Kind [instructions](deployment-examples/kind/README.md)
-- kind-ingress -> deploys APISIX as a Kubernetes ingress on a local cluster using Kind [instructions](deployment-examples/kind-ingress/README.md)
-- rancher -> deploys APISIX as a Kubernetes ingress on the WAF rancher cluster [instructions](deployment-examples/rancher/README.md)
+The CI/CD pipeline handles this automatically after merge.
 
-### Custom apisixmerge script
-Our custom merge apisix script offers the possibility to merge multiple apisix configurations files into one functional configuration file. This allows for functional seperation beyond apisix's normal possibilities.
+---
 
+# Pull Request Titles
 
-### Custom plugins
-Custom plugins have been created for the Frank!Gateway enhancing the functionality.
+This repository uses Conventional Commits through Pull Request titles.
 
-The following plugins have been created:
-1) FSC
-2) SOAP action router
-3) OIDC client
-4) Generic OAuth client
-5) Limit size
-6) Response extractor
-7) Cert Auth
-8) Frank sender 
-9) JWT client
+The final squash merge commit is generated from the PR title and used by `semantic-release`.
+
+PR titles must follow this format:
+
+<type>(optional-scope): description
+
+Examples:
+
+feat(api): add OAuth2 support
+fix(auth): resolve JWT refresh issue
+perf(cache): improve Redis lookup performance
+docs(readme): update installation instructions
+
+---
+
+# Release Types
+
+The following PR title types create releases:
+
+| Type   | Release |
+| ------ | ------- |
+| feat   | Minor   |
+| fix    | Patch   |
+| perf   | Patch   |
+| revert | Patch   |
+
+Examples:
+
+feat(api): add OAuth support
+
+Produces:
+
+1.4.0 -> 1.5.0
+
+---
+
+fix(auth): resolve token refresh bug
+
+Produces:
+
+1.5.0 -> 1.5.1
+
+---
+
+# Breaking Changes
+
+Breaking changes create a major release.
+
+You can indicate a breaking change in two ways.
+
+## Method 1 — Use !
+
+feat!: remove legacy SOAP endpoints
+
+## Method 2 — BREAKING CHANGE footer
+
+feat(api): redesign authentication system
+
+BREAKING CHANGE: legacy authentication endpoints were removed
+
+Produces:
+
+1.x.x -> 2.0.0
+
+---
+
+# Non-Release Types
+
+The following PR title types do NOT create releases:
+
+* docs
+* test
+* ci
+* chore
+
+Examples:
+
+docs(readme): fix typo
+ci(github): update workflow permissions
+test(api): improve integration coverage
+
+These changes will not publish a new Docker image or GitHub release.
+
+---
+
+# Commit Messages
+
+Commit messages inside a Pull Request are not important for versionin, however please make sure to make your commits descriptive and targeted.
+
+The squash merge commit generated from the PR title is what drives releases.
+
+---
+
+# Squash Merging
+
+This repository uses squash merging exclusively.
+
+Before merging, ensure the Pull Request title follows the Conventional Commits format.
+
+Good examples:
+
+feat(api): add OAuth2 support
+fix(cache): resolve Redis connection leak
+
+Bad examples:
+
+Update stuff
+Fix things
+Changes
+
+---
+
+# Pull Request Guidelines
+
+Please:
+
+* Keep Pull Requests focused
+* Prefer one logical change per PR
+* Add tests where appropriate
+* Update documentation when needed
+* Ensure CI passes before requesting review
+
+Good example:
+
+fix(auth): resolve JWT expiration handling
+
+Bad example:
+
+feat: add auth, update docs, fix CI, and refactor cache
+
+---
+
 
 
 ## Testing
+For a more detailed explaination about the testing requirements for developping plugins, make sure to check out the readme under src/plugins
 
-### Postman tests
+### Unit testing plugins
+
+Plugin logic is tested with [Busted](https://lunarmodules.github.io/busted/), a Lua unit testing framework, running inside a minimal Docker container. All spec files live in the `spec/` folder at the repository root alongside a shared `Dockerfile` that sets up the test runner.
+
+
+---
+
+### Bruno tests
 For manual API validation you can use the collection in `tests/bruno/bruno.json` (with suite requests under `tests/bruno/*`).
 
 ### Local test run (all suites)
@@ -129,14 +221,6 @@ Detailed documentation on the OIDC client can be found here [here](deployment-ex
 A flexible and custom version of the OIDC client plugin allowing you to define your own fields. 
 
 Detailed documentation on the Generic OAuth Client plugin can be found here [here](docs/generic-oauth-plugin/readme.md)
-
-### Merge-config script
-The `scripts/merge.lua` script merges multiple APISIX YAML configuration files from a watch directory into a single `apisix.yaml`. It runs continuously in the background (activated with `MERGE_CONFIGURATIONS=true`) and regenerates the output whenever a file changes. It also detects and reports duplicate route IDs and names across files.
-
-Unfortunately, this only works in a standalone docker container. For a kubernetes setup you will have to merge files manually. This can be done by downloading the script under scripts/merge.lua and running this locally on your computer. 
-
-Detailed documentation and the test suite can be found [here](tests/merge-config/README.MD)
-
 
 
 ### Limit size
@@ -181,3 +265,28 @@ APISIX has existing authentication plugins for validating incoming tokens, but t
 The JWT Client plugin enables the Frank!Gateway to request a JWT access token from an external IDP, cache it, and add it as a Bearer token on upstream requests.
 
 Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/bruno/jwt-client).
+
+### OPA
+
+This project uses the APISIX OPA plugin for authorization decisions via Open Policy Agent.
+The only project-specific customization is support for the `with_body` attribute, so request bodies can be forwarded to OPA input.
+All other OPA plugin behavior follows standard APISIX logic.
+
+An example local test setup for the `with_body` behavior is available in [tests/opa](tests/opa), with a sample Rego policy in [tests/opa/policies/example-authz.rego](tests/opa/policies/example-authz.rego).
+
+# CI/CD Flow
+
+After merging into `master`:
+
+1. CI runs automatically
+2. semantic-release analyzes the squash commit
+3. A new version is calculated
+4. The changelog is updated
+5. A GitHub Release is created
+6. Docker images are published automatically
+
+---
+
+# Thank You
+
+Thank you for contributing 🚀
