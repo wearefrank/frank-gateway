@@ -1,0 +1,64 @@
+meta {
+  name: [APISIX] allow - all placeholders present and valid
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/authzen/brp
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  x-pdp-token: test-pdp-secret-123
+}
+
+body:json {
+  {
+    "case_id": "ROT-CASE-2026-0201",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["name", "birth_date"],
+    "token": "trace-placeholder-valid-0001",
+    "legal_basis": "wet-brp-artikel-2.7",
+    "request_source": "municipality-case-api",
+    "authorization": {
+      "action": "read",
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "organization": "urn:nl:gov:rotterdam",
+        "assurance_level": "substantial",
+        "roles": ["municipality_caseworker"],
+        "scopes": ["brp:read"]
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "sensitivity": "high"
+      },
+      "context": {
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "substantial"
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 200 - all placeholders resolved, body passed schema validation", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  Counterpart to test 12. All required authorization fields are present, so the
+  serverless-pre-function plugin sets every ctx.var used as a placeholder.
+  resolve_placeholders produces a fully populated body, the schema validation passes,
+  and the PDP returns an allow decision.
+}

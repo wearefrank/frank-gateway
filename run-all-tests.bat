@@ -52,6 +52,7 @@ set "PASSED_LIST="
 set "FAILED_LIST="
 
 call :run_suite cert-auth
+call :run_suite auth-zen
 call :run_suite frank-sender
 call :run_suite generic-oauth
 call :run_suite jwt-client

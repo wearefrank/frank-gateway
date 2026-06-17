@@ -1,0 +1,82 @@
+meta {
+  name: [APISIX] allow BRP read for active municipal case
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/authzen/brp
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  x-request-id: req-rotterdam-20260512-0001
+  x-pdp-token: test-pdp-secret-123
+}
+
+body:json {
+  {
+    "case_id": "ROT-CASE-2026-0042",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["name", "birth_date", "residential_address"],
+    "token": "trace-rotterdam-20260512-0001",
+    "legal_basis": "wet-brp-artikel-2.7",
+    "request_source": "municipality-case-api",
+    "authorization": {
+      "action": "read",
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "organization": "urn:nl:gov:rotterdam",
+        "assurance_level": "substantial",
+        "roles": ["municipality_caseworker"],
+        "scopes": ["brp:read"]
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "sensitivity": "high"
+      },
+      "context": {
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "substantial"
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 200 - request forwarded to upstream", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("upstream receives business payload", function() {
+    const body = res.getBody();
+    let echoed = body.json;
+
+    if (!echoed && typeof body.data === "string" && body.data.length > 0) {
+      try {
+        echoed = JSON.parse(body.data);
+      } catch (e) {
+        echoed = null;
+      }
+    }
+
+    expect(echoed).to.be.an("object");
+    expect(echoed.case_id).to.equal("ROT-CASE-2026-0042");
+    expect(echoed.citizen.bsn).to.equal("999991234");
+    expect(echoed.requested_field).to.include("birth_date");
+  });
+}
+
+docs {
+  Real-world read scenario using a single dynamic route.
+  response-extractor builds the AuthZEN request from authorization fields in the
+  business payload, then APISIX forwards to upstream when policy allows.
+}

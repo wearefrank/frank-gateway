@@ -12,13 +12,7 @@ The main characteristics of Apache APISIX are:
 - Pluggable configuration based on a rich plugin ecosystem
 - Top ranked for performance
 
-The Frank API Gateway is a superset of Apache APISIX.
-- Improved functionality for SOAP services
-    - Routing based on SOAP action
-    - Analytics based on SOAP action
-- FSC NLX Inway
-    - Can act as a Inway in a FSC NLX group
-    - Can combine the FSC NLX Inway with different APISIX plugins 
+The Frank API Gateway is a superset of Apache APISIX with custom plugins.
 
 ## Layout & Structure
 This repository contains two components:
@@ -73,7 +67,11 @@ The following plugins have been created:
 7) Cert Auth
 8) Frank sender 
 9) JWT client
-10) OPA
+10) AuthZen NLGOV
+
+### Patches: 
+The following standard plugins in Apisix have patches applied to them:
+1) Opa 
 
 
 ## Testing
@@ -165,10 +163,16 @@ The JWT Client plugin enables the Frank!Gateway to request a JWT access token fr
 
 Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/bruno/jwt-client).
 
-### OPA
+### Authzen NLGOV
 
-This project uses the APISIX OPA plugin for authorization decisions via Open Policy Agent.
-The only project-specific customization is support for the `with_body` attribute, so request bodies can be forwarded to OPA input.
-All other OPA plugin behavior follows standard APISIX logic.
+The Authzen NLGOV plugin integrates APISIX with an AuthZEN-style policy decision point for Dutch government-style authorization checks. It specifically implements the Access evaluation API.
+https://logius-standaarden.github.io/authzen-nlgov
 
-An example local test setup for the `with_body` behavior is available in [tests/opa](tests/opa), with a sample Rego policy in [tests/opa/policies/example-authz.rego](tests/opa/policies/example-authz.rego).
+It is intended for cases where access decisions depend on structured context such as subject identity, organization, role/scope, requested action, resource sensitivity, and legal/operational purpose.
+
+
+Local setup and policy-agent details are documented in [docs/authzen/readme.md](docs/auth-zen/README.MD).
+
+test setup details are documented in [tests/auth-zen/README.MD](tests/auth-zen/README.MD).
+Bruno integration tests can be found in [tests/bruno/auth-zen](tests/bruno/auth-zen).
+
