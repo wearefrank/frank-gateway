@@ -1,0 +1,67 @@
+meta {
+  name: [APISIX] pdp-auth - allow with valid PDP bearer token
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/authzen/brp
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  x-request-id: req-rotterdam-pdp-auth-valid-0001
+  x-pdp-token: test-pdp-secret-123
+}
+
+body:json {
+  {
+    "case_id": "ROT-CASE-2026-0099",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["name", "birth_date"],
+    "token": "trace-pdp-auth-valid-0001",
+    "legal_basis": "wet-brp-artikel-2.7",
+    "request_source": "municipality-case-api",
+    "authorization": {
+      "action": "read",
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "organization": "urn:nl:gov:rotterdam",
+        "assurance_level": "substantial",
+        "roles": ["municipality_caseworker"],
+        "scopes": ["brp:read"]
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "sensitivity": "high"
+      },
+      "context": {
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "substantial"
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 200 - PDP accepted the bearer token and allowed the request", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  Tests that APISIX forwards the bearer token from x-pdp-token to the PDP.
+  The plugin resolves $http_x_pdp_token from the incoming request header and sends it
+  as "Authorization: Bearer <token>" to the policy agent.
+  The PDP validates the token and returns a decision — access is granted here because
+  both the token and the policy check pass.
+  PDP_AUTH_TOKEN in docker-compose must be set to "test-pdp-secret-123".
+}

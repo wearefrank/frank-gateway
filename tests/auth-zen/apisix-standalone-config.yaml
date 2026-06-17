@@ -182,6 +182,11 @@ routes:
             end
       auth-zen:
         host: "http://authzen-policy-agent:8180"
+        pdp_auth:
+          mode: bearer
+          bearer_token: "$http_x_pdp_token"
+          bearer_header: "Authorization"
+          bearer_prefix: "Bearer "
         X_Request_Id: "$authz_token"
         body:
           subject:

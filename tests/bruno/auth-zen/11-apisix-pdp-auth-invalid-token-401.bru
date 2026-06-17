@@ -1,0 +1,65 @@
+meta {
+  name: [APISIX] pdp-auth - deny with invalid PDP bearer token
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/authzen/brp
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  x-request-id: req-rotterdam-pdp-auth-invalid-0001
+  x-pdp-token: this-is-the-wrong-token
+}
+
+body:json {
+  {
+    "case_id": "ROT-CASE-2026-0100",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["name"],
+    "token": "trace-pdp-auth-invalid-0001",
+    "legal_basis": "wet-brp-artikel-2.7",
+    "request_source": "municipality-case-api",
+    "authorization": {
+      "action": "read",
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "organization": "urn:nl:gov:rotterdam",
+        "assurance_level": "substantial",
+        "roles": ["municipality_caseworker"],
+        "scopes": ["brp:read"]
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "sensitivity": "high"
+      },
+      "context": {
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "substantial"
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 401 - PDP rejected the bearer token", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+}
+
+docs {
+  Tests that an invalid bearer token causes the PDP to reject the call.
+  The plugin sends "Authorization: Bearer this-is-the-wrong-token" to the PDP.
+  The PDP returns 401, which the auth-zen plugin propagates back to the client as-is.
+  PDP_AUTH_TOKEN in docker-compose must be set to "test-pdp-secret-123".
+}

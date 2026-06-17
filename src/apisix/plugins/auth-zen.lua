@@ -1,6 +1,14 @@
 local core = require("apisix.core")
 local plugin_name = "auth-zen"
 local http = require("resty.http")
+local ngx_ssl
+
+do
+    local ok, ssl_mod = pcall(require, "ngx.ssl")
+    if ok then
+        ngx_ssl = ssl_mod
+    end
+end
 
 
 local schema = {
@@ -60,6 +68,46 @@ local schema = {
             type = "boolean",
             default = true,
         },
+        pdp_auth = {
+            type = "object",
+            properties = {
+                mode = {
+                    type = "string",
+                    enum = { "none", "bearer" },
+                    default = "none",
+                },
+                bearer_header = {
+                    type = "string",
+                    minLength = 1,
+                    default = "Authorization",
+                },
+                bearer_prefix = {
+                    type = "string",
+                    default = "Bearer ",
+                },
+                bearer_token = {
+                    type = "string",
+                    minLength = 1,
+                },
+                mtls = {
+                    type = "object",
+                    properties = {
+                        enabled = {
+                            type = "boolean",
+                            default = false,
+                        },
+                        client_cert = {
+                            type = "string",
+                            minLength = 1,
+                        },
+                        client_key = {
+                            type = "string",
+                            minLength = 1,
+                        },
+                    },
+                },
+            },
+        },
         send_headers_to_authzen = {
             type = "array",
             minItems = 1,
@@ -100,6 +148,20 @@ function _M.check_schema(conf)
     local check = { "host" }
     core.utils.check_https(check, conf, _M.name)
     core.utils.check_tls_bool({ "ssl_verify" }, conf, _M.name)
+
+    local pdp_auth = conf.pdp_auth
+    if pdp_auth then
+        if pdp_auth.mode == "bearer" and not pdp_auth.bearer_token then
+            return false, "pdp_auth.bearer_token is required when pdp_auth.mode is bearer"
+        end
+
+        if pdp_auth.mtls and pdp_auth.mtls.enabled then
+            if not pdp_auth.mtls.client_cert or not pdp_auth.mtls.client_key then
+                return false, "pdp_auth.mtls.client_cert and pdp_auth.mtls.client_key are required when pdp_auth.mtls.enabled is true"
+            end
+        end
+    end
+
     return core.schema.check(schema, conf)
 end
 
@@ -136,6 +198,24 @@ local function resolve_placeholders(value, ctx)
     return out
 end
 
+local function parse_pem_objects(client_cert_pem, client_key_pem)
+    if not ngx_ssl then
+        return nil, nil, "ngx.ssl is unavailable; cannot parse mTLS client certificate"
+    end
+
+    local cert, cert_err = ngx_ssl.parse_pem_cert(client_cert_pem)
+    if not cert then
+        return nil, nil, "failed to parse pdp_auth.mtls.client_cert: " .. (cert_err or "unknown error")
+    end
+
+    local pkey, pkey_err = ngx_ssl.parse_pem_priv_key(client_key_pem)
+    if not pkey then
+        return nil, nil, "failed to parse pdp_auth.mtls.client_key: " .. (pkey_err or "unknown error")
+    end
+
+    return cert, pkey
+end
+
 function _M.access(conf, ctx)
     local request_body = resolve_placeholders(conf.body, ctx)
     local params = {
@@ -159,6 +239,41 @@ function _M.access(conf, ctx)
         local request_id = resolve_placeholders(conf.X_Request_Id, ctx)
         if request_id ~= nil then
             params.headers["X-Request-ID"] = tostring(request_id)
+        end
+    end
+
+    if conf.pdp_auth then
+        local auth_conf = conf.pdp_auth
+
+        if auth_conf.mode == "bearer" then
+            local token = resolve_placeholders(auth_conf.bearer_token, ctx)
+            if token == nil or token == "" then
+                core.log.error("pdp_auth.mode is bearer but pdp_auth.bearer_token resolved to empty")
+                return 500
+            end
+
+            local header_name = auth_conf.bearer_header or "Authorization"
+            local header_prefix = auth_conf.bearer_prefix or "Bearer "
+            params.headers[header_name] = header_prefix .. tostring(token)
+        end
+
+        if auth_conf.mtls and auth_conf.mtls.enabled then
+            local client_cert_pem = resolve_placeholders(auth_conf.mtls.client_cert, ctx)
+            local client_key_pem = resolve_placeholders(auth_conf.mtls.client_key, ctx)
+
+            if not client_cert_pem or not client_key_pem then
+                core.log.error("pdp_auth.mtls is enabled but client certificate or key is missing")
+                return 500
+            end
+
+            local cert, pkey, parse_err = parse_pem_objects(client_cert_pem, client_key_pem)
+            if not cert then
+                core.log.error(parse_err)
+                return 500
+            end
+
+            params.ssl_client_cert = cert
+            params.ssl_client_priv_key = pkey
         end
     end
 

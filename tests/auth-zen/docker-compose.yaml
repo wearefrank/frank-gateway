@@ -42,6 +42,8 @@ services:
       - "/app/authzen_server.py"
     volumes:
       - ./policy-agent/python:/app:ro
+    environment:
+      PDP_AUTH_TOKEN: "test-pdp-secret-123"
     ports:
       - "8180:8180/tcp"
     networks:

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import json
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 # Couldn't find a NLGOV Authzen agent, so this is a basic test data provider. It doesn't need to be perfect, so don't look at it too closely
+
+PDP_AUTH_TOKEN = os.environ.get("PDP_AUTH_TOKEN", "")
 
 ALLOWED_PURPOSES = {
     "uitvoering-wettelijke-taak",
@@ -172,6 +175,13 @@ class AuthzenHandler(BaseHTTPRequestHandler):
         if self.path != "/access/v1/evaluation": 
             self._json_response(404, {"error": "not found"})
             return
+
+        if PDP_AUTH_TOKEN:
+            auth_header = self.headers.get("Authorization", "")
+            expected = "Bearer " + PDP_AUTH_TOKEN
+            if auth_header != expected:
+                self._json_response(401, {"error": "unauthorized"})
+                return
 
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(length)
