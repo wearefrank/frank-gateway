@@ -25,6 +25,21 @@ The Frank!Gateway can be built using the following command:
 docker build --build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') -t frank-api-gateway .
 ```
 
+### Minimum requirements
+**Minimum:**
+| Resource | Minimum                            |
+| -------- | ---------------------------------- |
+| CPU      | 1 vCPU                             |
+| Memory   | 256–512 MB RAM                     |
+| Storage  | 1+ GB container image + logs       |
+
+**Recommended:**
+| Resource | Recommended                        |
+| -------- | ---------------------------------------- |
+| CPU      | 2 vCPU                                   |
+| Memory   | 1–2 GB RAM                               |
+| Storage  | 1+ GB container image + logs             |
+
 
 ### Deployment configurations & examples
 The directory `deployment-examples` contains four deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
@@ -60,6 +75,13 @@ The following standard plugins in Apisix have patches applied to them:
 
 
 ## Testing
+
+### Unit testing plugins
+
+Plugin logic is tested with [Busted](https://lunarmodules.github.io/busted/), a Lua unit testing framework, running inside a minimal Docker container. All spec files live in the `spec/` folder at the repository root alongside a shared `Dockerfile` that sets up the test runner.
+
+
+---
 
 ### Postman tests
 For manual API validation you can use the collection in `tests/bruno/bruno.json` (with suite requests under `tests/bruno/*`).

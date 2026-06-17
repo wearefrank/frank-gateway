@@ -52,6 +52,17 @@ services:
     networks:
       apisix:
 
+  lua-unit-test:
+    build:
+      context: ../../
+      dockerfile: spec/Dockerfile
+    volumes:
+      - ../../:/frank-gateway
+    working_dir: /frank-gateway
+    command: ["busted", "spec"]
+    networks:
+      apisix:
+
 
   # # prometheus:
   #   image: prom/prometheus:v2.25.0
