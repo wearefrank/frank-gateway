@@ -2,11 +2,12 @@
 
 ## Overview
 
-This test suite verifies the `scripts/merge.lua` configuration merge script.
+This test suite verifies the `merge-config` APISIX plugin.
 
-The merge script watches `conf/mergeconfigs/` for YAML files, merges their
-APISIX sections (routes, upstreams, consumers, …) into a single
-`conf/apisix.yaml`, and re-runs every 2 seconds when a file changes.
+The plugin watches `conf/mergeconfigs/` for YAML files, merges their
+APISIX sections (routes, upstreams, consumers, ...) into a single
+`/usr/local/apisix/conf/apisix.yaml`, and re-runs every 2 seconds when a
+file changes.
 
 ### Test fixtures (`mergeconfigs/`)
 
@@ -15,8 +16,8 @@ APISIX sections (routes, upstreams, consumers, …) into a single
 | `config1.yaml` | Defines the shared `httpbun` upstream and a route on `/from-config1` |
 | `config2.yaml` | Defines a second route on `/from-config2` that reuses the upstream from config1 |
 
-APISIX is configured with `MERGE_CONFIGURATIONS=true`, so the merge script
-runs automatically in the background when the container starts.
+APISIX is configured with `plugin_attr.merge-config.enabled=true`, so the
+plugin runs automatically when the container starts.
 
 ## Quick start
 
@@ -61,7 +62,7 @@ including merge-config automatically.
 
 ## Standalone script test
 
-`test-only-script.yaml` runs the merge script in isolation (no APISIX) and
+`test-only-script.yaml` runs the legacy merge script in isolation (no APISIX) and
 writes the merged output to `output/apisix.yaml`.  Useful for inspecting the
 merge result without standing up the full stack:
 
