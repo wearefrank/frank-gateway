@@ -7,12 +7,22 @@ apisix:
   extra_lua_path: "/usr/local/apisix/custom-plugins/?.lua"
   extra_lua_cpath: "/usr/local/apisix/custom-plugin-libs/?.so"
 
-# Only plugins used by tests/cert-auth/apisix-standalone-config.yaml.
 plugins:
   - proxy-rewrite
+  - merge-config
 
 nginx_config:
   error_log_level: info
+  http:
+    custom_lua_shared_dict:
+      merge-config: 1m
+
+plugin_attr:
+  merge-config:
+    enabled: true
+    interval: 2
+    input_directory: "/usr/local/apisix/conf/mergeconfigs"
+    output_file: "/usr/local/apisix/conf/apisix.yaml"
 
 deployment:
   role: data_plane

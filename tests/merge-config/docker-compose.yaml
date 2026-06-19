@@ -31,8 +31,7 @@ services:
       - "9080:9080/tcp"
     networks:
       apisix:
-    environment:
-      MERGE_CONFIGURATIONS: "true"
+    environment: {}
       
   httpbun:
     image: sharat87/httpbun:latest
