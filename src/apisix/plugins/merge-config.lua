@@ -53,6 +53,27 @@ local _M = {
 	schema = plugin_conf_schema
 }
 
+local timer_started = false
+
+local function get_plugin_attr_conf()
+	local ok, local_conf = pcall(core.config.local_conf)
+	if not ok or type(local_conf) ~= "table" then
+		return {}
+	end
+
+	local plugin_attr = local_conf.plugin_attr
+	if type(plugin_attr) ~= "table" then
+		return {}
+	end
+
+	local conf = plugin_attr[plugin_name]
+	if type(conf) ~= "table" then
+		return {}
+	end
+
+	return conf
+end
+
 function _M.check_schema(conf)
 	return core.schema.check(_M.schema, conf)
 end
@@ -371,9 +392,11 @@ local function timer_handler(premature, conf)
 		return
 	end
 
-	local success, run_err = pcall(_M.run_once, conf)
+	local success, result_or_nil, run_err = pcall(_M.run_once, conf)
 	if not success then
-		core.log.error("merge-config timer error: ", run_err)
+		core.log.error("merge-config timer panic: ", result_or_nil)
+	elseif not result_or_nil then
+		core.log.error("merge-config timer run failed: ", run_err)
 	end
 
 	dict:delete(LOCK_KEY)
@@ -387,8 +410,7 @@ end
 -- Running the initial merge here guarantees the output file exists by the
 -- time APISIX first reads it.
 function _M.init()
-	local attr = core.config.local_conf().plugin_attr
-	local conf = (attr and attr[plugin_name]) or {}
+	local conf = get_plugin_attr_conf()
 
 	if conf.enabled == false then
 		return
@@ -402,16 +424,22 @@ function _M.init()
 		return
 	end
 
+	-- The init phase runs as root, while worker timers run as the nginx worker
+	-- user (typically nobody). Ensure the generated file remains writable so the
+	-- recurring timer can update it after config changes.
+	local chmod_ok = os.execute("chmod 666 " .. result.output_file)
+	if chmod_ok ~= true and chmod_ok ~= 0 then
+		core.log.error("merge-config init: failed to chmod output file: ", result.output_file)
+	end
+
 	core.log.info("merge-config init: initial build complete: ", result.output_file)
 end
 
---------------------------------------------------
--- INIT_WORKER
---------------------------------------------------
-function _M.init_worker()
-	-- Read plugin_attr from APISIX config (plugin_attr.merge-config in config.yaml).
-	local attr = core.config.local_conf().plugin_attr
-	local conf = (attr and attr[plugin_name]) or {}
+-- APISIX core invokes plugin.workflow_handler() while loading plugins inside
+-- its own init_worker path. This is the right place to start background
+-- timers for a plugin that is enabled globally but not attached to routes.
+function _M.workflow_handler()
+	local conf = get_plugin_attr_conf()
 
 	-- Allow the feature to be disabled entirely via plugin_attr.
 	if conf.enabled == false then
@@ -419,16 +447,16 @@ function _M.init_worker()
 		return
 	end
 
-	-- Only worker 0 registers the timer; all workers would otherwise each
-	-- create their own independent timer chain. The shared-dict lock is a
-	-- second guard for edge-cases (e.g. privileged agent worker).
-	if ngx.worker.id() ~= 0 then
+	if timer_started then
 		return
 	end
 
 	local interval = conf.interval or 2
 
-	core.log.info("merge-config: starting background merge timer (interval=", interval, "s)")
+	core.log.warn(
+		"merge-config: starting background merge timer (interval=", interval,
+		"s, worker_id=", tostring(ngx.worker.id()), ")"
+	)
 
 	-- Run immediately on startup, then every `interval` seconds.
 	local ok, err = ngx.timer.at(0, timer_handler, conf)
@@ -440,7 +468,10 @@ function _M.init_worker()
 	ok, err = ngx.timer.every(interval, timer_handler, conf)
 	if not ok then
 		core.log.error("merge-config: failed to start recurring timer: ", err)
+		return
 	end
+
+	timer_started = true
 end
 
 return _M

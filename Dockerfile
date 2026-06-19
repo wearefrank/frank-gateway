@@ -14,9 +14,6 @@ COPY src /usr/local/apisix/custom-plugins
 #Copy Base APISIX config
 COPY conf/config.yaml /usr/local/apisix/conf/config.yaml
 
-#Copy custom scripts into image
-COPY scripts /usr/local/bin/scripts
-
 # Copy haal centraal Certificates into image
 COPY certs/ /usr/local/share/ca-certificates/
 

@@ -73,8 +73,8 @@ The `docker-compose deployment` does contain the `improved SOAP functionality` m
 - kind-ingress -> deploys APISIX as a Kubernetes ingress on a local cluster using Kind [instructions](deployment-examples/kind-ingress/README.md)
 - rancher -> deploys APISIX as a Kubernetes ingress on the WAF rancher cluster [instructions](deployment-examples/rancher/README.md)
 
-### Custom apisixmerge script
-Our custom merge apisix script offers the possibility to merge multiple apisix configurations files into one functional configuration file. This allows for functional seperation beyond apisix's normal possibilities.
+### Merge-config plugin
+Our custom merge-config plugin offers the possibility to merge multiple APISIX configuration files into one functional `apisix.yaml`. This allows for functional separation beyond APISIX's normal possibilities.
 
 
 ### Custom plugins
@@ -130,10 +130,18 @@ A flexible and custom version of the OIDC client plugin allowing you to define y
 
 Detailed documentation on the Generic OAuth Client plugin can be found here [here](docs/generic-oauth-plugin/readme.md)
 
-### Merge-config script
-The `scripts/merge.lua` script merges multiple APISIX YAML configuration files from a watch directory into a single `apisix.yaml`. It runs continuously in the background (activated with `MERGE_CONFIGURATIONS=true`) and regenerates the output whenever a file changes. It also detects and reports duplicate route IDs and names across files.
+### Merge-config plugin
+The `merge-config` plugin merges multiple APISIX YAML configuration files from a watch directory into a single `apisix.yaml`.
 
-Unfortunately, this only works in a standalone docker container. For a kubernetes setup you will have to merge files manually. This can be done by downloading the script under scripts/merge.lua and running this locally on your computer. 
+The plugin runs in APISIX itself and:
+- executes an initial merge during APISIX startup
+- continues to check for changes on a timer (`init_worker` + `ngx.timer.every`)
+- regenerates the output whenever watched files change
+- detects and reports duplicate route IDs and names in APISIX logs
+
+The plugin uses a shared-dict lock so only one worker performs the merge at a time.
+
+Configuration is done via `plugin_attr.merge-config` in `conf/config.yaml` (or your environment-specific config), including fields such as `enabled`, `interval`, `input_directory`, and `output_file`.
 
 Detailed documentation and the test suite can be found [here](tests/merge-config/README.MD)
 
