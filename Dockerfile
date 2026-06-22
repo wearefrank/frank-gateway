@@ -14,14 +14,10 @@ COPY src /usr/local/apisix/custom-plugins
 #Copy Base APISIX config
 COPY conf/config.yaml /usr/local/apisix/conf/config.yaml
 
-#Copy custom scripts into image
-COPY scripts /usr/local/bin/scripts
-
 # Copy haal centraal Certificates into image
 COPY certs/ /usr/local/share/ca-certificates/
 
 USER root
-
 
 #update the local cert store, copy the local cert store and convert it to PEM for use in Lua
 RUN chmod -R 644 /usr/local/share/ca-certificates && \
@@ -33,10 +29,6 @@ RUN sed -i \
     -e '635i sys_conf["envs"]= {}' \
     -e 's~table_insert(sys_conf\["envs"\], name .. "=" .. value)~table_insert(sys_conf["envs"], name)~g' \
     /usr/local/apisix/apisix/cli/ops.lua
-
-# Make scripts executable
-RUN chmod +x /usr/local/bin/scripts/start.sh && \
-    chmod +x /usr/local/bin/scripts/merge.lua
     
 RUN apt-get update && apt-get install -y \
     lua5.1 \
@@ -47,5 +39,4 @@ RUN apt-get update && apt-get install -y \
 RUN luarocks install luafilesystem && \
     luarocks install lyaml
 
-ENTRYPOINT ["/usr/local/bin/scripts/start.sh"]
 CMD ["docker-start"]
