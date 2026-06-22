@@ -1,13 +1,6 @@
 # merge-config test – config1
 # Defines shared upstreams and routes owned by "service A".
 
-upstreams:
-  - id: 1
-    name: httpbun
-    nodes:
-      "httpbun:80": 1
-    type: roundrobin
-
 routes:
   - id: 1
     name: route-from-config1
@@ -17,8 +10,6 @@ routes:
     plugins:
       proxy-rewrite:
         uri: /anything
-
-
 
 
 upstreams:
