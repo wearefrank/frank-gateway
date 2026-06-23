@@ -64,9 +64,11 @@ jobs:
       - ci
 
     permissions:
-      contents: read
+      contents: write
       packages: write
       id-token: write
+      issues: write
+      pull-requests: write
 
     strategy:
       fail-fast: false
