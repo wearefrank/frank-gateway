@@ -56,6 +56,7 @@ call :run_suite frank-sender
 call :run_suite generic-oauth
 call :run_suite jwt-client
 call :run_suite limit-size
+call :run_suite merge-config
 call :run_suite oidc-client
 call :run_suite opa
 call :run_suite soap-action-router
@@ -203,6 +204,7 @@ set "WARMUP_SUITE=%~1"
 
 if /I "%WARMUP_SUITE%"=="generic-oauth" goto :warm_up_keycloak
 if /I "%WARMUP_SUITE%"=="oidc-client" goto :warm_up_keycloak
+if /I "%WARMUP_SUITE%"=="merge-config" goto :warm_up_merge_config
 goto :eof
 
 :warm_up_keycloak
@@ -210,6 +212,14 @@ echo [INFO] Waiting for Keycloak readiness (%WARMUP_SUITE%)...
 call :wait_http_ok_docker "http://keycloak:9081/realms/fg-testing/.well-known/openid-configuration" 30
 if errorlevel 1 exit /b 1
 call :wait_token_ready_docker "http://keycloak:9081/realms/fg-testing/protocol/openid-connect/token" "oidc-test-client" "KVJEeHx2gaX8Sg0siDMtHD1z1zsxJUqx" 30
+if errorlevel 1 exit /b 1
+goto :eof
+
+:warm_up_merge_config
+echo [INFO] Waiting for merge-config routes readiness (%WARMUP_SUITE%)...
+call :wait_http_ok_docker "http://apisix:9080/from-config1" 30
+if errorlevel 1 exit /b 1
+call :wait_http_ok_docker "http://apisix:9080/from-config2" 30
 if errorlevel 1 exit /b 1
 goto :eof
 

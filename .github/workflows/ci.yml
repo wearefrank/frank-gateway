@@ -159,6 +159,18 @@ jobs:
               fi
             fi
 
+            if [ "$suite_failed" -eq 0 ] && [ "$suite" = "merge-config" ]; then
+              echo "[INFO] Waiting for merge-config route readiness (${suite})..."
+              if ! wait_http_ok_docker "$suite_network" "http://apisix:9080/from-config1" 30; then
+                echo "[ERROR] merge-config route /from-config1 not ready for ${suite}."
+                suite_failed=1
+              fi
+              if [ "$suite_failed" -eq 0 ] && ! wait_http_ok_docker "$suite_network" "http://apisix:9080/from-config2" 30; then
+                echo "[ERROR] merge-config route /from-config2 not ready for ${suite}."
+                suite_failed=1
+              fi
+            fi
+
             if [ "$suite_failed" -eq 0 ]; then
               if ! docker run --rm \
                 --network "$suite_network" \
