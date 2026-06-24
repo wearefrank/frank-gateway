@@ -1,5 +1,6 @@
 local core = require("apisix.core")
 local lfs = require("lfs")
+local yaml = require("lyaml")
 local ngx = ngx
 
 local plugin_name = "merge-config"
@@ -93,10 +94,6 @@ local function read_file(file_path)
 	return content
 end
 
-local function trim_right_whitespace(text)
-	return (text:gsub("%s+$", ""))
-end
-
 local function list_yaml_files(input_directory)
 	local files = {}
 	local ok, err = pcall(function()
@@ -115,116 +112,243 @@ local function list_yaml_files(input_directory)
 	return files
 end
 
-local function extract_section(text, section_name, source_file)
-	local items = {}
-	local in_section, section_indent, item_indent
-	local current_item, current_line
+local function parse_yaml_file(file_path)
+	local content = read_file(file_path)
+	if content == "" then
+		return nil, "failed to read file"
+	end
+
+	local ok, parsed = pcall(yaml.load, content)
+	if not ok then
+		return nil, parsed
+	end
+
+	if type(parsed) ~= "table" then
+		return nil, "YAML root must be a mapping"
+	end
+
+	return parsed
+end
+
+local function locate_section_item_lines(text, section_name)
+	local line_numbers = {}
+	local in_section = false
+	local section_indent = nil
+	local item_indent = nil
 	local line_number = 0
 
 	for line in text:gmatch("[^\n]+") do
 		line_number = line_number + 1
 		local indent = #(line:match("^(%s*)") or "")
 
-		if line:match("^%s*" .. section_name .. "%s*:%s*$") then
-			in_section, section_indent, item_indent = true, indent, nil
-			current_item, current_line = nil, nil
-		elseif in_section then
-			if indent <= (section_indent or 0) and line:match("^%S") then
-				break
+		if not in_section then
+			if line:match("^%s*" .. section_name .. "%s*:%s*$") then
+				in_section = true
+				section_indent = indent
+				item_indent = nil
+			end
+		elseif indent <= section_indent and line:match("^%S") then
+			break
+		elseif line:match("^%s*-%s") then
+			if not item_indent then
+				item_indent = indent
 			end
 
-			if line:match("^%s*-%s") then
-				if not item_indent then
-					item_indent = indent
-				end
-
-				if indent == item_indent then
-					if current_item then
-						table.insert(items, {
-							configuration_item_text = trim_right_whitespace(current_item),
-							source_file_name = source_file,
-							source_line_number = current_line
-						})
-					end
-
-					current_item, current_line = line, line_number
-				else
-					current_item = current_item .. "\n" .. line
-				end
-			elseif current_item then
-				current_item = current_item .. "\n" .. line
+			if indent == item_indent then
+				table.insert(line_numbers, line_number)
 			end
 		end
 	end
 
-	if current_item then
+	return line_numbers
+end
+
+local function collect_section_items(parsed_yaml, raw_content, section_name, source_file)
+	local section_value = parsed_yaml[section_name]
+	if section_value == nil then
+		return {}
+	end
+
+	if type(section_value) ~= "table" then
+		return nil, string.format("section '%s' must be a YAML sequence", section_name)
+	end
+
+	local item_line_numbers = locate_section_item_lines(raw_content, section_name)
+	local items = {}
+	for i, item in ipairs(section_value) do
 		table.insert(items, {
-			configuration_item_text = trim_right_whitespace(current_item),
+			configuration_item = item,
 			source_file_name = source_file,
-			source_line_number = current_line
+			source_line_number = item_line_numbers[i] or "n/a",
+			section_index = i
 		})
 	end
 
 	return items
 end
 
-local function extract_id(text)
-	return tonumber(text:match("id:%s*(%d+)"))
+local function extract_id(item)
+	if type(item) ~= "table" then
+		return nil
+	end
+
+	if item.id == nil then
+		return nil
+	end
+
+	if type(item.id) == "number" then
+		return item.id
+	end
+
+	if type(item.id) == "string" then
+		local id = tonumber(item.id)
+		if id then
+			return id
+		end
+	end
+
+	return nil
 end
 
-local function extract_name(text)
-	return text:match("name:%s*['\"]?([%w%-%_]+)['\"]?")
+local function extract_name(item)
+	if type(item) ~= "table" then
+		return nil
+	end
+
+	if type(item.name) == "string" then
+		return item.name
+	end
+
+	return nil
 end
 
 local function detect_duplicates(section_name, items, log)
 	local seen_ids = {}
 	local seen_names = {}
+	local filtered_items = {}
+	local excluded_entries = {}
 
 	for _, entry in ipairs(items) do
-		local text = entry.configuration_item_text
+		local item = entry.configuration_item
+		local is_duplicate = false
 
-		local id = extract_id(text)
+		local id = extract_id(item)
 		if id then
-			if seen_ids[id] then
+			local first_entry = seen_ids[id]
+			if first_entry then
+				is_duplicate = true
 				core.log.error(
 					"duplicate id=", id,
 					" section=", section_name,
-					" file=", entry.source_file_name,
-					" line=", entry.source_line_number
+					" first_file=", first_entry.source_file_name,
+					" first_line=", first_entry.source_line_number,
+					" duplicate_file=", entry.source_file_name,
+					" duplicate_line=", entry.source_line_number
 				)
 
 				table.insert(log.duplicate_ids, {
 					id = id,
 					section_name = section_name,
-					file_name = entry.source_file_name,
-					line_number = entry.source_line_number
+					first_file_name = first_entry.source_file_name,
+					first_line_number = first_entry.source_line_number,
+					duplicate_file_name = entry.source_file_name,
+					duplicate_line_number = entry.source_line_number
 				})
 			else
-				seen_ids[id] = true
+				seen_ids[id] = entry
 			end
 		end
 
-		local name = extract_name(text)
+		local name = extract_name(item)
 		if name then
-			if seen_names[name] then
+			local first_entry = seen_names[name]
+			if first_entry then
+				is_duplicate = true
 				core.log.error(
 					"duplicate name=", name,
 					" section=", section_name,
-					" file=", entry.source_file_name,
-					" line=", entry.source_line_number
+					" first_file=", first_entry.source_file_name,
+					" first_line=", first_entry.source_line_number,
+					" duplicate_file=", entry.source_file_name,
+					" duplicate_line=", entry.source_line_number
 				)
 
 				table.insert(log.duplicate_names, {
 					name = name,
 					section_name = section_name,
-					file_name = entry.source_file_name,
-					line_number = entry.source_line_number
+					first_file_name = first_entry.source_file_name,
+					first_line_number = first_entry.source_line_number,
+					duplicate_file_name = entry.source_file_name,
+					duplicate_line_number = entry.source_line_number
 				})
 			else
-				seen_names[name] = true
+				seen_names[name] = entry
+			end
+		end
+
+		if is_duplicate then
+			excluded_entries[entry] = true
+		else
+			table.insert(filtered_items, entry)
+		end
+	end
+
+	return filtered_items
+end
+
+local function trim_yaml_document_markers(text)
+	local without_start = text:gsub("^%-%-%-%s*\n", "")
+	return without_start:gsub("\n?%.%.%.%s*$", "")
+end
+
+local function indent_lines(text, indent)
+	local prefix = string.rep(" ", indent)
+	return prefix .. text:gsub("\n", "\n" .. prefix)
+end
+
+local function dump_yaml_sequence(items)
+	if #items == 0 then
+		return "[]"
+	end
+
+	local ok, dumped = pcall(yaml.dump, items)
+	if not ok then
+		return nil, dumped
+	end
+
+	local documents = {}
+	local current_doc = nil
+
+	for line in dumped:gmatch("[^\n]+") do
+		if line:match("^%s*%-%-%-%s*$") then
+			current_doc = {}
+		elseif line:match("^%s*%.%.%.%s*$") then
+			if current_doc and #current_doc > 0 then
+				table.insert(documents, current_doc)
+			end
+			current_doc = nil
+		else
+			if current_doc ~= nil then
+				table.insert(current_doc, line)
 			end
 		end
 	end
+
+	if #documents == 0 then
+		local normalized = trim_yaml_document_markers(dumped)
+		normalized = normalized:gsub("%s+$", "")
+		return normalized
+	end
+
+	local rendered = {}
+	for _, doc_lines in ipairs(documents) do
+		table.insert(rendered, "- " .. doc_lines[1])
+		for i = 2, #doc_lines do
+			table.insert(rendered, "  " .. doc_lines[i])
+		end
+	end
+
+	return table.concat(rendered, "\n")
 end
 
 local function write_output(output_file, merged_sections, section_order, log)
@@ -245,11 +369,13 @@ local function write_output(output_file, merged_sections, section_order, log)
 			output_handle:write("# --- DUPLICATE IDS ---\n")
 			for _, entry in ipairs(log.duplicate_ids) do
 				output_handle:write(string.format(
-					"# id=%s | section=%s | file=%s | line=%s\n",
+					"# id=%s | section=%s | first_file=%s | first_line=%s | duplicate_file=%s | duplicate_line=%s\n",
 					entry.id,
 					entry.section_name,
-					entry.file_name,
-					entry.line_number
+					entry.first_file_name,
+					entry.first_line_number,
+					entry.duplicate_file_name,
+					entry.duplicate_line_number
 				))
 			end
 			output_handle:write("\n")
@@ -259,11 +385,13 @@ local function write_output(output_file, merged_sections, section_order, log)
 			output_handle:write("# --- DUPLICATE NAMES ---\n")
 			for _, entry in ipairs(log.duplicate_names) do
 				output_handle:write(string.format(
-					"# name=%s | section=%s | file=%s | line=%s\n",
+					"# name=%s | section=%s | first_file=%s | first_line=%s | duplicate_file=%s | duplicate_line=%s\n",
 					entry.name,
 					entry.section_name,
-					entry.file_name,
-					entry.line_number
+					entry.first_file_name,
+					entry.first_line_number,
+					entry.duplicate_file_name,
+					entry.duplicate_line_number
 				))
 			end
 			output_handle:write("\n")
@@ -276,14 +404,23 @@ local function write_output(output_file, merged_sections, section_order, log)
 		output_handle:write(string.rep("#", 60), "\n")
 		output_handle:write(section .. ":")
 
-		local items = merged_sections[section]
-		if #items == 0 then
+		local entries = merged_sections[section]
+		if #entries == 0 then
 			output_handle:write(" []\n\n")
 		else
-			output_handle:write("\n")
-			for _, entry in ipairs(items) do
-				output_handle:write("  " .. entry.configuration_item_text:gsub("\n", "\n  ") .. "\n")
+			local items = {}
+			for _, entry in ipairs(entries) do
+				table.insert(items, entry.configuration_item)
 			end
+
+			local dumped, dump_err = dump_yaml_sequence(items)
+			if not dumped then
+				output_handle:close()
+				return nil, "failed to dump YAML section '" .. section .. "': " .. tostring(dump_err)
+			end
+
+			output_handle:write("\n")
+			output_handle:write(indent_lines(dumped, 2), "\n")
 			output_handle:write("\n")
 		end
 	end
@@ -323,17 +460,30 @@ local function build(conf)
 
 	for _, file_name in ipairs(files) do
 		local file_path = input_directory .. "/" .. file_name
-		local content = read_file(file_path)
+		local raw_content = read_file(file_path)
+		if raw_content == "" then
+			return nil, "failed to read YAML file '" .. file_name .. "'"
+		end
+
+		local parsed_yaml, parse_err = parse_yaml_file(file_path)
+		if not parsed_yaml then
+			return nil, "failed to parse YAML file '" .. file_name .. "': " .. tostring(parse_err)
+		end
 
 		for _, section in ipairs(section_order) do
-			for _, item in ipairs(extract_section(content, section, file_name)) do
+			local section_items, section_err = collect_section_items(parsed_yaml, raw_content, section, file_name)
+			if not section_items then
+				return nil, "invalid section in file '" .. file_name .. "': " .. tostring(section_err)
+			end
+
+			for _, item in ipairs(section_items) do
 				table.insert(merged_sections[section], item)
 			end
 		end
 	end
 
 	for _, section in ipairs(section_order) do
-		detect_duplicates(section, merged_sections[section], log)
+		merged_sections[section] = detect_duplicates(section, merged_sections[section], log)
 	end
 
 	local ok, write_err = write_output(output_file, merged_sections, section_order, log)

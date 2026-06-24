@@ -14,7 +14,7 @@ file changes.
 | File | Purpose |
 |------|---------|
 | `config1.yaml` | Defines the shared `httpbun` upstream and a route on `/from-config1` |
-| `config2.yaml` | Defines a second route on `/from-config2` that reuses the upstream from config1 |
+| `config2.yaml` | Defines routes owned by "service B" that reuse the upstream from config1, including a multiline literal scalar (`|`) in route metadata |
 
 APISIX is configured with `plugin_attr.merge-config.enabled=true`, so the
 plugin runs automatically when the container starts.
@@ -59,6 +59,7 @@ including merge-config automatically.
 | `01-route-from-config1-200.bru` | `GET /from-config1` | 200 – route defined in config1 is reachable |
 | `02-route-from-config2-200.bru` | `GET /from-config2` | 200 – route defined in config2 is reachable |
 | `03-unknown-route-404.bru` | `GET /not-a-route` | 404 – undefined path is rejected |
+| `04-route-from-multiline-200.bru` | `GET /from-multiline` | 200 – route with multiline literal scalar metadata is merged and loaded correctly |
 
 ## Standalone script test
 

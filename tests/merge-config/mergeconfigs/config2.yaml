@@ -11,4 +11,16 @@ routes:
       proxy-rewrite:
         uri: /anything
 
+  - id: 3
+    name: route-from-multiline
+    uri: /from-multiline
+    upstream_id: 1
+    status: 1
+    desc: |
+      literal block scalar line 1
+      literal block scalar line 2
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+
 #END
