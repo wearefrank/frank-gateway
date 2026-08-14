@@ -243,6 +243,7 @@ nginx_config:                     # Config for render the template to generate n
       openid-connect-client-cache: 1m
       generic-oauth-client-cache: 1m
       jwt-client-cache: 1m
+      merge-config: 1m
 
     proxy_ssl_server_name: true   # Send the server name in the SNI extension when establishing an SSL/TLS
                                   # connection with the upstream server, allowing the upstream server to
@@ -527,6 +528,7 @@ plugins:                           # plugin list (sorted by priority)
   # <- recommend to use priority (0, 100) for your custom plugins
   - example-plugin                 # priority: 0
   - cert-auth                      # priority 100
+  - merge-config
   - frank-sender
   - generic-oauth-client
   - jwt-client                    
@@ -562,6 +564,11 @@ stream_plugins:                    # stream plugin list (sorted by priority)
 #   protocols:
 #     - name: pingpong
 plugin_attr:          # Plugin attributes
+  merge-config:       # Plugin: merge-config
+    enabled: true    # Set to true to activate the background merge timer
+    interval: 2       # How often (in seconds) to check for changes and rebuild
+    input_directory: "/usr/local/apisix/conf/mergeconfigs"
+    output_file: "/usr/local/apisix/conf/apisix.yaml"
   log-rotate:         # Plugin: log-rotate
     timeout: 10000    # maximum wait time for a log rotation(unit: millisecond)
     interval: 3600    # Set the log rotate interval in seconds.

@@ -1,18 +1,29 @@
-# frank-api-gateway
+# Frank!Gateway
 
-The Frank API Gateway is based on Apache APISIX, see https://apisix.apache.org/ for an introduction to Apache APISIX.
+![Frank!Gateway Banner](frank-gateway-github-banner.png)
 
-The main characteristics of Apache APISIX are:
-- Fully Open Source – part of the Apache foundation as a top level project with large contributor base
-- Run everywhere (including ARM64)
-    - Bare metal
-    - Kubernetes
-    - Cloud
-    - VM
+Frank!Gateway is an API gateway built for the specific needs of Dutch municipalities. Its core addition is **full bidirectional traffic support**: connections can run both from SaaS solutions to on-premises systems (outside-in) and from on-premises systems to SaaS services (inside-out).
+
+Frank!Gateway is based on [Apache APISIX](https://apisix.apache.org/) and extends it with capabilities tailored to the municipal market. By building on a proven, high-performance foundation, Frank!Gateway inherits the strengths of APISIX while adding the functionality that Dutch government organisations need.
+
+## Why Frank!Gateway
+
+Additional capabilities tailored to the municipal market:
+
+- **Bidirectional traffic** – supports both outside-in (SaaS to on-premises) and inside-out (on-premises to SaaS) connections
+- **SOAP routing support** for legacy systems (ZDS)
+- **FSC standard support** via the FSC-Inway plugin
+- **Authorization based on AuthZEN and Open Policy Agent (OPA)**, e.g. for accessing BRP data
+- **Response extractor** collects relevant message data for logging, auditing and accountability
+
+### Built on a solid foundation
+
+Frank!Gateway inherits the core strengths of Apache APISIX:
+- Fully Open Source – part of the Apache foundation as a top level project with a large contributor base
+- Runs everywhere (including ARM64): bare metal, Kubernetes, cloud, and VM
 - Pluggable configuration based on a rich plugin ecosystem
 - Top ranked for performance
 
-The Frank API Gateway is a superset of Apache APISIX with custom plugins.
 
 ## Layout & Structure
 This repository contains two components:
@@ -27,19 +38,34 @@ docker build --build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') -t fr
 
 ### Minimum requirements
 **Minimum:**
-| Resource | Minimum                            |
-| -------- | ---------------------------------- |
-| CPU      | 1 vCPU                             |
-| Memory   | 256–512 MB RAM                     |
-| Storage  | 1+ GB container image + logs       |
+
+| Resource | Minimum                      |
+|----------|------------------------------|
+| CPU      | 1 vCPU                       |
+| Memory   | 256–512 MB RAM               |
+| Storage  | 1+ GB container image + logs |
 
 **Recommended:**
-| Resource | Recommended                        |
-| -------- | ---------------------------------------- |
-| CPU      | 2 vCPU                                   |
-| Memory   | 1–2 GB RAM                               |
-| Storage  | 1+ GB container image + logs             |
 
+| Resource | Recommended                  |
+|----------|------------------------------|
+| CPU      | 2 vCPU                       |
+| Memory   | 1–2 GB RAM                   |
+| Storage  | 1+ GB container image + logs |
+
+
+### Versioning and Release strategy
+
+Versioning & Release Strategy
+
+This project follows Semantic Versioning (SemVer):
+```
+MAJOR.MINOR.PATCH
+```
+Example:
+```
+v1.2.3
+```
 
 ### Deployment configurations & examples
 The directory `deployment-examples` contains four deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
@@ -55,124 +81,54 @@ The `docker-compose deployment` does contain the `improved SOAP functionality` m
 - rancher -> deploys APISIX as a Kubernetes ingress on the WAF rancher cluster [instructions](deployment-examples/rancher/README.md)
 
 ### Custom plugins
-Custom plugins have been created for the Frank!Gateway enhancing the functionality.
+Custom plugins have been created for the Frank!Gateway, enhancing the functionality of Apache APISIX for the municipal market.
 
-The following plugins have been created:
-1) FSC
-2) SOAP action router
-3) OIDC client
-4) Generic OAuth client
-5) Limit size
-6) Response extractor
-7) Cert Auth
-8) Frank sender 
-9) JWT client
-10) AuthZen NLGOV
+#### FSC Inway
+- Can act as an Inway within an FSC NLX group
+- Composable with various APISIX plugins
 
-### Patches: 
-The following standard plugins in Apisix have patches applied to them:
-1) Opa 
+#### SOAP Action Router
+- Routes based on the SOAP action (in the header, Content-Type, or body)
+- Enables routes per specific SOAP operation
 
+#### OIDC Client
+- Lets the Frank!Gateway act as an OIDC client
+- Supports the client credentials flow toward upstream systems
 
-## Testing
+#### Generic OAuth Client
+- Flexible variant of the OIDC plugin
+- Supports configurable fields
 
-### Unit testing plugins
+#### Limit Size
+- Blocks requests/responses that exceed a configured size
+- Protects against excessive payload usage
 
-Plugin logic is tested with [Busted](https://lunarmodules.github.io/busted/), a Lua unit testing framework, running inside a minimal Docker container. All spec files live in the `spec/` folder at the repository root alongside a shared `Dockerfile` that sets up the test runner.
+#### Response Extractor
+- Extracts values from JSON responses using JSONPath
+- Makes them available as context variables for downstream plugins and logging
 
+#### Cert Auth (mTLS)
+- Supports certificate-based client authentication (CN/SAN)
+- Identifies APISIX consumers via mTLS
 
----
+#### Frank Sender
+- Sends requests to a Frank endpoint first
+- Uses the response as a new request toward the upstream
+- Centralizes mapping and transformation logic
 
-### Postman tests
-For manual API validation you can use the collection in `tests/bruno/bruno.json` (with suite requests under `tests/bruno/*`).
+#### JWT Client
+- Retrieves JWT access tokens from external IdPs
+- Caches tokens and attaches them to upstream requests
 
-### Local test run (all suites)
-For local automated testing across all plugin suites, run:
+#### OPA (extension)
+- Patch to the existing APISIX OPA plugin
+- Adds support for the request body in policy evaluation
 
-```bat
-run-all-tests.bat
-```
+#### AuthZEN Plugin
+- Implements the OpenID AuthZEN protocol
+- Integrates with policy engines such as OPA/Rego, XACML, Zanzibar, and IDQL
 
-This script starts each test suite environment, executes the Bruno tests, and writes JUnit reports to `tests/bruno/results`.
+### Merge-config plugin
+Our custom merge-config plugin offers the possibility to merge multiple APISIX configuration files into one functional `apisix.yaml`. This allows for functional separation beyond APISIX's normal possibilities.
 
-### FSC 
-The FSC plugin:
-- Can act as a Inway in a FSC NLX group
-- Can combine the FSC NLX Inway with different APISIX plugins 
-
-Detailed documentation on the FSC plugin and how to run and test the FSC plugin locally can be found [here](tests/fsc/FSC-NLX.md)
-
-### SOAP action router
-APISIX can create routing rules based on HTTP headers. However, within SOAP the specific operation is determined by the SOAP action, this SOAP action can either be in a HTTP header, Content-Type header or body.
-The plugin can extract the SOAP action and trigger the router enabling the possibility to create routes per SOAP action.
-
-Detailed documentation on the SOAP action router and Postman test collection can be found [here](deployment-examples/docker-compose/README.md)
-
-### OIDC client
-APISIX has existing OpenID connect and JWT plugins, but these plugins are for protecting routes. In these plugins the clients of APISIX need to authenticate and APISIX checks the access tokens.
-The OIDC client plugin enables the Frank!Gateway to a OIDC client that can authenticate with a external IDP and use the client_credentials flow to authenticate with a upstream.
-
-Detailed documentation on the OIDC client can be found here [here](deployment-examples/oidc-client/OIDC-client.md)
-
-### Generic OAuth client
-A flexible and custom version of the OIDC client plugin allowing you to define your own fields. 
-
-Detailed documentation on the Generic OAuth Client plugin can be found here [here](docs/generic-oauth-plugin/readme.md)
-
-
-### Limit size
-blocks either requests and or responses if the payload or entire request or response is larger than a pre-configured threshold.
-
-### Response extractor
-Extracts values from upstream JSON response bodies using [JSONPath](https://goessner.net/articles/JsonPath/) expressions and exposes them as APISIX request context variables for use by downstream plugins or log formats.
-
-The plugin is configured as a map of variable name → JSONPath expression. Each matched value is:
-- Stored in `ctx.extracted` (a Lua table, accessible by other plugins in the same request)
-- Stored as `ctx.var.extracted` (a JSON-encoded string, usable in `log_format`)
-- Stored individually as `ctx.var.<variable_name>` for direct access in log formats or other plugins
-
-Example configuration:
-```yaml
-response-extractor:
-  transaction_id: "$.transactionId"
-  status_code: "$.result.status"
-```
-
-This would make `$transaction_id` and `$status_code` available as APISIX variables for logging or further processing.
-
-> **Note:** The plugin only processes JSON responses (`application/json` or `+json`). Responses without a JSON body are silently skipped. The extractor buffers up to 1 MB of response body; larger responses are skipped to protect memory usage.
-
-### Cert Auth 
-
-APISIX supports TLS, but by default this is mainly used for server-side TLS termination.
-The Cert Auth plugin enables mutual TLS (mTLS) client authentication, allowing APISIX to identify consumers based on certificate attributes such as Common Name (CN) or SAN identifier.
-
-Detailed documentation on the Cert Auth plugin and local setup can be found [here](docs/cert-auth-plugin/README.MD).
-
-### Frank Sender 
-
-The Frank Sender plugin forwards the incoming request to a configured Frank endpoint first, reads the response body, and replaces the original in-flight request body with that response before continuing to the configured upstream.
-This enables request transformation and mapping logic to be centralized in a Frank service.
-
-Detailed documentation on the Frank Sender plugin can be found [here](docs/frank-sender/README.md).
-
-### Jwt Client 
-
-APISIX has existing authentication plugins for validating incoming tokens, but this plugin is focused on outbound authentication.
-The JWT Client plugin enables the Frank!Gateway to request a JWT access token from an external IDP, cache it, and add it as a Bearer token on upstream requests.
-
-Example configuration and tests for the JWT Client plugin can be found [here](tests/jwt-client/apisix.yaml) and [here](tests/bruno/jwt-client).
-
-### Authzen NLGOV
-
-The Authzen NLGOV plugin integrates APISIX with an AuthZEN-style policy decision point for Dutch government-style authorization checks. It specifically implements the Access evaluation API.
-https://logius-standaarden.github.io/authzen-nlgov
-
-It is intended for cases where access decisions depend on structured context such as subject identity, organization, role/scope, requested action, resource sensitivity, and legal/operational purpose.
-
-
-Local setup and policy-agent details are documented in [docs/authzen/readme.md](docs/auth-zen/README.MD).
-
-test setup details are documented in [tests/auth-zen/README.MD](tests/auth-zen/README.MD).
-Bruno integration tests can be found in [tests/bruno/auth-zen](tests/bruno/auth-zen).
 

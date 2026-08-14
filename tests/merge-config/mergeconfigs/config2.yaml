@@ -1,0 +1,26 @@
+# merge-config test – config2
+# Defines routes owned by "service B"; shares the upstream from config1.
+
+routes:
+  - id: 2
+    name: route-from-config2
+    uri: /from-config2
+    upstream_id: 1
+    status: 1
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+
+  - id: 3
+    name: route-from-multiline
+    uri: /from-multiline
+    upstream_id: 1
+    status: 1
+    desc: |
+      literal block scalar line 1
+      literal block scalar line 2
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+
+#END

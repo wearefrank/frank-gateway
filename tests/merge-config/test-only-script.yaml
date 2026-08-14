@@ -1,0 +1,13 @@
+services:
+  merge-test:
+    build:
+      context: ../..
+      dockerfile: tests/merge-config/test-script.Dockerfile
+
+
+    volumes:
+      - ../merge-config/output/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ../merge-config/mergeconfigs:/usr/local/apisix/conf/mergeconfigs
+
+
+    command: lua5.1 scripts/merge.lua
