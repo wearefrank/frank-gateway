@@ -71,18 +71,6 @@
         "changelogTitle": "[![conventional commits](https://img.shields.io/badge/conventional%20commits-1.0.0-yellow.svg)](https://conventionalcommits.org) [![semantic versioning](https://img.shields.io/badge/semantic%20versioning-2.0.0-green.svg)](https://semver.org)"
       }
     ],
-    [
-      "@semantic-release/git",
-      {
-        "assets": [
-          "CHANGELOG.md",
-          "src/main/resources/BuildInfo.properties",
-          "configurations/{{ cookiecutter.configuration_name }}/BuildInfo.properties",
-          "publiccode.yaml"
-        ],
-        "message": "chore(<%= nextRelease.type %>): release <%= nextRelease.version %> <%= nextRelease.channel !== null ? `on ${nextRelease.channel} channel ` : '' %>[skip ci]\n\n<%= nextRelease.notes %>"
-      }
-    ],
     "@semantic-release/github"
   ]
 }

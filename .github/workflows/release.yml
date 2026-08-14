@@ -41,14 +41,22 @@ jobs:
           node-version: 24
       
       - name: Install dependencies
-        run: yarn global add semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github @semantic-release/exec @semantic-release/release-notes-generator @semantic-release/commit-analyzer conventional-changelog-conventionalcommits
+        run: yarn global add semantic-release @semantic-release/changelog @semantic-release/github @semantic-release/exec @semantic-release/release-notes-generator @semantic-release/commit-analyzer conventional-changelog-conventionalcommits
       
       - name: Get next version
         id: next-version
-        run: semantic-release --dryRun
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then
+            echo "release-version=$INPUT_VERSION" >> $GITHUB_OUTPUT
+            echo "release-tag=v$INPUT_VERSION" >> $GITHUB_OUTPUT
+            echo "release-type=manual" >> $GITHUB_OUTPUT
+          else
+            semantic-release --dryRun
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_VERSION: ${{ inputs.version }}
 
 
   ci:
@@ -64,9 +72,11 @@ jobs:
       - ci
 
     permissions:
-      contents: read
+      contents: write
       packages: write
       id-token: write
+      issues: write
+      pull-requests: write
 
     strategy:
       fail-fast: false
@@ -103,7 +113,7 @@ jobs:
           node-version: 24
       
       - name: Install dependencies
-        run: yarn global add semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github @semantic-release/exec @semantic-release/release-notes-generator @semantic-release/commit-analyzer conventional-changelog-conventionalcommits
+        run: yarn global add semantic-release @semantic-release/changelog @semantic-release/github @semantic-release/exec @semantic-release/release-notes-generator @semantic-release/commit-analyzer conventional-changelog-conventionalcommits
       
       - name: Semantic Release
         run: semantic-release
