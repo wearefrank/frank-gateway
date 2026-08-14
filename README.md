@@ -128,3 +128,7 @@ Custom plugins have been created for the Frank!Gateway, enhancing the functional
 - Implements the OpenID AuthZEN protocol
 - Integrates with policy engines such as OPA/Rego, XACML, Zanzibar, and IDQL
 
+### Merge-config plugin
+Our custom merge-config plugin offers the possibility to merge multiple APISIX configuration files into one functional `apisix.yaml`. This allows for functional separation beyond APISIX's normal possibilities.
+
+
