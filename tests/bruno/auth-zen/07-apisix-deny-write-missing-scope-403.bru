@@ -1,0 +1,75 @@
+meta {
+  name: [APISIX] deny BRP write without write scope
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/authzen/brp
+  body: json
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  x-request-id: req-rotterdam-20260512-0003
+  x-pdp-token: test-pdp-secret-123
+}
+
+body:json {
+  {
+    "case_id": "ROT-CASE-2026-0044",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["residential_address"],
+    "token": "trace-rotterdam-20260512-0003",
+    "mutation": {
+      "address": {
+        "street": "Nieuwe Binnenweg",
+        "house_number": "123",
+        "postal_code": "3015AA",
+        "city": "Rotterdam"
+      }
+    },
+    "authorization": {
+      "action": "write",
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "organization": "urn:nl:gov:rotterdam",
+        "assurance_level": "high",
+        "roles": ["municipality_caseworker"],
+        "scopes": ["brp:read"]
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "sensitivity": "high"
+      },
+      "context": {
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "high"
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 403 - missing brp:write scope denied by policy agent", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("policy denial includes write-scope reason", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("reason_admin");
+    expect(body.reason_admin).to.have.property("403");
+    expect(body.reason_admin["403"]).to.contain("write");
+  });
+}
+
+docs {
+  Real-world deny scenario: address mutation requested by an integration client
+  that lacks write scope. APISIX must block the call before it reaches upstream.
+}

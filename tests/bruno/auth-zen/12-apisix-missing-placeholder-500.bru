@@ -1,0 +1,43 @@
+meta {
+  name: [APISIX] deny - missing placeholder (no authorization block)
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/authzen/brp
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  x-pdp-token: test-pdp-secret-123
+}
+
+body:json {
+  {
+    "case_id": "ROT-CASE-2026-0200",
+    "citizen": {
+      "bsn": "999991234"
+    },
+    "requested_field": ["name"]
+  }
+}
+
+tests {
+  test("status is 500 - required placeholders were never set by previous plugin", function() {
+    expect(res.getStatus()).to.equal(500);
+  });
+}
+
+docs {
+  Verifies that omitting the authorization block causes the serverless-pre-function plugin
+  to never set authz_subject_type, authz_subject_id, authz_resource_type, authz_resource_id
+  and authz_action_name in ctx.var.
+
+  resolve_placeholders returns nil for each of those, so the resolved body is missing
+  required fields. The body schema validation added to _M.access catches this and returns
+  500 before the PDP is ever called.
+}

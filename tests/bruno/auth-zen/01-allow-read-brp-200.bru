@@ -1,0 +1,74 @@
+meta {
+  name: allow BRP read with NL-gov context
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{authzenBaseUrl}}/access/v1/evaluation
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  accept: application/json
+  Authorization: Bearer test-pdp-secret-123
+}
+
+body:json {
+  {
+    "input": {
+      "subject": {
+        "type": "service-account",
+        "id": "municipality-case-api",
+        "properties": {
+          "organization": "urn:nl:gov:rotterdam",
+          "assurance_level": "substantial",
+          "roles": ["municipality_caseworker"],
+          "scopes": ["brp:read"]
+        }
+      },
+      "resource": {
+        "type": "brp-record",
+        "id": "bsn:999991234",
+        "properties": {
+          "sensitivity": "high"
+        }
+      },
+      "action": {
+        "name": "read"
+      },
+      "context": {
+        "purpose": "uitvoering-wettelijke-taak",
+        "channel": "mtls",
+        "loa": "substantial",
+        "time": "2026-05-11T11:00:00Z",
+        "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        "tracestate": "congo=t61rcWkgMzE",
+        "mim": "https://example.org/mim/authzen/v1",
+        "ld-context": "https://example.org/contexts/authzen-v1.jsonld"
+      }
+    }
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("decision is allow", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("decision", true);
+    expect(body).to.have.property("context");
+    expect(body.context).to.have.property("metadata");
+    expect(body.context.metadata).to.have.property("policy_id", "nl-gov-authzen-v1");
+  });
+}
+
+docs {
+  NOTE: This test calls the AuthZEN policy agent (OPA) directly — it does NOT test the APISIX auth-zen plugin.
+  Its purpose is to verify that the policy logic itself is correct before the plugin integration is tested.
+  See tests 05–09 for expected APISIX plugin behaviour.
+}
