@@ -35,6 +35,12 @@ services:
     networks:
       apisix:
     env_file: ./.env
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9091/apisix/prometheus/metrics"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
       
   httpbun:
     image: sharat87/httpbun:latest

@@ -562,7 +562,7 @@ end
 function _M.init()
 	local conf = get_plugin_attr_conf()
 
-	if conf.enabled == false then
+	if not conf.enabled then
 		return
 	end
 
@@ -592,7 +592,7 @@ function _M.workflow_handler()
 	local conf = get_plugin_attr_conf()
 
 	-- Allow the feature to be disabled entirely via plugin_attr.
-	if conf.enabled == false then
+	if not conf.enabled then
 		core.log.info("merge-config: disabled via plugin_attr, skipping timer")
 		return
 	end
