@@ -565,7 +565,7 @@ stream_plugins:                    # stream plugin list (sorted by priority)
 #     - name: pingpong
 plugin_attr:          # Plugin attributes
   merge-config:       # Plugin: merge-config
-    enabled: true    # Set to true to activate the background merge timer
+    enabled: false    # Set to true to activate the background merge timer
     interval: 2       # How often (in seconds) to check for changes and rebuild
     input_directory: "/usr/local/apisix/conf/mergeconfigs"
     output_file: "/usr/local/apisix/conf/apisix.yaml"
