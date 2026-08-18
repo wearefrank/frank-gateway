@@ -42,6 +42,41 @@ jobs:
       - name: Run Busted unit tests in /spec
         run: busted spec
 
+  compose-smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Start root docker compose stack
+        run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Verify gateway routes traffic
+        run: |
+          set -euo pipefail
+          curl -fsS -o /dev/null http://127.0.0.1:9080/any
+
+      - name: Fail on APISIX error logs
+        run: |
+          set -uo pipefail
+          logs="$(docker compose logs --no-color apisix)"
+          if echo "$logs" | grep -E '\[(error|alert|emerg|crit)\]'; then
+            echo "[ERROR] APISIX reported errors during startup."
+            exit 1
+          fi
+          echo "[INFO] No APISIX error log entries found."
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose down --remove-orphans --volumes
+
   integration-tests:
     runs-on: ubuntu-latest
     continue-on-error: true
