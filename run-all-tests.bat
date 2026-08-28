@@ -61,6 +61,7 @@ call :run_suite merge-config
 call :run_suite oidc-client
 call :run_suite opa
 call :run_suite soap-action-router
+call :run_suite stdout-logger
 
 echo.
 echo ========================================
