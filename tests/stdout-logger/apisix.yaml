@@ -1,0 +1,30 @@
+routes:
+  - id: 1
+    name: upstream-test
+    uri: /*
+    upstream_id: 1
+    status: 1
+    plugins:
+      stdout-logger:
+        log_output: json
+        log_format:
+          timestamp: "$time_iso8601"
+          gemeente_code: "0484"
+          request:
+            request_method: "$request_method"
+            request_path: "$uri"
+            request_host: "$host"
+          response:
+            status: "$status"
+            upstream_latency_ms: "$upstream_response_time"
+          audit:
+            route_id: "$route_id"
+
+upstreams:
+  - name: httpbun
+    id: 1
+    nodes:
+      "httpbun": 1
+    type: roundrobin
+
+#END
