@@ -207,6 +207,7 @@ set "WARMUP_SUITE=%~1"
 if /I "%WARMUP_SUITE%"=="generic-oauth" goto :warm_up_keycloak
 if /I "%WARMUP_SUITE%"=="oidc-client" goto :warm_up_keycloak
 if /I "%WARMUP_SUITE%"=="merge-config" goto :warm_up_merge_config
+if /I "%WARMUP_SUITE%"=="stdout-logger" goto :warm_up_stdout_logger
 goto :eof
 
 :warm_up_keycloak
@@ -222,6 +223,12 @@ echo [INFO] Waiting for merge-config routes readiness (%WARMUP_SUITE%)...
 call :wait_http_ok_docker "http://apisix:9080/from-config1" 30
 if errorlevel 1 exit /b 1
 call :wait_http_ok_docker "http://apisix:9080/from-config2" 30
+if errorlevel 1 exit /b 1
+goto :eof
+
+:warm_up_stdout_logger
+echo [INFO] Waiting for httpbun upstream readiness (%WARMUP_SUITE%)...
+call :wait_http_ok_docker "http://apisix:9080/get" 30
 if errorlevel 1 exit /b 1
 goto :eof
 

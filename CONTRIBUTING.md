@@ -274,6 +274,24 @@ All other OPA plugin behavior follows standard APISIX logic.
 
 An example local test setup for the `with_body` behavior is available in [tests/opa](tests/opa), with a sample Rego policy in [tests/opa/policies/example-authz.rego](tests/opa/policies/example-authz.rego).
 
+### Stdout Logger
+
+The Stdout Logger plugin writes one structured JSON log line per request to the container's stdout. `log_format` is a template: string leaf values starting with `$` are resolved as APISIX/nginx variables (or as the plugin's own pseudo-variables, see below), other leaf values (and nested objects) are copied as-is.
+
+The plugin also exposes a few pseudo-variables that aren't real nginx vars but can be referenced from `log_format` like any other variable:
+- `$request_body` / `$response_body`: only populated when `include_req_body`/`include_resp_body` (or the matching `include_req_body_expr`/`include_resp_body_expr` condition) is set
+- `$request_headers` / `$response_headers`: only populated when `include_req_headers`/`include_resp_headers` is set
+- `$log_type`: always set, classifying the response as `Error` (status >= 500), `Warn` (status >= 400), or `Info` (otherwise)
+
+The `_expr` options accept an APISIX-style condition rule (evaluated via `resty.expr.v1`), so body capture can be made conditional, e.g. only logging the body for failed requests:
+```yaml
+stdout-logger:
+  include_resp_body_expr:
+    - ["status", ">=", 400]
+```
+
+Example configuration and tests can be found [here](tests/stdout-logger/apisix.yaml).
+
 # CI/CD Flow
 
 After merging into `master`:
