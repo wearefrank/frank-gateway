@@ -24,6 +24,12 @@ local _M = {
                     "with '$' are resolved as APISIX/nginx variables, other leaf values " ..
                     "(and nested objects) are copied as-is."
             },
+            labels = {
+                type = "object",
+                description = "Key-value map of log labels. String leaf values starting " ..
+                    "with '$' are resolved as APISIX/nginx variables, other leaf values " ..
+                    "(and nested objects) are copied as-is."
+            },
             include_req_body = {type = "boolean", default = false},
             include_req_body_expr = {
                 type = "array",
@@ -150,6 +156,9 @@ function _M.log(conf, ctx)
     ctx.var.log_type = resolve_log_type(ctx)
 
     local entry = resolve_value(conf.log_format, ctx)
+    if conf.labels then
+        entry.labels = resolve_value(conf.labels, ctx)
+    end
 
     local line, err = core.json.encode(entry)
     if not line then

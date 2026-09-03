@@ -131,6 +131,7 @@ Custom plugins have been created for the Frank!Gateway, enhancing the functional
 #### Stdout Logger
 - Writes a configurable, structured JSON log line per request to stdout
 - Log fields are a template of APISIX/nginx variables, resolved per request
+- Supports an optional `labels` map to output structured log labels (e.g. for Grafana Alloy / Loki stream processing)
 - Can optionally include the request/response body and headers
 - Classifies each entry with a `log_type` (`Error`/`Warn`/`Info`) based on the response status
 

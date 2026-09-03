@@ -7,6 +7,9 @@ routes:
     plugins:
       stdout-logger:
         log_output: json
+        labels:
+          log_type: "$log_type"
+          env: "prod"
         log_format:
           log_type: "$log_type"        
           timestamp: "$time_iso8601"

@@ -32,7 +32,7 @@ discovery.relabel "apisix_logs" {
 loki.source.docker "apisix" {
   host       = "unix:///var/run/docker.sock"
   targets    = discovery.relabel.apisix_logs.output
-  forward_to = [loki.write.local.receiver]
+  forward_to = [loki.process.apisix_stdout_labels.receiver]
 }
 
 // Receive logs pushed in Loki format (e.g. APISIX loki-logger) and enrich
@@ -51,6 +51,26 @@ loki.process "apisix_audit_labels" {
     values = {
       audit_source    = "apisix-loki-sender",
       ingest_endpoint = "alloy-apisix-loki-receiver",
+    }
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.process "apisix_stdout_labels" {
+  // 1. Parse JSON fields from the stdout log line
+  stage.json {
+    expressions = {
+      "log_type"    = "labels.log_type",
+      "environment" = "labels.env",
+    }
+  }
+
+  // 2. Assign extracted values as Loki stream labels
+  stage.labels {
+    values = {
+      "log_type"    = "log_type",
+      "environment" = "environment",
     }
   }
 

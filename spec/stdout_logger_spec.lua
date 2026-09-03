@@ -158,6 +158,27 @@ describe("stdout-logger plugin", function()
 		}, json_encode_args)
 	end)
 
+	it("resolves labels map when conf.labels is defined", function()
+		local conf = {
+			log_format = { message = "hello" },
+			labels = {
+				log_type = "$log_type",
+				env = "prod",
+			},
+		}
+		local ctx = { var = { status = "200" } }
+
+		plugin.log(conf, ctx)
+
+		assert.are.same({
+			message = "hello",
+			labels = {
+				log_type = "Info",
+				env = "prod",
+			},
+		}, json_encode_args)
+	end)
+
 	it("writes the encoded line followed by a newline and flushes stdout", function()
 		json_encode_result = '{"a":1}'
 		local conf = { log_format = { a = 1 } }
