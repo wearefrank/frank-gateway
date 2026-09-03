@@ -13,32 +13,6 @@ routes:
         log_labels:
           gateway: frank-gateway
           source: apisix-route-headers
-      stdout-logger:
-        log_output: json
-        labels:
-          log_type: "$log_type"
-          env: "prod"
-        log_format:
-          log_type: "$log_type"        
-          timestamp: "$time_iso8601"
-          gemeente_code: "1234"
-          request:
-            request_method: "$request_method"
-            request_path: "$uri"
-            request_host: "$host"
-            request_body: "$request_body"
-            request_headers: "$request_headers"
-          response:
-            status: "$status"
-            upstream_latency_ms: "$upstream_response_time"
-            response_body: "$response_body"
-            response_headers: "$response_headers"
-          audit:
-            route_id: "$route_id"
-        include_req_body: true
-        include_resp_body: true
-        include_req_headers: true
-        include_resp_headers: true
 
 upstreams:
   - name: httpbun
