@@ -102,7 +102,7 @@ local function expose_results(response_extractor_ctx, results)
     end
 end
 
-local function is_json_content_type(content_type, allowed_types)
+local function is_allowed_content_type(content_type, allowed_types)
     if not content_type then
         return false
     end
@@ -137,7 +137,7 @@ function _M.body_filter(conf, response_extractor_ctx)
 
         local content_type = ngx.header["Content-Type"]
         local allowed_types = conf.content_types or DEFAULT_CONTENT_TYPES
-        if not is_json_content_type(content_type, allowed_types) then
+        if not is_allowed_content_type(content_type, allowed_types) then
             response_extractor_ctx._skip_extraction = true
             return
         end
