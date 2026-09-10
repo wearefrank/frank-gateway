@@ -1,8 +1,8 @@
-FROM apache/apisix:3.16.0-ubuntu
+FROM apache/apisix:3.18.0-ubuntu
 
 ARG BUILD_DATE
 LABEL org.opencontainers.image.created=$BUILD_DATE
-LABEL based-on="Apache APISIX 3.16.0 Ubuntu"
+LABEL based-on="Apache APISIX 3.18.0 Ubuntu"
 
 # Overlay patched APISIX plugins from the local patches folder.
 # Files with the same path/name in /usr/local/apisix/apisix/plugins are replaced.
