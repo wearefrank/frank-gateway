@@ -50,7 +50,7 @@ services:
       apisix:
 
   open-ftv-pdp:
-    image: "registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/eam/pdp@sha256:bab4a73c08e27535a61a1e8284b8b190439b408cad7d9236b9032b6d63c9b7d3"
+    image: "registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/eam/pdp@sha256:c5f8153259fe7a23db03d2bf989b90430d42b23d86160e13920b678d551ad5aa"
     restart: always
     volumes:
       - ./open-ftv/policies:/tmp/policies
