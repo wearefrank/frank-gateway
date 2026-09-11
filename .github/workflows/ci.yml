@@ -112,6 +112,11 @@ jobs:
             fi
           done < tests/fragile-images.txt
 
+      # TEMPORARY: proves the auth-zen suite survives with the upstream registry
+      # unreachable. Remove this step once verified.
+      - name: Simulate upstream outage (temporary test step)
+        run: echo "127.0.0.1 registry.gitlab.com" | sudo tee -a /etc/hosts
+
       - name: Run Bruno test suites (non-blocking)
         shell: bash
         run: |
