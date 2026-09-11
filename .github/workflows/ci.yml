@@ -87,6 +87,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
 
+      - name: Cache fragile third-party test images
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: /tmp/fragile-image-cache
+          key: fragile-images-${{ hashFiles('tests/fragile-images.txt') }}
+
+      - name: Restore fragile images from cache, or pull and populate it
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p /tmp/fragile-image-cache
+          while IFS= read -r image || [ -n "$image" ]; do
+            [ -z "$image" ] && continue
+            case "$image" in \#*) continue ;; esac
+            tarball="/tmp/fragile-image-cache/$(echo "$image" | tr -c 'a-zA-Z0-9' '_').tar"
+            if [ -f "$tarball" ]; then
+              echo "[INFO] Loading ${image} from cache."
+              docker load -i "$tarball"
+            else
+              echo "[INFO] Cache miss, pulling ${image}."
+              # Don't let a dead upstream image abort the whole job: log it and let
+              # the affected suite fail on its own "docker compose up" step below.
+              if ! docker pull "$image"; then
+                echo "[WARN] Failed to pull ${image}; the suite(s) using it will fail to start."
+                continue
+              fi
+              docker save -o "$tarball" "$image"
+            fi
+          done < tests/fragile-images.txt
+
       - name: Run Bruno test suites (non-blocking)
         shell: bash
         run: |
@@ -158,7 +188,7 @@ jobs:
 
             suite_failed=0
 
-            if ! docker compose up -d --build --force-recreate; then
+            if ! docker compose up -d --build --force-recreate --pull missing; then
               echo "[ERROR] Failed to start containers for ${suite}."
               suite_failed=1
             fi

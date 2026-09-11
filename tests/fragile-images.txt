@@ -1,0 +1,24 @@
+# List of third-party (non-wearefrank) images used by tests/**/docker-compose.yaml
+# that have proven unreliable upstream (a tag/path was removed, breaking CI with
+# no warning). CI (.github/workflows/ci.yml, "integration-tests" job) pulls each
+# image listed here once, saves it as a tarball, and restores it from that cache
+# on later runs instead of re-pulling from the origin registry every time. As
+# long as the cache entry survives (evicted after ~7 days unused, see
+# https://docs.github.com/actions/using-workflows/caching-dependencies-to-speed-up-workflows),
+# a suite keeps working even if upstream deletes/renames the image afterwards.
+#
+# Requirements for an entry to actually be protected by this cache:
+# - The exact same reference must also be used in the service's `image:` field
+#   in its docker-compose.yaml, with `pull_policy: missing` (or `never`) set,
+#   so Docker Compose doesn't try to contact the registry when the image is
+#   already present locally.
+# - Use a tag reference (repo:tag), not an `@sha256:...` digest. `docker save`/
+#   `docker load` only preserve RepoTags, not RepoDigests, so a digest-only
+#   reference can never be matched locally again after being loaded from the
+#   cache, and Compose will attempt (and fail) to pull it anyway.
+#
+# One full image reference per line. Blank lines and lines starting with '#'
+# are ignored.
+#
+# registry.gitlab.com/.../open-ftv/pdp:v0.1.0 == sha256:500feae2ba403d79a2ec0c454da0f07a1dc4561db6191f3a2d307eae0c22be81
+registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/pdp:v0.1.0
