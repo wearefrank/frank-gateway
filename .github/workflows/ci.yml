@@ -96,7 +96,7 @@ jobs:
       - name: Restore fragile images from cache, or pull and populate it
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           mkdir -p /tmp/fragile-image-cache
           while IFS= read -r image || [ -n "$image" ]; do
             [ -z "$image" ] && continue
@@ -107,15 +107,15 @@ jobs:
               docker load -i "$tarball"
             else
               echo "[INFO] Cache miss, pulling ${image}."
-              docker pull "$image"
+              # Don't let a dead upstream image abort the whole job: log it and let
+              # the affected suite fail on its own "docker compose up" step below.
+              if ! docker pull "$image"; then
+                echo "[WARN] Failed to pull ${image}; the suite(s) using it will fail to start."
+                continue
+              fi
               docker save -o "$tarball" "$image"
             fi
           done < tests/fragile-images.txt
-
-      # TEMPORARY: proves the auth-zen suite survives with the upstream registry
-      # unreachable. Remove this step once verified.
-      - name: Simulate upstream outage (temporary test step)
-        run: echo "127.0.0.1 registry.gitlab.com" | sudo tee -a /etc/hosts
 
       - name: Run Bruno test suites (non-blocking)
         shell: bash
