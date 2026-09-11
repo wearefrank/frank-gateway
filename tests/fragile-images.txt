@@ -1,0 +1,5 @@
+# Third-party test-only images that have disappeared from their upstream
+# registry before (tag/path removed). CI caches these as tarballs so a
+# suite still runs from cache even if upstream becomes unavailable.
+# One full image reference (ideally pinned by @sha256 digest) per line.
+registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/pdp@sha256:500feae2ba403d79a2ec0c454da0f07a1dc4561db6191f3a2d307eae0c22be81
