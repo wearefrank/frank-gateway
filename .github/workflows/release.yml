@@ -25,7 +25,7 @@ jobs:
       version-next-tag: ${{ steps.next-version.outputs.release-tag }}
       version-next-type: ${{ steps.next-version.outputs.release-type }}
     steps:
-      - uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           disable-sudo: true
           egress-policy: audit
@@ -33,10 +33,10 @@ jobs:
             github.com:443
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #7.0.1
       
       - name: "Setup Node"
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 #6.2.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 #7.0.0
         with:
           node-version: 24
       
@@ -86,29 +86,29 @@ jobs:
             image: ghcr.io/wearefrank/frank-gateway
 
     steps:
-      - uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
       - name: Download Pre-build Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 #7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #8.0.1
         with:
           pattern: pre-build-*
           merge-multiple: true
   
       - name: Download Build Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 #7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #8.0.1
         with:
           pattern: build-*
           merge-multiple: true
 
       - name: Setup Node
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 #6.2.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 #7.0.0
         with:
           node-version: 24
       
@@ -121,10 +121,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e
 
   docker-release:
-    uses: wearefrank/ci-cd-templates/.github/workflows/docker-release-generic.yml@ccdadddd25f58e57826be3865961e241c9b8ee17 #2.1.5
+    uses: wearefrank/ci-cd-templates/.github/workflows/docker-release-generic.yml@3ea6c89c3ffb6c75528377110fea41851bc87c01 #2.4.11
     needs: 
       - analyze-commits
       - release
