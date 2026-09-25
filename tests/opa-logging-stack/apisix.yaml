@@ -1,0 +1,31 @@
+routes:
+  - id: 1
+    name: upstream-test
+    uri: /*
+    upstream_id: 1
+    status: 1
+    plugins:
+      opa:
+        host: http://opa:8181
+        policy: apisix/authz/result
+        with_body: true
+        with_route: true
+        send_headers_upstream:
+          - x-opa-user
+      loki-logger:
+        log_format:
+          Hello: "World!"
+        endpoint_addrs:
+          - http://alloy:3101
+        log_labels:
+          gateway: frank-gateway
+          source: apisix-route-headers
+
+upstreams:
+  - id: 1
+    name: echo-upstream
+    desc: echo API
+    type: roundrobin
+    nodes:
+      "httpbun:80": 1
+#END

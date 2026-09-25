@@ -1,0 +1,378 @@
+logging {
+    level = "info"
+    format = "json"
+}
+
+///////////////////// LOKI /////////////////////
+
+discovery.kubernetes "pods" {
+    role = "pod"
+    namespaces {
+        names = ["alloy","cert-manager", "cnpg-system", "dab", "default", "dex",
+                "flux-system", "headlamp", "kube-node-lease", "kube-public", 
+                "kube-state-metrics", "kube-system", "system-upgrade-controller"]
+        own_namespace = true
+    }
+
+    selectors {
+        role  = "pod"
+        field = "spec.nodeName=" + coalesce(env("HOSTNAME"), constants.hostname)
+    }
+}
+
+loki.source.kubernetes "pod_logs" {
+    targets    = discovery.relabel.pod_logs.output
+    forward_to = [loki.process.add_cluster_label.receiver]
+}
+
+loki.process "add_cluster_label" {
+    forward_to = [loki.write.main.receiver]
+    stage.drop {
+        older_than = "180m"
+        drop_counter_reason = "logs are older than 180 min"
+    }
+
+    stage.static_labels {
+        values = {
+            cluster = env("CLUSTER_NAME"),
+        }
+    }
+}
+
+// this also has to be reviewed, we need to decrease labels and even wrongly
+// usage of labels
+discovery.relabel "pod_logs" {
+    targets = discovery.kubernetes.pods.targets
+
+    rule {
+            source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name", "__meta_kubernetes_pod_label_app", "__tmp_controller_name", "__meta_kubernetes_pod_name"]
+            regex         = "^;*([^;]+)(;.*)?$"
+            target_label  = "app"
+    }
+
+    rule {
+            source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_instance", "__meta_kubernetes_pod_label_instance"]
+            regex         = "^;*([^;]+)(;.*)?$"
+            target_label  = "instance"
+    }
+
+    rule {
+            source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component", "__meta_kubernetes_pod_label_component"]
+            regex         = "^;*([^;]+)(;.*)?$"
+            target_label  = "component"
+    }
+
+    rule {
+            source_labels = ["__meta_kubernetes_namespace"]
+            target_label  = "namespace"
+    }
+
+    rule {
+            source_labels = ["namespace", "app"]
+            separator     = "/"
+            target_label  = "job"
+            replacement   = ""
+    }
+
+    rule {
+            source_labels = ["__meta_kubernetes_pod_container_name"]
+            target_label  = "container"
+    }
+
+    rule {
+            source_labels = ["__meta_kubernetes_pod_container_name"]
+            regex         = "opa"
+            target_label  = "log_type"
+            replacement   = "opa-decision"
+    }
+
+    rule {
+        source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+        target_label  = "__path__"
+        separator     = "/"
+        replacement   = "/var/log/pods/*$1/*.log"
+    }
+    // Label creation -  "container_runtime" field from "__meta_kubernetes_pod_container_id"
+    rule {
+        source_labels = ["__meta_kubernetes_pod_container_id"]
+        action = "replace"
+        target_label = "container_runtime"
+        regex = "^(\\S+):\\/\\/.+$"
+        replacement = "$1"
+    }
+}
+
+loki.write "main" {
+    endpoint {
+        url = "https://loki-gateway.commonground.test.utrecht.nl/loki/api/v1/push"
+        headers = { "X-Scope-OrgID" = env("ALLOY_TENANT_ID") }
+        authorization {
+            type        = "Bearer"
+            credentials_file = "/etc/alloy/secrets/bearer-token"
+        } 
+    }
+}
+
+///////////////////// LOKI ADDONS /////////////////////
+
+discovery.kubernetes "services" {
+    role = "service"
+}
+
+///////////////////// METRICS /////////////////////
+
+// enable the use of kubernetes objects 'podmonitors'
+//prometheus.operator.podmonitors "podmonitors" {
+//    forward_to = [prometheus.relabel.add_cluster_label.receiver]
+//
+//    namespaces = ["alloy","cert-manager", "cnpg-system","default","dab",
+//             "flux-system", "kube-node-lease", "kube-public", "kube-system",
+//             "nlx","system-upgrade-controller","wearefrank"]
+//}
+
+// enable the use of kubernetes objects 'servicemonitors'
+//prometheus.operator.servicemonitors "monitors" {
+//    forward_to = [prometheus.relabel.add_cluster_label.receiver]
+//
+//    namespaces = ["alloy","cert-manager", "cnpg-system","default","dab",
+//             "flux-system", "kube-node-lease", "kube-public", "kube-system",
+//             "nlx","system-upgrade-controller","wearefrank"]
+//}
+
+// KUBE-STATE-METRICS
+discovery.kubernetes "ksm_svc" {
+    role = "service"
+    namespaces {
+        names = ["kube-state-metrics"]
+    }
+}
+
+// we must honor labels so conflicting labels like namespace won't be relabeled as "external_namespace". This will 
+// break our current dashboard logic due to used filter variables. 
+// it might be possible to also do this via prometheus.operator.servicemonitor component and relabeling, but for now
+// we just enable a simple scrape. 
+// for more details see prometheus docs: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+prometheus.scrape "kube_state_metrics" {
+    targets         = discovery.kubernetes.ksm_svc.targets
+    scheme          = "http"
+    honor_labels    = true
+    scrape_interval = "30s"
+    forward_to      = [prometheus.relabel.add_cluster_label.receiver]
+}
+
+prometheus.exporter.self "alloy" {
+}
+
+prometheus.scrape "alloy" {
+    targets    = prometheus.exporter.self.alloy.targets
+    forward_to = [prometheus.relabel.add_cluster_label.receiver]
+}
+
+prometheus.relabel "add_cluster_label" {
+    forward_to        = [prometheus.remote_write.main.receiver]
+
+    // Preserve any existing cluster into cnpg_cluster label
+    rule {
+        source_labels = ["cluster"]
+        target_label  = "cnpg_cluster"
+        regex         = "(.+)"
+        replacement   = "$1"
+        action        = "replace"
+    }
+    // Add cluster label
+    rule {
+        action        = "replace"
+        target_label  = "cluster"
+        replacement   = env("CLUSTER_NAME")
+    }
+}
+
+prometheus.remote_write "main" {
+  endpoint {
+    url = "https://mimir-gateway.commonground.test.utrecht.nl/api/v1/push"
+    headers = { "X-Scope-OrgID" = env("ALLOY_TENANT_ID") }
+
+    queue_config {
+      sample_age_limit = "15m"
+    }
+    authorization {
+      type        = "Bearer"
+      credentials_file = "/etc/alloy/secrets/bearer-token"
+    } 
+  }
+}
+
+
+// Kubelet metrics & CAdvisor
+// The Kubelet gathers metrics statistics at the node, volume, pod and container level.
+// This information is emitted by the K8S Summary API, which can be reached through a 
+// proxied request on the K8S API server. The configuration below utilises this to
+// retrieve Kubelet and CAdvisor telemetry data points.
+discovery.kubernetes "k8s_nodes" {
+    role = "node"
+}
+
+discovery.relabel "kubelet" {
+    targets = discovery.kubernetes.k8s_nodes.targets
+
+    // Replace the address with the HTTPS 443 endpoint, as by default
+    // the '__address__' label stores the HTTP endpoint.
+    rule {
+        replacement  = "kubernetes.default.svc:443"
+        target_label = "__address__"
+    }
+
+    // Set the '__metrics_path__' label used by the Prometheus scrape action
+    // later in the pipeline. This interpolates the node name in the proxy request
+    // for the API server, which will in turn query the Summary API.
+    rule {
+        regex         = "(.+)"
+        source_labels = ["__meta_kubernetes_node_name"]
+        replacement   = "/api/v1/nodes/$1/proxy/metrics"
+        target_label  = "__metrics_path__"
+    }
+}
+
+prometheus.scrape "kubelet" {
+    job_name = "integrations/kubernetes/kubelet"
+    targets  = discovery.relabel.kubelet.output
+    scheme   = "https"
+
+    tls_config {
+        server_name          = "kubernetes"
+        // Use the certificate bundle placed into the filesystem tree of every container in K8S.
+        ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        insecure_skip_verify = false
+    }
+
+    // Use the default credential that every Pod has through its associated Service Account.
+    bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    forward_to        = [prometheus.relabel.add_cluster_label.receiver]
+}
+
+discovery.relabel "cadvisor" {
+    targets = discovery.kubernetes.k8s_nodes.targets
+
+    // Replace the address with the HTTPS 443 endpoint, as by default
+    // the '__address__' label stores the HTTP endpoint.
+    rule {
+        replacement  = "kubernetes.default.svc:443"
+        target_label = "__address__"
+    }
+
+    // Set the '__metrics_path__' label used by the Prometheus scrape action
+    // later in the pipeline. This interpolates the node name in the proxy request
+    // for the API server, which will in turn query the Summary API.
+    rule {
+        regex         = "(.+)"
+        source_labels = ["__meta_kubernetes_node_name"]
+        replacement   = "/api/v1/nodes/$1/proxy/metrics/cadvisor"
+        target_label  = "__metrics_path__"
+    }
+}
+
+prometheus.scrape "cadvisor" {
+    job_name = "integrations/kubernetes/cadvisor"
+    targets  = discovery.relabel.cadvisor.output
+    scheme   = "https"
+
+    tls_config {
+        server_name          = "kubernetes"
+        // Use the certificate bundle placed into the filesystem tree of every container in K8S.
+        ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        insecure_skip_verify = false
+    }
+
+    // Use the default credential that every Pod has through its associated Service Account.
+    bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    forward_to        = [prometheus.relabel.add_cluster_label.receiver]
+}
+
+///////////////////// METRICS ADDONS /////////////////////
+
+// added for kubernetes api dashboard
+discovery.kubernetes "kubernetes" {
+	role = "endpoints"
+}
+
+discovery.relabel "kubernetes" {
+    targets = discovery.kubernetes.kubernetes.targets
+    rule {
+        source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_service_name", "__meta_kubernetes_endpoint_port_name"]
+        regex         = "default;kubernetes;https"
+        action        = "keep"
+    }
+}
+
+prometheus.scrape "kubernetes" {
+    targets    = discovery.relabel.kubernetes.output
+    forward_to = [prometheus.relabel.kubernetes.receiver]
+    job_name   = "kubernetes-apiservers"
+    scheme     = "https"
+
+    authorization {
+        type             = "Bearer"
+        credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    }
+
+    tls_config {
+        ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        insecure_skip_verify = true
+    }
+}
+
+prometheus.relabel "kubernetes" {
+    forward_to = [prometheus.relabel.add_cluster_label.receiver]
+    rule {
+        source_labels = ["__name__"]
+        regex         = "(up|apiserver_request_duration_seconds_count|apiserver_request_duration_seconds_sum|workqueue_depth|process_cpu_seconds_total|process_resident_memory_bytes|apiserver_client_certificate_expiration_seconds_count|apiserver_request_duration_seconds_bucket|apiserver_request_total)"
+        action        = "keep"
+    }
+}
+
+///////////////////// AUDIT LOGGING /////////////////////
+
+// ── ADD: Audit log receiver endpoint ─────────────────────────────────────────
+loki.source.api "audit_receiver" {
+  http {
+    listen_address = "0.0.0.0"
+    listen_port    = 3101
+  }
+
+  forward_to = [loki.relabel.audit_cluster_labels.receiver]
+}
+
+loki.relabel "audit_cluster_labels" {
+  forward_to = [loki.write.aks_audit.receiver]   // <-- dedicated audit writer
+
+  rule {
+    target_label = "cluster"
+    replacement  = env("CLUSTER_NAME")
+  }
+
+  rule {
+    target_label = "env"
+    replacement  = env("ENV")
+  }
+
+  rule {
+    target_label = "job"
+    replacement  = "audit"
+  }
+}
+
+loki.write "aks_audit" {
+  endpoint {
+    url = "https://loki-audit-gateway.commonground.test.utrecht.nl/loki/api/v1/push"
+    headers = { "X-Scope-OrgID" = env("ALLOY_TENANT_ID") }
+    authorization {
+        type        = "Bearer"
+        credentials_file = "/etc/alloy/secrets/bearer-audit-token"
+    } 
+  }
+
+  external_labels = {
+    cluster = env("CLUSTER_NAME"),  // belt-and-suspenders: ensures cluster
+    env     = env("ENV"),           // label is on every stream even if
+  }                                 // relabel somehow drops it
+}
