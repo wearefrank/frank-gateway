@@ -31,11 +31,10 @@ services:
       - "run"
       - "--server"
       - "--addr=0.0.0.0:8181"
-      - "--config-file=/config/opa-config.yaml"
+      - "--set=decision_logs.console=true"
       - "/policies"
     volumes:
       - ./policies:/policies:ro
-      - ./opa-config.yaml:/config/opa-config.yaml:ro
     networks:
       apisix:
 
