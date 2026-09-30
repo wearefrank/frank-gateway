@@ -25,3 +25,11 @@ updates:
         patterns: [ "*" ]
     allow:
       - dependency-name: "apache/apisix"
+
+  - package-ecosystem: "docker"
+    directories: [ "/mirrors/*" ]
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "build(dependencies):"
