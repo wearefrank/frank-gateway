@@ -1,59 +1,30 @@
-name: Mirror third-party images
-
-# Copies the upstream image referenced in each mirrors/<name>/Dockerfile to
-# ghcr.io/<owner>/mirror-<name>:<tag>, so tests don't depend on upstream registries.
+name: Mirror Open FTV PDP
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master]
     paths:
-      - "mirrors/**"
       - ".github/workflows/mirror-images.yml"
   workflow_dispatch:
-
-concurrency:
-  group: mirror-images
-  cancel-in-progress: false
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       packages: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # 3.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Copy images to ghcr
+      - name: Pull and publish image to GHCR
         shell: bash
         env:
-          OWNER: ${{ github.repository_owner }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          owner="$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')"
-          for dockerfile in mirrors/*/Dockerfile; do
-            name="$(basename "$(dirname "$dockerfile")")"
-            src="$(awk 'toupper($1)=="FROM"{print $2; exit}' "$dockerfile")"
-            tag="${src##*:}"
-            if [ -z "$src" ] || [ "$tag" = "$src" ] || [[ "$tag" == */* ]]; then
-              echo "[ERROR] ${dockerfile} must contain 'FROM <image>:<tag>'."
-              exit 1
-            fi
-            dst="ghcr.io/${owner}/mirror-${name}:${tag}"
-            echo "[INFO] Mirroring ${src} -> ${dst}"
-            docker buildx imagetools create --tag "$dst" "$src"
-          done
+          source_image="registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/pdp:v0.1.0"
+          target_image="ghcr.io/wearefrank/mirror-open-ftv-pdp:v0.1.0"
+
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+          docker pull --platform linux/amd64 "$source_image"
+          docker tag "$source_image" "$target_image"
+          docker push "$target_image"
