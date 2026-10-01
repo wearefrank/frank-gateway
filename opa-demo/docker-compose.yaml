@@ -23,10 +23,8 @@ services:
     volumes:
       - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml
       - ./config.yaml:/usr/local/apisix/conf/config.yaml
-      - ./logs:/usr/local/apisix/logs
     ports:
       - "9080:9080/tcp"
-      - "9180:9180/tcp"
   
     networks:
       apisix:
