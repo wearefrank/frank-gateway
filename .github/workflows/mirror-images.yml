@@ -14,17 +14,17 @@ jobs:
       packages: write
 
     steps:
-      - name: Install Skopeo
-        run: sudo apt-get update && sudo apt-get install --yes skopeo
-
-      - name: Copy image to GHCR
+      - name: Pull and publish image to GHCR
         shell: bash
         env:
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          printf '%s' "$GHCR_TOKEN" | skopeo login ghcr.io --username "$GHCR_USER" --password-stdin
-          skopeo copy --all \
-            docker://registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/pdp:v0.1.0 \
-            docker://ghcr.io/wearefrank/mirror-open-ftv-pdp:v0.1.0
+          source_image="registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/pdp:v0.1.0"
+          target_image="ghcr.io/wearefrank/mirror-open-ftv-pdp:v0.1.0"
+
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+          docker pull --platform linux/amd64 "$source_image"
+          docker tag "$source_image" "$target_image"
+          docker push "$target_image"
