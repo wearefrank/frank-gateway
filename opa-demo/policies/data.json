@@ -1,0 +1,12 @@
+{
+  "allowed_fields": [
+    "adressering",
+    "burgerservicenummer",
+    "geboorte",
+    "geslacht",
+    "leeftijd",
+    "naam",
+    "nationaliteiten",
+    "verblijfplaats"
+  ]
+}
