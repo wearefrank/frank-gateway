@@ -1,0 +1,37 @@
+routes:
+  - id: 1
+    name: upstream-test
+    uri: /*
+    upstream_id: 1
+    status: 1
+    plugins:
+      opa:
+        host: http://opa:8181
+        policy: apisix/authz/v1
+        with_body: true
+        # TODO navragen hoe het zit met de correlation id en opa(moet opa deze hebben)
+      opentelemetry:
+        sampler:
+          name: always_off       # generates trace context for logging but never exports spans 
+                                # "$opentelemetry_context_traceparent"," "$opentelemetry_trace_id",  "$opentelemetry_span_id"
+
+
+upstreams:
+  - name: httpbun
+    id: 1
+    nodes:
+      "httpbun": 1
+    type: roundrobin
+
+
+plugin_metadata:
+  - id: opentelemetry
+    set_ngx_var: true
+
+
+global:
+
+
+
+
+#END
