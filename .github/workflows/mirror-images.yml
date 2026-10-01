@@ -1,0 +1,30 @@
+name: Mirror Open FTV PDP
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - ".github/workflows/mirror-images.yml"
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - name: Pull and publish image to GHCR
+        shell: bash
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          source_image="registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/pdp:v0.1.0"
+          target_image="ghcr.io/wearefrank/mirror-open-ftv-pdp:v0.1.0"
+
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+          docker pull --platform linux/amd64 "$source_image"
+          docker tag "$source_image" "$target_image"
+          docker push "$target_image"
