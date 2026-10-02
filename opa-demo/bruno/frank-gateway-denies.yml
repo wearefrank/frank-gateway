@@ -1,14 +1,14 @@
 info:
-  name: opa
+  name: frank-gateway-denies
   type: http
-  seq: 3
+  seq: 2
 
 http:
-  method: POST
-  url: localhost:8181/v1/data/apisix/authz/v1
+  method: GET
+  url: localhost:9080/anything
   body:
     type: json
-    data: '{"input": {"request": {"body": {"fields": ["adressering", "naam"]}}}}'
+    data: '{"fields": ["adressering", "naam", "IllegalField"]}'
   auth: inherit
 
 settings:

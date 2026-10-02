@@ -39,3 +39,13 @@ Het is mogelijk om meerdere Rego-bestanden in een OPA-container te plaatsen. OPA
 ## Besluiten loggen
 
 Ook `opa-config.yaml` is van belang. In dit voorbeeld is het loggen van besluiten ingeschakeld. Deze logs kunnen worden gebruikt voor protocollering.
+
+
+## Alternatief
+
+Deze heb ik erin gezet om een andere oplossingsrichting te laten zien, ik krijg het idee dat deze complexer is maar hou het besluit voor de richting bij het core team. 
+
+Ook is het mogelijk op "Opal" te gebruiken. 
+Opal splitst de architectuur voor beslissingen verder op in servers die de regels ophalen en clients die deze regels uitvoeren. 
+In het voorbeeld van opal-docker-compose staat een voorbeeld van hoe we dit voor eekels momenteel lokaal testen. 
+Hier luisterd de opal server naar de eekels-policies repo. Bij wijzigingen haalt hij deze op, en zet hij het neer in de opal clients. Deze opal clients werken vervolgens functioneel ongeveer hetzelfde als de standalone opa setup. 

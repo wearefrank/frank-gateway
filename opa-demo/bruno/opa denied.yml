@@ -1,14 +1,14 @@
 info:
-  name: opa
+  name: opa denied
   type: http
-  seq: 3
+  seq: 4
 
 http:
   method: POST
   url: localhost:8181/v1/data/apisix/authz/v1
   body:
     type: json
-    data: '{"input": {"request": {"body": {"fields": ["adressering", "naam"]}}}}'
+    data: '{"input": {"request": {"body": {"fields": ["adressering", "naam","IllegalField"]}}}}'
   auth: inherit
 
 settings:

@@ -42,22 +42,13 @@ services:
     restart: always
     command: ["run", "--server", "--config-file", "/opa-config.yaml", "--addr", ":8181", "/policies"]
     volumes:
-      - ./policies:/policies
+      - ./opa/opa-config.yaml:/opa-config.yaml:ro
+      - ./opa/policies:/policies:ro
     ports:
       - "8181:8181/tcp"
-    configs:
-      - source: opa-config.yaml
-        target: /opa-config.yaml
     networks:
       apisix:
     
-
-configs:
-  # Hierdoor gaat hij de logs in de console weergeven, dit kan gebruikt worden voor logging 
-  opa-config.yaml:
-    content: |
-      decision_logs:
-        console: true
 
 
 networks:
