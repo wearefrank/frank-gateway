@@ -1,10 +1,11 @@
-name: Mirror Open FTV PDP
+name: Mirror third-party images
 
 on:
   push:
     branches: [main, master]
     paths:
       - ".github/workflows/mirror-images.yml"
+      - "mirrors/**"
   workflow_dispatch:
 
 jobs:
@@ -14,17 +15,43 @@ jobs:
       packages: write
 
     steps:
+      - name: Check out repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
       - name: Pull and publish image to GHCR
         shell: bash
         env:
+          OWNER: ${{ github.repository_owner }}
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          source_image="registry.gitlab.com/digilab.overheid.nl/ecosystem/ftv/open-ftv/pdp:v0.1.0"
-          target_image="ghcr.io/wearefrank/mirror-open-ftv-pdp:v0.1.0"
+          shopt -s nullglob
+          dockerfiles=(mirrors/*/Dockerfile)
+          if [[ ${#dockerfiles[@]} -eq 0 ]]; then
+            echo "::error::No mirror Dockerfiles found under mirrors/."
+            exit 1
+          fi
 
+          owner="${OWNER,,}"
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
-          docker pull --platform linux/amd64 "$source_image"
-          docker tag "$source_image" "$target_image"
-          docker push "$target_image"
+
+          for dockerfile in "${dockerfiles[@]}"; do
+            name="$(basename "$(dirname "$dockerfile")")"
+            source_image="$(awk 'toupper($1)=="FROM" { print $2; exit }' "$dockerfile")"
+            if [[ -z "$source_image" || "$source_image" == *@* || "$source_image" != *:* ]]; then
+              echo "::error::${dockerfile} must contain FROM <image>:<tag>."
+              exit 1
+            fi
+            tag="${source_image##*:}"
+            if [[ -z "$tag" || "$tag" == */* ]]; then
+              echo "::error::${dockerfile} must use an image tag, not a digest."
+              exit 1
+            fi
+
+            target_image="ghcr.io/${owner}/mirror-${name}:${tag}"
+            echo "[INFO] Mirroring ${source_image} to ${target_image}"
+            docker pull --platform linux/amd64 "$source_image"
+            docker tag "$source_image" "$target_image"
+            docker push "$target_image"
+          done
