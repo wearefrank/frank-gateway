@@ -158,7 +158,7 @@ jobs:
 
             suite_failed=0
 
-            if ! docker compose up -d --build --force-recreate; then
+            if ! docker compose up -d --build --force-recreate --pull missing; then
               echo "[ERROR] Failed to start containers for ${suite}."
               suite_failed=1
             fi
