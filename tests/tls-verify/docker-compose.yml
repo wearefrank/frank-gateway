@@ -1,0 +1,25 @@
+x-upstream: &upstream
+  image: nginx:alpine
+  network_mode: "service:gateway"
+  volumes:
+    - ./certs:/certs:ro
+    - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+
+services:
+  gateway:
+    build: ../..
+    ports: ["9080:9080"]
+    extra_hosts:
+      - "upstream-valid:127.0.0.1"
+      - "upstream-wronghost:127.0.0.1"
+      - "upstream-selfsigned:127.0.0.1"
+      - "upstream-untrusted:127.0.0.1"
+    volumes:
+      - ./certs/ca.crt:/certs/ca.crt:ro
+      - ./apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ./apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+
+  upstream-valid:      { <<: *upstream, environment: { CERT: valid,      PORT: "8441" } }
+  upstream-wronghost:  { <<: *upstream, environment: { CERT: wronghost,  PORT: "8442" } }
+  upstream-selfsigned: { <<: *upstream, environment: { CERT: selfsigned, PORT: "8443" } }
+  upstream-untrusted:  { <<: *upstream, environment: { CERT: untrusted,  PORT: "8444" } }

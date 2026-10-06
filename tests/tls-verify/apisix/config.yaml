@@ -1,0 +1,7 @@
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml
+apisix:
+  ssl:
+    ssl_trusted_certificate: /certs/ca.crt

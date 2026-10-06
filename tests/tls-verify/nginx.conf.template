@@ -1,0 +1,6 @@
+server {
+  listen ${PORT} ssl;
+  ssl_certificate     /certs/${CERT}.crt;
+  ssl_certificate_key /certs/${CERT}.key;
+  location / { return 200 "ok\n"; }
+}

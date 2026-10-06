@@ -23,13 +23,7 @@ USER root
 RUN chmod -R 644 /usr/local/share/ca-certificates && \
     update-ca-certificates && \
     cp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.pem
-
-#patch a bug in the APISIX code that causes the gateway to crash when loading certificates in environment variables. see https://github.com/apache/apisix/issues/7223#issuecomment-1380123833
-RUN sed -i \
-    -e '635i sys_conf["envs"]= {}' \
-    -e 's~table_insert(sys_conf\["envs"\], name .. "=" .. value)~table_insert(sys_conf["envs"], name)~g' \
-    /usr/local/apisix/apisix/cli/ops.lua
-    
+   
 RUN apt-get update && apt-get install -y \
     lua5.1 \
     luarocks \
