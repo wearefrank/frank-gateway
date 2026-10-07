@@ -1,8 +1,8 @@
-FROM apache/apisix:3.18.0-ubuntu
+FROM apache/apisix:3.19.0-ubuntu
 
 ARG BUILD_DATE
 LABEL org.opencontainers.image.created=$BUILD_DATE
-LABEL based-on="Apache APISIX 3.16.0 Ubuntu"
+LABEL based-on="Apache APISIX 3.19.0 Ubuntu"
 
 # Overlay patched APISIX plugins from the local patches folder.
 # Files with the same path/name in /usr/local/apisix/apisix/plugins are replaced.
@@ -23,13 +23,7 @@ USER root
 RUN chmod -R 644 /usr/local/share/ca-certificates && \
     update-ca-certificates && \
     cp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.pem
-
-#patch a bug in the APISIX code that causes the gateway to crash when loading certificates in environment variables. see https://github.com/apache/apisix/issues/7223#issuecomment-1380123833
-RUN sed -i \
-    -e '635i sys_conf["envs"]= {}' \
-    -e 's~table_insert(sys_conf\["envs"\], name .. "=" .. value)~table_insert(sys_conf["envs"], name)~g' \
-    /usr/local/apisix/apisix/cli/ops.lua
-    
+   
 RUN apt-get update && apt-get install -y \
     lua5.1 \
     luarocks \
