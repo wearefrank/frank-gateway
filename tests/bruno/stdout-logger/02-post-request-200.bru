@@ -1,0 +1,22 @@
+meta {
+  name: POST request through stdout-logger returns 200
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/post
+  body: json
+}
+
+body:json {
+  {
+    "data": "hello"
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

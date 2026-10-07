@@ -1,0 +1,15 @@
+meta {
+  name: GET request through stdout-logger returns 200
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/get
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
