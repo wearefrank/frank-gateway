@@ -120,11 +120,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.WEAREFRANK_BOT_PAT }}
           GH_TOKEN: ${{ secrets.WEAREFRANK_BOT_PAT }}
-      - name: Semantic Release
-        run: semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
 
   docker-release:
     permissions:
