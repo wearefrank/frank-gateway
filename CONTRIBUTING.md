@@ -237,13 +237,17 @@ The plugin is configured as a map of variable name → JSONPath expression. Each
 Example configuration:
 ```yaml
 response-extractor:
-  transaction_id: "$.transactionId"
-  status_code: "$.result.status"
+  fields:
+    transaction_id: "$.transactionId"
+    status_code: "$.result.status"
+  max_body_size: 1048576   # optional, defaults to 1 MB
+  content_types:           # optional, defaults to ["application/json"]
+    - application/json
 ```
 
 This would make `$transaction_id` and `$status_code` available as APISIX variables for logging or further processing.
 
-> **Note:** The plugin only processes JSON responses (`application/json` or `+json`). Responses without a JSON body are silently skipped. The extractor buffers up to 1 MB of response body; larger responses are skipped to protect memory usage.
+> **Note:** The plugin only processes JSON responses (a `Content-Type` matching one of `content_types` or ending in `+json`). Responses without a matching content type are silently skipped. The extractor buffers up to `max_body_size` bytes of response body (1 MB by default); larger responses are skipped to protect memory usage.
 
 ### Cert Auth 
 
