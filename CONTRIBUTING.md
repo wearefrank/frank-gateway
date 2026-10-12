@@ -234,6 +234,19 @@ The plugin is configured as a map of variable name → JSONPath expression. Each
 - Stored as `ctx.var.extracted` (a JSON-encoded string, usable in `log_format`)
 - Stored individually as `ctx.var.<variable_name>` for direct access in log formats or other plugins
 
+**Configuration change:** Extraction fields must now be nested under `fields`. Configurations that previously passed the field map directly are no longer valid. For example, change:
+```yaml
+response-extractor:
+  ip: "$.headers['X-Real-Ip']"
+```
+to:
+```yaml
+response-extractor:
+  fields:
+    ip: "$.headers['X-Real-Ip']"
+```
+Plugin options such as `max_body_size` and `content_types` remain alongside `fields`.
+
 Example configuration:
 ```yaml
 response-extractor:
