@@ -87,6 +87,7 @@ jobs:
     needs:
       - analyze-commits
       - ci
+      - docker-ci
     steps:
       - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
@@ -94,6 +95,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #7.0.0
+        with:
+          token: ${{ secrets.WEAREFRANK_BOT_PAT }}
 
       - name: Download Pre-build Artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c #8.0.1
