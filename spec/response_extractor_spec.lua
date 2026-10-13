@@ -81,13 +81,13 @@ describe("response-extractor plugin", function()
 			}
 		end
 
-		_G.ngx = { arg = { nil, false } }
+		_G.ngx = { arg = { nil, false }, header = { ["Content-Type"] = "application/json" } }
 
 		plugin = require("apisix.plugins.response-extractor")
 	end)
 
 	it("delegates schema checks to apisix core", function()
-		local conf = { ip = "$.headers['X-Real-Ip']" }
+		local conf = { fields = { ip = "$.headers['X-Real-Ip']" } }
 
 		local ok = plugin.check_schema(conf)
 
@@ -98,7 +98,7 @@ describe("response-extractor plugin", function()
 	end)
 
 	it("buffers chunks when response is not finished", function()
-		local conf = { ip = "$.headers['X-Real-Ip']" }
+		local conf = { fields = { ip = "$.headers['X-Real-Ip']" } }
 		local ctx = { var = {} }
 
 		ngx.arg = { '{"headers":', false }
@@ -113,8 +113,10 @@ describe("response-extractor plugin", function()
 
 	it("extracts configured values on response end", function()
 		local conf = {
-			ip = "$.headers['X-Real-Ip']",
-			requestId = "$.headers['X-Request-Id']"
+			fields = {
+				ip = "$.headers['X-Real-Ip']",
+				requestId = "$.headers['X-Request-Id']"
+			}
 		}
 		local ctx = { var = {} }
 
@@ -140,8 +142,10 @@ describe("response-extractor plugin", function()
 
 	it("returns empty extracted arrays when JSON decode fails", function()
 		local conf = {
-			ip = "$.headers['X-Real-Ip']",
-			requestId = "$.headers['X-Request-Id']"
+			fields = {
+				ip = "$.headers['X-Real-Ip']",
+				requestId = "$.headers['X-Request-Id']"
+			}
 		}
 		local ctx = { var = {} }
 
@@ -165,8 +169,10 @@ describe("response-extractor plugin", function()
 
 	it("logs jsonpath failures and keeps empty arrays for failed paths", function()
 		local conf = {
-			ip = "$.headers['X-Real-Ip']",
-			missing = "$.headers['Missing']"
+			fields = {
+				ip = "$.headers['X-Real-Ip']",
+				missing = "$.headers['Missing']"
+			}
 		}
 		local ctx = { var = {} }
 
@@ -183,5 +189,109 @@ describe("response-extractor plugin", function()
 		assert.are.same("missing", warn_logs[1][2])
 		assert.are.same(": ", warn_logs[1][3])
 		assert.are.same("unsupported path", warn_logs[1][4])
+	end)
+
+	it("skips extraction for non-JSON content types", function()
+		local conf = { fields = { ip = "$.headers['X-Real-Ip']" } }
+		local ctx = { var = {} }
+
+		ngx.header["Content-Type"] = "text/plain"
+		ngx.arg = { '{"headers":{"X-Real-Ip":"127.0.0.1"}}', true }
+		plugin.body_filter(conf, ctx)
+
+		assert.is_nil(ctx.extracted)
+		assert.is_nil(ctx.var.extracted)
+		assert.are.same(0, #decode_calls)
+		assert.is_nil(ctx._resp_body_chunks)
+	end)
+
+	it("accepts content types with a +json suffix", function()
+		local conf = { fields = { ip = "$.headers['X-Real-Ip']" } }
+		local ctx = { var = {} }
+
+		ngx.header["Content-Type"] = "application/hal+json; charset=utf-8"
+		ngx.arg = { '{"headers":{"X-Real-Ip":"127.0.0.1","X-Request-Id":"req-1"}}', true }
+		plugin.body_filter(conf, ctx)
+
+		assert.are.same(1, #decode_calls)
+		assert.are.same("127.0.0.1", ctx.extracted.ip[1])
+	end)
+
+	it("accepts additional configured content types", function()
+		local conf = {
+			fields = { ip = "$.headers['X-Real-Ip']" },
+			content_types = { "application/vnd.api+json", "text/x-json" }
+		}
+		local ctx = { var = {} }
+
+		ngx.header["Content-Type"] = "text/x-json"
+		ngx.arg = { '{"headers":{"X-Real-Ip":"127.0.0.1","X-Request-Id":"req-1"}}', true }
+		plugin.body_filter(conf, ctx)
+
+		assert.are.same(1, #decode_calls)
+		assert.are.same("127.0.0.1", ctx.extracted.ip[1])
+	end)
+
+	it("skips extraction once the buffered body exceeds max_body_size", function()
+		local conf = {
+			fields = { ip = "$.headers['X-Real-Ip']" },
+			max_body_size = 10
+		}
+		local ctx = { var = {} }
+
+		ngx.arg = { "this chunk is definitely longer than ten bytes", false }
+		plugin.body_filter(conf, ctx)
+
+		assert.is_nil(ctx._resp_body_chunks)
+		assert.are.same(1, #warn_logs)
+		assert.are.same("response body exceeds max_body_size (", warn_logs[1][1])
+
+		-- further chunks (including eof) are ignored once the limit is exceeded
+		ngx.arg = { "trailing", true }
+		plugin.body_filter(conf, ctx)
+
+		assert.is_nil(ctx.extracted)
+		assert.is_nil(ctx.var.extracted)
+		assert.are.same(0, #decode_calls)
+	end)
+
+	it("uses the default 1 MB body size limit when max_body_size is not configured", function()
+		local conf = { fields = { ip = "$.headers['X-Real-Ip']" } }
+		local ctx = { var = {} }
+
+		ngx.arg = { string.rep("a", 1024 * 1024 + 1), true }
+		plugin.body_filter(conf, ctx)
+
+		assert.is_nil(ctx._resp_body_chunks)
+		assert.is_nil(ctx.extracted)
+		assert.are.same(0, #decode_calls)
+	end)
+
+	it("skips extraction when the cumulative size of several chunks exceeds max_body_size", function()
+		local conf = {
+			fields = { ip = "$.headers['X-Real-Ip']" },
+			max_body_size = 10
+		}
+		local ctx = { var = {} }
+
+		ngx.arg = { "12345", false }
+		plugin.body_filter(conf, ctx)
+
+		assert.are.same(1, #ctx._resp_body_chunks)
+		assert.are.same(0, #warn_logs)
+
+		ngx.arg = { "6789012345", false }
+		plugin.body_filter(conf, ctx)
+
+		assert.is_nil(ctx._resp_body_chunks)
+		assert.are.same(1, #warn_logs)
+		assert.are.same("response body exceeds max_body_size (", warn_logs[1][1])
+
+		ngx.arg = { "trailing", true }
+		plugin.body_filter(conf, ctx)
+
+		assert.is_nil(ctx.extracted)
+		assert.is_nil(ctx.var.extracted)
+		assert.are.same(0, #decode_calls)
 	end)
 end)
