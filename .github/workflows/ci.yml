@@ -206,6 +206,14 @@ jobs:
               fi
             fi
 
+            if [ "$suite_failed" -eq 0 ] && [ "$suite" = "stdout-logger" ]; then
+              echo "[INFO] Waiting for httpbun upstream readiness (${suite})..."
+              if ! wait_http_ok_docker "$suite_network" "http://apisix:9080/get" 30; then
+                echo "[ERROR] httpbun upstream not ready for ${suite}."
+                suite_failed=1
+              fi
+            fi
+
             if [ "$suite_failed" -eq 0 ]; then
               if ! docker run --rm \
                 --network "$suite_network" \

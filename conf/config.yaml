@@ -536,6 +536,7 @@ plugins:                           # plugin list (sorted by priority)
   - soap-action-router             
   - openid-connect-client
   - fsc
+  - stdout-logger
   #- gm                            # priority: -43
   - aws-lambda                     # priority: -1899
   - azure-functions                # priority: -1900
