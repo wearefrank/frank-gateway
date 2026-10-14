@@ -1,0 +1,27 @@
+# Regression test for Frank-gateway issue 152.
+# The certificate and key contain newlines and are injected through environment variables.
+
+ssls:
+  - id: 1
+    snis:
+      - "localhost"
+      - "apisix.localhost"
+      - "host.docker.internal"
+    cert: "${{SERVER_CERT}}"
+    key: "${{SERVER_KEY}}"
+
+routes:
+  - name: anything
+    id: 1
+    uri: /anything
+    upstream_id: 1
+    status: 1
+
+upstreams:
+  - name: httpbun
+    id: 1
+    nodes:
+      "httpbun:80": 1
+    type: roundrobin
+
+#END
