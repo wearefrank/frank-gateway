@@ -61,6 +61,7 @@ call :run_suite merge-config
 call :run_suite oidc-client
 call :run_suite opa
 call :run_suite soap-action-router
+call :run_suite regression-tests/multiline-cert-env
 
 echo.
 echo ========================================
@@ -173,7 +174,8 @@ set "ACTIVE_BRUNO_NETWORK=%BRUNO_DOCKER_NETWORK%"
 if not defined ACTIVE_BRUNO_NETWORK set "ACTIVE_BRUNO_NETWORK=!SUITE_DOCKER_NETWORK!"
 if not defined ACTIVE_BRUNO_NETWORK exit /b 1
 set "BRUNO_WORKDIR=/workspace/tests/bruno/%BRUNO_SUITE%"
-set "BRUNO_JUNIT=/workspace/tests/bruno/results/%BRUNO_SUITE%.xml"
+set "BRUNO_JUNIT_NAME=%BRUNO_SUITE:/=-%"
+set "BRUNO_JUNIT=/workspace/tests/bruno/results/%BRUNO_JUNIT_NAME%.xml"
 
 setlocal DisableDelayedExpansion
 docker run --rm --network "%ACTIVE_BRUNO_NETWORK%" --add-host "apisix.localhost:%APISIX_CONTAINER_IP%" --add-host "host.docker.internal:%APISIX_CONTAINER_IP%" -v "%REPO_ROOT_DOCKER%:/workspace" -w "%BRUNO_WORKDIR%" "%BRUNO_CLI_IMAGE%" run . -r --env "%BRUNO_ENV%" --insecure --reporter-junit "%BRUNO_JUNIT%"

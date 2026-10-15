@@ -33,4 +33,18 @@ RUN apt-get update && apt-get install -y \
 RUN luarocks install luafilesystem && \
     luarocks install lyaml
 
+    #Monkey Patch, issue Frank-gateway 152 - certificates with newlines in apisix.yml    
+    
+RUN set -eux; \
+    f=/usr/local/apisix/apisix/core/config_yaml.lua; \
+    sed -i \
+      -e 's|local resolved, err = file.resolve_conf_var_in_text(raw_config)|local resolved = yaml.load(raw_config); local ok, err = file.resolve_conf_var(resolved or {}); if not ok then resolved = nil end|' \
+      -e 's|return yaml.load(resolved), nil|return resolved, nil|' \
+      "$f"; \
+    grep -q 'file.resolve_conf_var(resolved or {})' "$f"; \
+    grep -q 'return resolved, nil' "$f"; \
+    ! grep -q 'resolve_conf_var_in_text(raw_config)' "$f"
+
+USER apisix
+
 CMD ["docker-start"]

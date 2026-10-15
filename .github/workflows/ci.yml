@@ -101,7 +101,8 @@ jobs:
           discovered_suites=()
 
           while IFS= read -r compose_file; do
-            suite="$(basename "$(dirname "$compose_file")")"
+            suite_dir="$(dirname "$compose_file")"
+            suite="${suite_dir#"${REPO_ROOT}/tests/"}"
             bruno_collection="${REPO_ROOT}/tests/bruno/${suite}/bruno.json"
 
             if [ -f "$bruno_collection" ]; then
@@ -109,7 +110,7 @@ jobs:
             else
               echo "[INFO] Skipping suite ${suite}: missing Bruno collection ${bruno_collection}."
             fi
-          done < <(find "${REPO_ROOT}/tests" -mindepth 2 -maxdepth 2 -type f -name docker-compose.yaml | sort)
+          done < <(find "${REPO_ROOT}/tests" -mindepth 2 -maxdepth 3 -type f -name docker-compose.yaml | sort)
 
           if [ "${#discovered_suites[@]}" -eq 0 ]; then
             echo "[WARN] No Bruno suites discovered."
@@ -213,7 +214,7 @@ jobs:
                 --add-host "host.docker.internal:$apisix_ip" \
                 -v "${REPO_ROOT}:/workspace" \
                 -w "/workspace/tests/bruno/${suite}" \
-                "$BRUNO_CLI_IMAGE" run . -r --env "$BRUNO_ENV" --insecure --reporter-junit "/workspace/tests/bruno/results/${suite}.xml"; then
+                "$BRUNO_CLI_IMAGE" run . -r --env "$BRUNO_ENV" --insecure --reporter-junit "/workspace/tests/bruno/results/${suite////-}.xml"; then
                 echo "[ERROR] Bruno execution failed for ${suite}."
                 suite_failed=1
               fi
