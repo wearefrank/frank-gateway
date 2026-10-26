@@ -1,22 +1,50 @@
 # cert-auth Plugin (Standalone)
+## Description
+Cert-auth is a Frank-Gateway plugin that allows for verification of a clients SAN/CN 
 
-This document explains how `cert-auth` is configured and tested in this repository.
+## Features:
+- protect a route with a check for either a CN or a SAN 
 
-In this setup, APISIX runs in standalone mode. That means TLS certificates, consumers, routes, and plugin configuration are all defined in `apisix-standalone-config.yaml`.
 
-## How matching works
+## Requirements:
+- Enabled in the config.yaml
+- Requires TLS communication
+- Requires a seperate consumer
+- Requires a consumer restriction 
+
+## Behavior 
 
 The `cert-auth` plugin can map a client certificate to a consumer in multiple ways.
 
 - `cn`: match the certificate Common Name (CN)
 - `identifier`: match SAN or CN
 
-Current examples in this repository:
+it will check the incoming certificate to find a match with the allowed CN or SAN and give back a 403 if this fails. 
 
-- Consumer `certuser` uses `cn: ssl.bult.bz`
-- Consumer `testuser` uses `identifier: apisix.localhost`
+## Known issues
 
-## Route protection
+## Configuration 
+
+### Plugin Metadata 
+Name  cert-auth
+Type  auth
+Priority  2401
+
+### Plugin Schema 
+local consumer_schema = {
+	type = "object",
+	properties = {
+		cn = {type = "string"},
+		identifier = {type = "string"},
+	},
+	oneOf = {
+		{ required = {"cn"} }, -- cn is kept around so existing consumer configs don't break, but identifier is the preferred field going forward.
+		{ required = {"identifier"} },
+	},
+}
+
+
+## Examples:
 
 Routes enable `cert-auth: {}` and are combined with `consumer-restriction` to control which authenticated consumers may access each route.
 
@@ -31,22 +59,13 @@ This provides both certificate-based authentication and route-level authorizatio
 ![Consumer](image.png)
 ![Consumer-Restriction](image-1.png)
 
-## Test commands
 
-Start from repository root.
+local _M = {
+	version = 0.2,
+	plugin, so APISIX knows it must pick a consumer
+	schema = schema,
+	consumer_schema = consumer_schema
+}
 
-### Certuser (CN-based)
-
-```shell
-openssl s_client -connect localhost:9443 -servername localhost -cert certs/test/client/certuser-new.pem -key certs/test/client/certuser-new.key
-```
-
-### Testuser (identifier-based via PKCS#12)
-
-```shell
-openssl pkcs12 -in certs/test/keystore/client.p12 -clcerts -nokeys -out certs/test/keystore/testuser-cert.pem -passin pass:
-openssl pkcs12 -in certs/test/keystore/client.p12 -nocerts -nodes -out certs/test/keystore/testuser-key.pem -passin pass:
-openssl s_client -connect localhost:9443 -servername apisix.localhost -cert certs/test/keystore/testuser-cert.pem -key certs/test/keystore/testuser-key.pem
-```
 
 For a full local setup and additional context, see `tests/cert-auth/README.MD`.

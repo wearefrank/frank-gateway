@@ -32,18 +32,86 @@ Type	auth
 
 Priority	1999
 
-### Plugin Schema
+### Options
 
-| Property                    | Type            | Required | Default                   | Description                                 |
-|-----------------------------|-----------------|----------|---------------------------|---------------------------------------------|
-| `host`                      | `string`        | Yes      | -                         | Base URL of the AuthZEN service             |
-| `endpoint`                  | `string`        | No       | `/access/v1/evaluation`   | Authorization evaluation endpoint           |
-| `body`                      | `object`        | Yes      | -                         | AuthZEN request body                        |
-| `timeout`                   | `integer`       | No       | `3000`                    | Timeout in milliseconds                     |
-| `ssl_verify`                | `boolean`       | No       | `true`                    | Enable TLS certificate verification         |
-| `send_headers_to_authzen`   | `array[string]` | No       | -                         | Request headers forwarded to AuthZEN        |
-| `send_headers_upstream`     | `array[string]` | No       | -                         | Response headers forwarded upstream         |
-| `X_Request_Id`              | `string`        | No       | -                         | Optional request ID header                  |
+Configure these options under `plugins.auth-zen` on a Route, Consumer, or globally. `host` and `body` are required.
+
+| Option | Required | Description | Default |
+| --- | --- | --- | --- |
+| `host` | Yes | Base URL of the AuthZEN service, such as `https://authzen.example.com`. | — |
+| `endpoint` | No | Path appended to `host` for the authorization request. | `/access/v1/evaluation` |
+| `body` | Yes | JSON object sent to AuthZEN. It must include `subject`, `resource`, and `action`; see [Request Body Structure](#request-body-structure). | — |
+| `timeout` | No | Timeout for the AuthZEN request, in milliseconds. Must be a positive integer. | `3000` |
+| `ssl_verify` | No | Verify the AuthZEN service's TLS certificate. | `true` |
+| `pdp_auth` | No | Authentication used when calling the PDP. See the examples below. | None |
+| `send_headers_to_authzen` | No | Incoming request headers to copy to the AuthZEN request. Only headers present in the request are forwarded. | None |
+| `send_headers_upstream` | No | AuthZEN response headers to copy into the request sent upstream. Only headers present in the PDP response are copied. | None |
+| `x_request_id` | No | Value to send to AuthZEN in the `X-Request-ID` header. Supports a variable placeholder. | None |
+
+### Configuration examples
+
+Basic configuration:
+
+```json
+{
+  "host": "https://authzen.example.com",
+  "body": {
+    "subject": {
+      "type": "user",
+      "id": "$consumer_name"
+    },
+    "resource": {
+      "type": "api",
+      "id": "$uri"
+    },
+    "action": {
+      "name": "$request_method"
+    }
+  }
+}
+```
+
+Bearer authentication can be configured with a literal token or a variable. `bearer_header` and `bearer_prefix` are optional and default to `Authorization` and `Bearer `:
+
+```json
+{
+  "pdp_auth": {
+    "mode": "bearer",
+    "bearer_token": "$http_x_pdp_token"
+  }
+}
+```
+
+For mutual TLS, enable `mtls` and provide both the PEM-encoded client certificate and private key. Bearer authentication and mTLS may be used together:
+
+```json
+{
+  "pdp_auth": {
+    "mode": "none",
+    "mtls": {
+      "enabled": true,
+      "client_cert": "$authzen_client_cert",
+      "client_key": "$authzen_client_key"
+    }
+  }
+}
+```
+
+To forward request headers to AuthZEN or copy response headers to the upstream request, configure lists of header names:
+
+```json
+{
+  "send_headers_to_authzen": [
+    "Authorization",
+    "X-Forwarded-For"
+  ],
+  "send_headers_upstream": [
+    "x-user-id",
+    "x-user-role"
+  ],
+  "x_request_id": "$request_id"
+}
+```
 
 ---
 
