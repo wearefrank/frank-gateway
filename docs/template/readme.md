@@ -1,4 +1,6 @@
-## `<Name>` Plugin
+# `<Name>` Plugin
+
+## Description:
 Describe the basics of the plugin here 
 
 ## Features:
@@ -8,13 +10,11 @@ Describe the basics of the plugin here
 
 ## Behavior: 
 
-## Known issues
+## Known issues:
 
-## 
+## Configuration:
 
-## Configuration
-
-### Plugin Metadata
+### Plugin Metadata: 
 Name	<Name>
 
 Type	<Type>
@@ -25,7 +25,8 @@ Priority	<Priority>
 
 | Property                    | Type            | Required | Default                   | Description                                 |
 |-----------------------------|-----------------|----------|---------------------------|---------------------------------------------|
-| `<NameOfField`                      | `<Type>`        | `<Required>`      | <`DefaultValue`>                         | <`Description`>            |
+| <NameOfField>             | <Type>        | <Required>| <DefaultValue>       | <Description>            |
+
 ### Configuration specifics 
 
 ## Examples 
