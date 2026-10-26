@@ -1,15 +1,29 @@
-### Authzen NLGOV plugin
+# Authzen NLGOV plugin
 
-auth-zen is an Apache APISIX authentication plugin that integrates with an external AuthZEN-compatible authorization service following the NLGOV standards to evaluate access decisions before proxying requests upstream.
+## Description: 
+auth-zen is a Frank!Gateway authentication plugin that integrates with an external AuthZEN-compatible authorization service following the NLGOV standards to evaluate access decisions before proxying requests upstream.
 
-### The plugin:
+## Features:
 
 - Sends a structured authorization request to an AuthZEN endpoint
-- Supports dynamic placeholder lookup using APISIX variables
+- Supports dynamic placeholder lookup using Frank!Gateway variables
 - Blocks requests by default when authorization fails or the auth service is unavailable
 - Optionally forwards selected request headers to AuthZEN
 - Optionally forwards selected response headers from AuthZEN upstream
 - Supports configurable timeout and TLS verification
+
+## Requirements:
+- Enabled in the config.yaml 
+- Requires a seperate Authzen server
+-
+
+## Behavior:
+Can be configured on a Route, Consumer or Globally. 
+The plugin sends the configured values(for example fields in the body) and lets the PDP decide if the request is allowed or not. The plugin then checks the value of decision in the response body, if this value is false, the gateway will return a 403.  If this request fails in some way, it will return a 503
+
+## Known issues
+
+## Configuration
 
 ### Plugin Metadata
 Name	auth-zen
@@ -18,8 +32,7 @@ Type	auth
 
 Priority	1999
 
-### Configuration
-## Plugin Schema
+### Plugin Schema
 
 | Property                    | Type            | Required | Default                   | Description                                 |
 |-----------------------------|-----------------|----------|---------------------------|---------------------------------------------|
@@ -34,14 +47,14 @@ Priority	1999
 
 ---
 
-## Request Body Structure
+### Request Body Structure
 
 The plugin sends the configured `body` object to the AuthZEN service after resolving placeholders from `ctx.var`.
 
 Any string value beginning with $ or containing $variable is resolved using ctx.var. This way, you can retrieve data from the body with a serverless-pre-function and set these as variables 
 
 
-### Structure
+### Examples
 
 ```
 {
@@ -69,7 +82,7 @@ Any string value beginning with $ or containing $variable is resolved using ctx.
     "request_id": "$request_id"
   }
 }
-````
+```
 
 ## Response
 
@@ -102,7 +115,7 @@ The plugin will then block or allow the request depending on the response
 
 When context exists on deny, it is returned as the response body.
 
-## Header Forwarding
+### Header Forwarding
 Forward Incoming Headers to AuthZEN
 ```
 "send_headers_to_authzen": [
@@ -111,7 +124,7 @@ Forward Incoming Headers to AuthZEN
 ]
 ```
 These headers are forwarded from the incoming request onto the authorization request to the authzen agent 
-#
+
 
 Forward AuthZEN Response Headers to Upstream
 ```
