@@ -15,7 +15,7 @@ auth-zen is a Frank!Gateway authentication plugin that integrates with an extern
 ## Requirements:
 - Enabled in the config.yaml 
 - Requires a seperate Authzen server
--
+- Response extractor/Serverless prefunction if you need extra variables
 
 ## Behavior:
 Can be configured on a Route, Consumer or Globally. 
@@ -32,7 +32,7 @@ Type	auth
 
 Priority	1999
 
-### Options
+### Configuration
 
 Configure these options under `plugins.auth-zen` on a Route, Consumer, or globally. `host` and `body` are required.
 

@@ -26,6 +26,7 @@ Priority	<Priority>
 | Property                    | Type            | Required | Default                   | Description                                 |
 |-----------------------------|-----------------|----------|---------------------------|---------------------------------------------|
 | <NameOfField>             | <Type>        | <Required>| <DefaultValue>       | <Description>            |
+### Configuration example
 
 ### Configuration specifics 
 

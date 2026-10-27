@@ -1,71 +1,75 @@
-# cert-auth Plugin (Standalone)
-## Description
-Cert-auth is a Frank-Gateway plugin that allows for verification of a clients SAN/CN 
+# Cert-auth Plugin
+
+## Description:
+
+The `cert-auth` plugin authenticates a client by matching its TLS client certificate to a configured Frank-Gateway consumer.
 
 ## Features:
-- protect a route with a check for either a CN or a SAN 
 
+- Identifies consumers using a certificate's DNS Subject Alternative Name (SAN) or subject serial number.
+- Supports matching the certificate Common Name (CN) for existing consumer configurations.
+- Works with `consumer-restriction` to authorize authenticated consumers on individual routes.
 
 ## Requirements:
-- Enabled in the config.yaml
-- Requires TLS communication
-- Requires a seperate consumer
-- Requires a consumer restriction 
 
-## Behavior 
+- Enable the plugin in `config.yaml`.
+- Configure TLS client-certificate authentication so APISIX receives the client's certificate.
+- Configure a consumer with either a `cert-auth.identifier` or `cert-auth.cn` value.
+- Add `cert-auth: {}` to routes that require certificate authentication.
+- Use `consumer-restriction` if access should be limited to specific authenticated consumers.
 
-The `cert-auth` plugin can map a client certificate to a consumer in multiple ways.
+## Behavior:
 
-- `cn`: match the certificate Common Name (CN)
-- `identifier`: match SAN or CN
+The plugin checks the client certificate against configured consumers. It first tries the certificate's DNS SAN and subject serial number against the consumer's `identifier` field, then falls back to the certificate's CN and the consumer's `cn` field.
 
-it will check the incoming certificate to find a match with the allowed CN or SAN and give back a 403 if this fails. 
+A missing client certificate returns HTTP `401`. If the certificate has no usable identity or no consumer matches it, the plugin returns HTTP `403`.
 
-## Known issues
+## Known issues:
 
-## Configuration 
+None currently documented.
 
-### Plugin Metadata 
-Name  cert-auth
-Type  auth
-Priority  2401
+## Configuration:
 
-### Plugin Schema 
-local consumer_schema = {
-	type = "object",
-	properties = {
-		cn = {type = "string"},
-		identifier = {type = "string"},
-	},
-	oneOf = {
-		{ required = {"cn"} }, -- cn is kept around so existing consumer configs don't break, but identifier is the preferred field going forward.
-		{ required = {"identifier"} },
-	},
-}
+### Plugin Metadata:
 
+| Name | Type | Priority |
+| --- | --- | --- |
+| `cert-auth` | `auth` | `2401` |
 
-## Examples:
+### Plugin Schema
 
-Routes enable `cert-auth: {}` and are combined with `consumer-restriction` to control which authenticated consumers may access each route.
+The route-level plugin has no configuration fields; enable it with `cert-auth: {}`. The following schema applies to the plugin configuration on a consumer:
 
-Example behavior:
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `cn` | string | Exactly one of `cn` or `identifier` | — | Certificate Common Name (CN) used to identify the consumer. Retained for compatibility. |
+| `identifier` | string | Exactly one of `cn` or `identifier` | — | Preferred identity value, matched against the certificate's DNS SAN or subject serial number. |
 
-- `/anything` only allows `certuser`
-- `/headers` only allows `testuser`
-- `/test-cn-with-identifier` rewrites to `/anything` and allows `certuser`
+### Configuration example
 
-This provides both certificate-based authentication and route-level authorization.
+```yaml
+consumers:
+  - username: certuser
+    plugins:
+      cert-auth:
+        identifier: api.example.org
 
-![Consumer](image.png)
-![Consumer-Restriction](image-1.png)
+routes:
+  - uri: /anything
+    plugins:
+      cert-auth: {}
+      consumer-restriction:
+        whitelist:
+          - certuser
+```
 
+### Configuration specifics
 
-local _M = {
-	version = 0.2,
-	plugin, so APISIX knows it must pick a consumer
-	schema = schema,
-	consumer_schema = consumer_schema
-}
+- Configure either `identifier` or `cn` on each consumer; the consumer schema requires exactly one.
+- A DNS SAN can be configured as the plain hostname, such as `api.example.org`. The plugin also recognizes values prefixed with `DNS:` or `DNSName:`.
+- The plugin authenticates the consumer; `consumer-restriction` is what limits a route to a consumer whitelist.
+- For a full local setup and additional context, see [`tests/cert-auth/README.MD`](../../tests/cert-auth/README.MD).
 
+## Examples
 
-For a full local setup and additional context, see `tests/cert-auth/README.MD`.
+The local test configuration demonstrates routes protected by `cert-auth` and restricted to different consumers. It also demonstrates authenticating with a CN-backed consumer before rewriting the request to another URI. See [`tests/cert-auth/apisix-standalone-config.yaml`](../../tests/cert-auth/apisix-standalone-config.yaml).
