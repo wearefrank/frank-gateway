@@ -27,14 +27,14 @@ Priority: 1
 
 | Property                    | Type            | Required | Default                   | Description                                 |
 |-----------------------------|-----------------|----------|---------------------------|---------------------------------------------|
-| request_limit | Integer | Yes | - | The limit of the request | 
+| request_limit | Integer | No | - | The limit of the request | 
 | request_limit_unit | Enum | No | bytes | unit of the limit, can be bytes, kilobytes, megabytes. This field is case sensitive! |
 | full_request | Boolean | No | false | when set to false it only checks the request body. When set to true it checks the entire HTTP request |
-| response_limit | Integer | Yes | - | The limit of the response | 
+| response_limit | Integer | No | - | The limit of the response | 
 | response_limit_unit | Enum | No | bytes | unit of the limit, can be bytes, kilobytes, megabytes. This field is case sensitive! |
-| full_response | Boolean | No | false | when set to false it only checks the response body. When set to true it checks the entire HTTP response |
+ | full_response | Integer | No | - | Omit to check only the response body. Any configured integer, including 0, selects the full-response check; boolean values are not accepted by the current schema. |
 | rejected_code | Integer | No | 413 | The status code that is used for a blocked request, can be a value between 200 and 599 |
-| rejected_message | String | No | size is too large | The message that is returned upon a blocked request | 
+| rejected_msg | String | No | size is too large | The message that is returned upon a blocked request | 
  
 ### Configuration example
 ```yaml

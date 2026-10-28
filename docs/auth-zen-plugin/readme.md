@@ -15,11 +15,11 @@ auth-zen is a Frank!Gateway authentication plugin that integrates with an extern
 ## Requirements:
 - Enabled in the config.yaml 
 - Requires a seperate Authzen server
-- Response extractor/Serverless prefunction if you need extra variables
+- If the decision needs fields from the incoming request body, these should be retrieved with Serverless prefunction. 
 
 ## Behavior:
 Can be configured on a Route, Consumer or Globally. 
-The plugin sends the configured values(for example fields in the body) and lets the PDP decide if the request is allowed or not. The plugin then checks the value of decision in the response body, if this value is false, the gateway will return a 403.  If this request fails in some way, it will return a 503
+The plugin sends the configured values(for example fields in the body) and lets the PDP decide if the request is allowed or not. A `false` decision returns HTTP 403, including the response context when present. Failure to contact the PDP also returns 403; a non-200 PDP response forwards that status. Malformed JSON or an invalid decision returns 503. Invalid resolved request-body fields or PDP authentication settings return 500.
 
 ## Known issues
 

@@ -16,7 +16,7 @@ Starts the build function on startup.
 retrieves all files inside the input directory. 
 Lists all sections and checks for any duplicate entries. 
 Merges the files together and writes to the output file 
-Runs a check every X seconds on the files in the input directory, if any change is detected reruns the build process
+Rebuilds and rewrites the merged configuration every `interval` seconds, even when the input files have not changed.
 
 ## Known issues:
 

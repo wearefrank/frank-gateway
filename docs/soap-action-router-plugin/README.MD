@@ -33,6 +33,7 @@ Priority	<Priority>
 | Property                    | Type            | Required | Default                   | Description                                 |
 |-----------------------------|-----------------|----------|---------------------------|---------------------------------------------|
 | <NameOfField>             | <Type>        | <Required>| <DefaultValue>       | <Description>            |
+<!-- Not filling this in yet, a rewrite of the plugin is needed  -->
 ### Configuration example
 
 ```yaml 

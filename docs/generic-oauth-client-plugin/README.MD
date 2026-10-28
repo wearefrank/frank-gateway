@@ -49,10 +49,7 @@ This example enables token caching and TLS certificate verification for the iden
 services:
   - id: 1
     name: protected-service
-    upstream:
-      type: roundrobin
-      nodes:
-        "api.example.org:443": 1
+    upstream-id: api-example 
     plugins:
       generic-oauth-client:
         token_endpoint: "https://identity.example.org/oauth2/token"
@@ -68,6 +65,12 @@ services:
 routes:
   - uri: /protected/*
     service_id: 1
+upstreams:
+    - id: api-example
+      schema: https
+      type: roundrobin
+      nodes:
+        "api.example.org:443": 1
 ```
 
 ### Configuration specifics 
