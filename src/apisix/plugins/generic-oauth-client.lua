@@ -17,7 +17,10 @@ local schema = {
 		},
 		client_id_value = {
 			description = "value for the parameter with the name defined in 'client_id_field_name'",
-			type = "string"
+			oneOf = {
+				{ type = "string" },
+				{ type = "integer", minimum = 0, maximum = 9007199254740991 }
+			}
 		},
 		ssl_verify = {
 			description = "Verify SSL certificate of host",
@@ -74,6 +77,9 @@ function _M.access(conf, ctx)
 
 	local client_id_name = conf.client_id_field_name
 	local client_id_value = conf.client_id_value
+	if type(client_id_value) == "number" then
+		client_id_value = string.format("%.0f", client_id_value)
+	end
 	local token_endpoint = conf.token_endpoint
 	local use_cache = conf.use_cache
 	local custom_params = conf.custom_parameters
