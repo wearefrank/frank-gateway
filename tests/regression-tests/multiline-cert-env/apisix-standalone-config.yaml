@@ -7,8 +7,8 @@ ssls:
       - "localhost"
       - "apisix.localhost"
       - "host.docker.internal"
-    cert: "${{SERVER_CERT}}"
-    key: "${{SERVER_KEY}}"
+    cert: ${{SERVER_CERT}}
+    key: ${{SERVER_KEY}}
 
 routes:
   - name: anything

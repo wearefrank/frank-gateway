@@ -72,6 +72,15 @@ services:
     networks:
       apisix:
 
+  apisix-cli-config-check:
+    extends:
+      service: apisix
+    entrypoint: ["sh", "-c"]
+    command: ["apisix init && apisix test"]
+    restart: "no"
+    profiles:
+      - cli-regression
+
   httpbun:
     image: sharat87/httpbun:latest
     restart: always
