@@ -1,0 +1,26 @@
+meta {
+  name: SOAP 1.2 body action matches the first route
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: application/soap+xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
+    <s:Body><Action>testTwo</Action></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

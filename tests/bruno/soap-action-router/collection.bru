@@ -1,0 +1,17 @@
+meta {
+  name: soap-action-router
+}
+
+tests {
+  if (res.getStatus() === 200) {
+    test("HTTPBun receives a POST at /anything over HTTP", function() {
+      const body = res.getBody();
+      expect(body.method).to.equal("POST");
+      expect(body.url).to.match(/^http:\/\/[^/]+\/anything$/);
+    });
+
+    test("request body is forwarded unchanged", function() {
+      expect(res.getBody().data).to.equal(req.getBody());
+    });
+  }
+}

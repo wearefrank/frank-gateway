@@ -1,0 +1,26 @@
+meta {
+  name: SOAP body action with a default namespace is extracted
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+    <Body><Action xmlns="urn:example">testOne</Action></Body>
+  </Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

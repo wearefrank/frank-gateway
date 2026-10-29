@@ -1,5 +1,5 @@
 meta {
-  name: action in SOAP body returns 200
+  name: nested SOAP body action matches the second route
   type: http
   seq: 3
 }
@@ -15,9 +15,13 @@ headers {
 
 body:xml {
   <?xml version="1.0" encoding="UTF-8"?>
-  <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+  <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:example">
     <soap:Body>
-      <Action>TestAction</Action>
+      <urn:MyAction>
+        <Payload>
+          <Action>testOne</Action>
+        </Payload>
+      </urn:MyAction>
     </soap:Body>
   </soap:Envelope>
 }
@@ -25,5 +29,10 @@ body:xml {
 tests {
   test("status is 200", function() {
     expect(res.getStatus()).to.equal(200);
+  });
+
+  test("body extraction does not inject a SOAPAction header", function() {
+    const headers = res.getBody().headers;
+    expect(Object.keys(headers).some(key => key.toLowerCase() === "soapaction")).to.equal(false);
   });
 }
