@@ -111,6 +111,15 @@ if errorlevel 1 (
     set "SUITE_FAILED=1"
     goto :run_suite_finish
 )
+if /I "%SUITE%"=="regression-tests/multiline-cert-env" (
+    echo [INFO] Validating APISIX CLI startup with multiline PEM values...
+    docker compose --profile cli-regression run --rm --no-deps apisix-cli-config-check
+    if errorlevel 1 (
+        echo [ERROR] APISIX CLI config validation failed for %SUITE%.
+        set "SUITE_FAILED=1"
+        goto :run_suite_finish
+    )
+)
 if defined RUN_ALL_TESTS_TRACE echo [TRACE] Containers started for %SUITE%
 
 set "CONTAINERS_STARTED=1"

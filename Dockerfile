@@ -45,6 +45,16 @@ RUN set -eux; \
     grep -q 'return resolved, nil' "$f"; \
     ! grep -q 'resolve_conf_var_in_text(raw_config)' "$f"
 
+RUN set -eux; \
+        f=/usr/local/apisix/apisix/cli/file.lua; \
+        sed -i \
+            -e 's|local resolved, err = resolve_conf_var_in_text(apisix_conf_yaml)|local resolved = yaml.load(apisix_conf_yaml); local ok, err = resolve_conf_var(resolved or {}); if not ok then resolved = nil end|' \
+            -e 's|local apisix_conf = yaml.load(resolved)|local apisix_conf = resolved|' \
+            "$f"; \
+        grep -q 'resolve_conf_var(resolved or {})' "$f"; \
+        grep -q 'local apisix_conf = resolved' "$f"; \
+        ! grep -q 'resolve_conf_var_in_text(apisix_conf_yaml)' "$f"
+
 USER apisix
 
 CMD ["docker-start"]

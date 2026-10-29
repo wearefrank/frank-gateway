@@ -164,6 +164,14 @@ jobs:
               suite_failed=1
             fi
 
+            if [ "$suite_failed" -eq 0 ] && [ "$suite" = "regression-tests/multiline-cert-env" ]; then
+              echo "[INFO] Validating APISIX CLI startup with multiline PEM values..."
+              if ! docker compose --profile cli-regression run --rm --no-deps apisix-cli-config-check; then
+                echo "[ERROR] APISIX CLI config validation failed for ${suite}."
+                suite_failed=1
+              fi
+            fi
+
             if [ "$suite_failed" -eq 0 ]; then
               apisix_container_id="$(docker compose ps -q apisix)"
               if [ -z "$apisix_container_id" ]; then
