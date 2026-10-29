@@ -10,6 +10,13 @@ routes:
                     upstream_id: testTwo
                   - soap_action: testOne
                     upstream_id: testOne
+                  - soap_action: testInline
+                    upstream:
+                      type: roundrobin
+                      scheme: http
+                      pass_host: node
+                      nodes:
+                        "httpbun:80": 1
 upstreams:
   - name: httpbun
     scheme: http

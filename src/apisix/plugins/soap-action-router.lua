@@ -46,7 +46,9 @@ local function find_action_in_body(body)
 	for key, value in pairs(body) do
 
 		if key ~= "_attr" then
-			if type(key) == "string" and key:lower():match("action") then
+			local local_name = type(key) == "string" and key:match("([^:]+)$")
+			local_name = local_name and local_name:lower()
+			if local_name == "action" or local_name == "soapaction" then
 				if type(value) == "string" then
 					return value
 				elseif type(value) == "table" and type(value[1]) == "string" then
@@ -126,11 +128,12 @@ local function parse_domain_for_node(node)
         end
     end
 end
-local function register_upstream(upstream_info, ctx)
+local function register_upstream(upstream_info, ctx, route_index)
     local nodes = upstream_info.nodes
     local new_nodes = {}
     if core.table.isarray(nodes) then
-        for _, node in ipairs(nodes) do
+        for _, configured_node in ipairs(nodes) do
+            local node = core.table.clone(configured_node)
             parse_domain_for_node(node)
             table.insert(new_nodes, node)
         end
@@ -170,7 +173,7 @@ local function register_upstream(upstream_info, ctx)
     local matched_route = ctx.matched_route
     up_conf.parent = matched_route
     local upstream_key = up_conf.type .. "#route_" ..
-                         matched_route.value.id .. "_" .. upstream_info.vid
+                         matched_route.value.id .. "_soap_action_" .. route_index
     if upstream_info.node_tid then
         upstream_key = upstream_key .. "_" .. upstream_info.node_tid
     end
@@ -187,17 +190,21 @@ end
 function _M.access(conf, ctx)
     local soap_action = find_soap_action()
     if soap_action then
-        for _, route in ipairs(conf.routes) do
+        for route_index, route in ipairs(conf.routes) do
             if route.soap_action and route.soap_action == soap_action then
+                if type(route.upstream) == "table" then
+                    return register_upstream(route.upstream, ctx, route_index)
+                end
+                if not route.upstream_id then
+                    core.log.error("missing upstream for SOAPAction: ", soap_action)
+                    return 500, "missing upstream for SOAPAction: " .. soap_action
+                end
                 local found_upstream = upstream.get_by_id(route.upstream_id)
                 if not found_upstream then
                     return 500, "failed to fetch upstream info by "
                                 .. "upstream id: " .. route.upstream_id
                 end
-                if found_upstream and type(route.upstream) == "table" then
-                    core.log.info("upstream: ", core.json.encode(found_upstream))
-                    return register_upstream(route.upstream, ctx)
-                elseif found_upstream and found_upstream ~= "plugin#upstream#is#empty" then
+                if found_upstream and found_upstream ~= "plugin#upstream#is#empty" then
                     ctx.upstream_id = route.upstream_id
                     core.log.info("upstream_id: ", route.upstream_id)
                     return
