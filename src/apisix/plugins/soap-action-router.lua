@@ -15,16 +15,9 @@ local soap_routes_schema = {
         properties = {
             upstream_id = schema_def.id_schema,
             upstream = schema_def.upstream,
-            soapAction = {
+            soap_action = {
                 type = "string",
                 description = "The SOAP action to match against the SOAPAction header or Content-Type header or body."
-            },
-            weight = {
-                description = "used to split traffic between different" ..
-                              "upstreams for plugin configuration",
-                type = "integer",
-                default = 1,
-                minimum = 0
             }
         }
     }
@@ -195,7 +188,7 @@ function _M.access(conf, ctx)
     local soap_action = find_soap_action()
     if soap_action then
         for _, route in ipairs(conf.routes) do
-            if route.soapAction and route.soapAction == soap_action then
+            if route.soap_action and route.soap_action == soap_action then
                 local found_upstream = upstream.get_by_id(route.upstream_id)
                 if not found_upstream then
                     return 500, "failed to fetch upstream info by "

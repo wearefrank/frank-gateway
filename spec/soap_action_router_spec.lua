@@ -33,8 +33,8 @@ describe("soap-action-router plugin", function()
         upstreams = { testOne = {}, testTwo = {} }
         conf = {
             routes = {
-                { soapAction = "testTwo", upstream_id = "testTwo" },
-                { soapAction = "testOne", upstream_id = "testOne" }
+                { soap_action = "testTwo", upstream_id = "testTwo" },
+                { soap_action = "testOne", upstream_id = "testOne" }
             }
         }
 
@@ -78,6 +78,14 @@ describe("soap-action-router plugin", function()
         end
     end)
 
+    it("defines soap_action without an unused route weight", function()
+        local properties = plugin.schema.properties.routes.items.properties
+
+        assert.are.equal("string", properties.soap_action.type)
+        assert.is_nil(properties.soapAction)
+        assert.is_nil(properties.weight)
+    end)
+
     it("matches a later route without looking up non-matching upstreams", function()
         local ctx = {}
 
@@ -95,7 +103,7 @@ describe("soap-action-router plugin", function()
         assert.are.same({ "testTwo" }, lookups)
     end)
 
-    it("skips entries without a soapAction", function()
+    it("skips entries without a soap_action", function()
         table.insert(conf.routes, 1, { upstream_id = "unused" })
         local ctx = {}
 

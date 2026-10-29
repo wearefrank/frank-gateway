@@ -6,9 +6,9 @@ routes:
                uri: /anything
           soap-action-router:
                routes:
-                  - soapAction: testTwo
+                  - soap_action: testTwo
                     upstream_id: testTwo
-                  - soapAction: testOne
+                  - soap_action: testOne
                     upstream_id: testOne
 upstreams:
   - name: httpbun
