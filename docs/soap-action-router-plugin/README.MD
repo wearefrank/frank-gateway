@@ -14,7 +14,7 @@ On receiving a request, this plugin is triggered(specifically on the access func
 ## Known issues:
 - Adding a plugin specific per soap action might be needed, for example to trigger a rewrite on specific actions(this might be better as a seperate plugin)
 - Multiple actions for one upstream currently requires adding seperate entries
-- Sending to a service instead of upstream might be needed and is no longer supported
+- Sending to a service instead of upstream might be needed and is not currently supported
 
 ## Configuration:
 
@@ -29,9 +29,9 @@ Priority: 967
 |-----------------------------|-----------------|----------|---------------------------|---------------------------------------------|
 | <NameOfField>             | <Type>        | <Required>| <DefaultValue>       | <Description>            |
 | routes | array | Yes | - | List of all possible routes | 
-| route.upstream_id | string | Either upstream_id or upstream| - | The upstream the soap action should be routed to|
-| route.upstream | object | Either upstream_id or upstream| - | The upstream the soap action should be routed to|
-| route.soap_action | string | yes | - | The soap action that the route should match| 
+| soap_action_source | enum | No | - | Where to extract the soap action from, can be empty, header, content_type or body| 
+| route.upstream_id | string | Yes | - | The upstream the soap action should be routed to|
+| route.soap_action | string | Yes | - | The soap action that the route should match| 
 
 ### Configuration example
 
