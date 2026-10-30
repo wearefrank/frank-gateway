@@ -1,7 +1,20 @@
 ## Related issue(s): 
 
 ## Description
+<!-- 
+Give a basic description
+--> 
 
+
+## Changes 
+<!--
+Describe the changes that are made in this pull request.
+-->
+
+<details>
+<summary>
+<strong>Pull Request Checklist</strong>
+</summary>
 
 ## Checklist
 - [ ] Plugin names are kebab-name
@@ -24,3 +37,5 @@
 - [ ] Squash: the PR title is clean and suitable for the changelog
 - [ ] Breaking changes are marked with `BREAKING: <description>` on the last line of the commit message
 - [ ] The PR targets the right branch: `main`, or a release channel (`next` for features, `next-major` for breaking changes) if the change should not be released immediately
+
+</details>
