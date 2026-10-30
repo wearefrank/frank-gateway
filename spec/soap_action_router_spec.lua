@@ -5,9 +5,8 @@ describe("soap-action-router plugin", function()
     local lookups
     local upstreams
     local conf
-    local registered
-    local schema_error
-    local scheme_conf
+    local body_reads
+    local header_reads
     local modules = {
         "apisix.core",
         "apisix.schema_def",
@@ -15,7 +14,6 @@ describe("soap-action-router plugin", function()
         "xml2lua",
         "xmlhandler.tree",
         "ngx",
-        "resty.ipmatcher",
         "apisix.plugins.soap-action-router"
     }
     local saved_loaded
@@ -33,9 +31,8 @@ describe("soap-action-router plugin", function()
         headers = { SOAPAction = "testOne" }
         body_tree = {}
         lookups = {}
-        registered = {}
-        schema_error = nil
-        scheme_conf = nil
+        body_reads = 0
+        header_reads = 0
         upstreams = { testOne = {}, testTwo = {} }
         conf = {
             routes = {
@@ -51,26 +48,10 @@ describe("soap-action-router plugin", function()
                     warn = function() end,
                     error = function() end
                 },
-                request = { get_body = function() return "<Envelope/>" end },
-                table = {
-                    isarray = function(value) return value[1] ~= nil end,
-                    clone = function(value)
-                        local copy = {}
-                        for key, item in pairs(value) do
-                            copy[key] = item
-                        end
-                        return copy
-                    end
-                },
-                utils = {
-                    parse_addr = function(addr)
-                        local host, port = addr:match("^([^:]+):(%d+)$")
-                        return host, tonumber(port)
-                    end
-                },
-                resolver = {
-                    parse_domain = function() return "127.0.0.1" end
-                }
+                request = { get_body = function()
+                    body_reads = body_reads + 1
+                    return "<Envelope/>"
+                end }
             }
         end
         package.preload["apisix.schema_def"] = function() return {} end
@@ -79,28 +60,14 @@ describe("soap-action-router plugin", function()
                 get_by_id = function(id)
                     table.insert(lookups, id)
                     return upstreams[id]
-                end,
-                check_schema = function()
-                    return schema_error == nil, schema_error
-                end,
-                set = function(ctx, key, version, upstream_conf)
-                    table.insert(registered, {
-                        ctx = ctx, key = key, version = version, conf = upstream_conf
-                    })
-                end,
-                set_scheme = function(_, upstream_conf)
-                    scheme_conf = upstream_conf
                 end
             }
         end
         package.preload["ngx"] = function()
-            return { req = { get_headers = function() return headers end } }
-        end
-        package.preload["resty.ipmatcher"] = function()
-            return {
-                parse_ipv4 = function(host) return host == "127.0.0.1" end,
-                parse_ipv6 = function() return false end
-            }
+            return { req = { get_headers = function()
+                header_reads = header_reads + 1
+                return headers
+            end } }
         end
         package.preload["xmlhandler.tree"] = function()
             return { new = function() return { root = body_tree } end }
@@ -125,6 +92,108 @@ describe("soap-action-router plugin", function()
         assert.are.equal("string", properties.soap_action.type)
         assert.is_nil(properties.soapAction)
         assert.is_nil(properties.weight)
+    end)
+
+    it("requires SOAP actions and upstream ids without allowing inline upstreams", function()
+        local route_schema = plugin.schema.properties.routes.items
+
+        assert.are.same({ "soap_action", "upstream_id" }, route_schema.required)
+        assert.is_false(route_schema.additionalProperties)
+        assert.is_nil(route_schema.properties.upstream)
+    end)
+
+    it("defines an optional restricted SOAP action source", function()
+        local source_schema = plugin.schema.properties.soap_action_source
+
+        assert.are.equal("string", source_schema.type)
+        assert.are.same({ "header", "content_type", "body" }, source_schema.enum)
+        assert.are.same({ "routes" }, plugin.schema.required)
+    end)
+
+    for _, source in ipairs({ "header", "content_type", "body" }) do
+        it("only uses the selected " .. source .. " source", function()
+            conf.soap_action_source = source
+            headers = {
+                SOAPAction = source == "header" and "testOne" or "testTwo",
+                ["Content-Type"] = 'application/soap+xml; action="' ..
+                    (source == "content_type" and "testOne" or "testTwo") .. '"'
+            }
+            body_tree = { Envelope = { Body = {
+                Action = source == "body" and "testOne" or "testTwo"
+            } } }
+            local ctx = {}
+
+            assert.is_nil(plugin.access(conf, ctx))
+            assert.are.equal("testOne", ctx.upstream_id)
+            assert.are.equal(source == "body" and 1 or 0, body_reads)
+            assert.are.equal(source == "body" and 0 or 1, header_reads)
+        end)
+
+        it("does not fall back when the selected " .. source .. " source is missing", function()
+            conf.soap_action_source = source
+            headers = {
+                SOAPAction = "testOne",
+                ["Content-Type"] = 'application/soap+xml; action="testOne"'
+            }
+            body_tree = { Envelope = { Body = { Action = "testOne" } } }
+            if source == "header" then
+                headers.SOAPAction = nil
+            elseif source == "content_type" then
+                headers["Content-Type"] = "application/soap+xml; charset=utf-8"
+            else
+                body_tree = {}
+            end
+
+            local status = plugin.access(conf, {})
+
+            assert.are.equal(403, status)
+            assert.are.same({}, lookups)
+            assert.are.equal(source == "body" and 1 or 0, body_reads)
+            assert.are.equal(source == "body" and 0 or 1, header_reads)
+        end)
+
+        it("does not fall back when the selected " .. source .. " action is unmatched", function()
+            conf.soap_action_source = source
+            headers = {
+                SOAPAction = source == "header" and "unknown" or "testOne",
+                ["Content-Type"] = 'application/soap+xml; action="' ..
+                    (source == "content_type" and "unknown" or "testOne") .. '"'
+            }
+            body_tree = { Envelope = { Body = {
+                Action = source == "body" and "unknown" or "testOne"
+            } } }
+
+            local status, err = plugin.access(conf, {})
+
+            assert.are.equal(500, status)
+            assert.are.equal("No matching route found for SOAPAction: unknown", err)
+            assert.are.same({}, lookups)
+        end)
+    end
+
+    it("prefers SOAPAction when all sources are present without a selected source", function()
+        headers = {
+            SOAPAction = "testOne",
+            ["Content-Type"] = 'application/soap+xml; action="testTwo"'
+        }
+        body_tree = { Envelope = { Body = { Action = "testTwo" } } }
+        local ctx = {}
+
+        assert.is_nil(plugin.access(conf, ctx))
+        assert.are.equal("testOne", ctx.upstream_id)
+        assert.are.same({ "testOne" }, lookups)
+        assert.are.equal(0, body_reads)
+    end)
+
+    it("prefers Content-Type over XML without a selected source or SOAPAction header", function()
+        headers = { ["Content-Type"] = 'application/soap+xml; action="testOne"' }
+        body_tree = { Envelope = { Body = { Action = "testTwo" } } }
+        local ctx = {}
+
+        assert.is_nil(plugin.access(conf, ctx))
+        assert.are.equal("testOne", ctx.upstream_id)
+        assert.are.same({ "testOne" }, lookups)
+        assert.are.equal(0, body_reads)
     end)
 
     it("matches a later route without looking up non-matching upstreams", function()
@@ -264,76 +333,6 @@ describe("soap-action-router plugin", function()
 
         assert.is_nil(plugin.access(conf, ctx))
         assert.are.equal("testTwo", ctx.upstream_id)
-    end)
-
-    it("registers an inline upstream without looking up an upstream id", function()
-        conf.routes[2] = {
-            soap_action = "testOne",
-            upstream = {
-                type = "roundrobin", scheme = "http", pass_host = "node",
-                nodes = { ["httpbun:80"] = 1 }
-            }
-        }
-        local ctx = { matched_route = { value = { id = "soap" } }, conf_version = 7 }
-
-        assert.is_nil(plugin.access(conf, ctx))
-        assert.are.same({}, lookups)
-        assert.are.equal(1, #registered)
-        assert.are.equal("roundrobin#route_soap_soap_action_2", registered[1].key)
-        assert.are.equal(7, registered[1].version)
-        assert.are.equal(ctx, registered[1].ctx)
-        assert.are.equal(ctx.matched_route, registered[1].conf.parent)
-        assert.are.equal("http", registered[1].conf.scheme)
-        assert.are.equal("node", registered[1].conf.pass_host)
-        assert.are.same({
-            { host = "127.0.0.1", domain = "httpbun", port = 80, weight = 1 }
-        }, registered[1].conf.nodes)
-        assert.is_nil(scheme_conf)
-    end)
-
-    it("registers HTTPS inline array nodes without mutating configuration", function()
-        local node = { host = "httpbun", port = 443, weight = 1 }
-        conf.routes[2] = {
-            soap_action = "testOne",
-            upstream = { type = "roundrobin", scheme = "https", nodes = { node } }
-        }
-        local ctx = { matched_route = { value = { id = "soap" } }, conf_version = 7 }
-
-        assert.is_nil(plugin.access(conf, ctx))
-        assert.are.same({}, lookups)
-        assert.are.equal(1, #registered)
-        assert.are.equal(registered[1].conf, scheme_conf)
-        assert.are.equal("127.0.0.1", registered[1].conf.nodes[1].host)
-        assert.are.same({ host = "httpbun", port = 443, weight = 1 }, node)
-    end)
-
-    it("uses distinct registration keys for different inline routes", function()
-        for _, route in ipairs(conf.routes) do
-            route.upstream_id = nil
-            route.upstream = { type = "roundrobin", nodes = { ["127.0.0.1:80"] = 1 } }
-        end
-        local ctx = { matched_route = { value = { id = "soap" } }, conf_version = 7 }
-
-        assert.is_nil(plugin.access(conf, ctx))
-        headers.SOAPAction = "testTwo"
-        assert.is_nil(plugin.access(conf, ctx))
-        assert.are.equal(2, #registered)
-        assert.are_not.equal(registered[1].key, registered[2].key)
-    end)
-
-    it("surfaces inline upstream validation failures without registering it", function()
-        conf.routes[2] = {
-            soap_action = "testOne",
-            upstream = { type = "invalid", nodes = { ["127.0.0.1:80"] = 1 } }
-        }
-        schema_error = "invalid upstream type"
-
-        local status, err = plugin.access(conf, {})
-
-        assert.are.equal(500, status)
-        assert.are.equal(schema_error, err)
-        assert.are.same({}, lookups)
-        assert.are.same({}, registered)
     end)
 
     it("reports a missing upstream instead of looking up a nil id", function()

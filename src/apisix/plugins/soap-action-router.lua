@@ -5,16 +5,16 @@ local ngx 			= require("ngx")
 local schema_def = require("apisix.schema_def")
 local upstream   = require("apisix.upstream")
 local plugin_name = "soap-action-router"
-local ipmatcher  = require("resty.ipmatcher")
 
 
 local soap_routes_schema = {
     type = "array",
     items = {
         type = "object",
+        additionalProperties = false,
+        required = {"soap_action", "upstream_id"},
         properties = {
             upstream_id = schema_def.id_schema,
-            upstream = schema_def.upstream,
             soap_action = {
                 type = "string",
                 description = "The SOAP action to match against the SOAPAction header or Content-Type header or body."
@@ -25,8 +25,14 @@ local soap_routes_schema = {
 local schema = {
 	type = "object",
 	properties = {
-		routes = soap_routes_schema
+		routes = soap_routes_schema,
+        soap_action_source = {
+            type = "string",
+            enum = {"header", "content_type", "body"},
+            description = "Only inspect this source for the SOAP action. Omit to use the fallback order."
+        }
 	},
+    required = {"routes"},
 	description = "Matches the SOAPAction header, Content-Type action, or body action and routes accordingly."
 }
 
@@ -39,6 +45,10 @@ local _M = {
 	schema = schema,
 	metadata_schema = metadata_schema
 }
+
+function _M.check_schema(conf)
+    return core.schema.check(schema, conf)
+end
 
 -- need to traverse the table since we do not know the xmlns prefixes beforehand
 local function find_action_in_body(body)
@@ -66,26 +76,34 @@ local function find_action_in_body(body)
 	end
 end
 
-local function find_soap_action()
-    local headers = ngx.req.get_headers()
-    local soap_action = headers["SOAPAction"]
-
-    if soap_action then
-        return soap_action
+local function find_soap_action(source)
+    local headers
+    if source ~= "body" then
+        headers = ngx.req.get_headers()
     end
 
-    -- If no match or SOAPAction missing, try to get from Content-Type (SOAP 1.2)
-    local content_type = headers["Content-Type"]
-    if content_type then
-        for k in string.gmatch(content_type, "[^;]+") do
-            local key, value = k:match("^%s*([^=]+)%s*=%s*\"?([^\";]+)\"?")
-            if key and key:lower() == "action" then
-                return value
-            end
+    if not source or source == "header" then
+        local soap_action = headers["SOAPAction"]
+        if soap_action or source == "header" then
+            return soap_action
         end
     end
 
-    -- Final fallback: parse body for action
+    if not source or source == "content_type" then
+        local content_type = headers["Content-Type"]
+        if content_type then
+            for k in string.gmatch(content_type, "[^;]+") do
+                local key, value = k:match("^%s*([^=]+)%s*=%s*\"?([^\";]+)\"?")
+                if key and key:lower() == "action" then
+                    return value
+                end
+            end
+        end
+        if source == "content_type" then
+            return false
+        end
+    end
+
     core.log.info("Trying to find SOAPAction in body")
     local body, err = core.request.get_body()
     if not body then
@@ -111,90 +129,11 @@ local function find_soap_action()
     end
     return false
 end
-local function parse_domain_for_node(node)
-    local host = node.domain or node.host
-    if not ipmatcher.parse_ipv4(host)
-       and not ipmatcher.parse_ipv6(host)
-    then
-        node.domain = host
-
-        local ip, err = core.resolver.parse_domain(host)
-        if ip then
-            node.host = ip
-        end
-
-        if err then
-            core.log.error("dns resolver domain: ", host, " error: ", err)
-        end
-    end
-end
-local function register_upstream(upstream_info, ctx, route_index)
-    local nodes = upstream_info.nodes
-    local new_nodes = {}
-    if core.table.isarray(nodes) then
-        for _, configured_node in ipairs(nodes) do
-            local node = core.table.clone(configured_node)
-            parse_domain_for_node(node)
-            table.insert(new_nodes, node)
-        end
-    else
-        for addr, weight in pairs(nodes) do
-            local node = {}
-            local port, host
-            host, port = core.utils.parse_addr(addr)
-            node.host = host
-            parse_domain_for_node(node)
-            node.port = port
-            node.weight = weight
-            table.insert(new_nodes, node)
-        end
-    end
-
-    local up_conf = {
-        name = upstream_info.name,
-        type = upstream_info.type,
-        hash_on = upstream_info.hash_on,
-        pass_host = upstream_info.pass_host,
-        upstream_host = upstream_info.upstream_host,
-        key = upstream_info.key,
-        nodes = new_nodes,
-        timeout = upstream_info.timeout,
-        scheme = upstream_info.scheme,
-        tls = upstream_info.tls,
-        keepalive_pool = upstream_info.keepalive_pool,
-    }
-
-    local ok, err = upstream.check_schema(up_conf)
-    if not ok then
-        core.log.error("failed to validate generated upstream: ", err)
-        return 500, err
-    end
-
-    local matched_route = ctx.matched_route
-    up_conf.parent = matched_route
-    local upstream_key = up_conf.type .. "#route_" ..
-                         matched_route.value.id .. "_soap_action_" .. route_index
-    if upstream_info.node_tid then
-        upstream_key = upstream_key .. "_" .. upstream_info.node_tid
-    end
-    core.log.info("upstream_key: ", upstream_key)
-    upstream.set(ctx, upstream_key, ctx.conf_version, up_conf)
-    -- the schemes handle_upstream() dispatches on ctx.upstream_scheme for
-    local scheme = upstream_info.scheme
-    if scheme == "https" or scheme == "ws" or scheme == "wss" then
-        upstream.set_scheme(ctx, up_conf)
-    end
-    return
-end
-
 function _M.access(conf, ctx)
-    local soap_action = find_soap_action()
+    local soap_action = find_soap_action(conf.soap_action_source)
     if soap_action then
-        for route_index, route in ipairs(conf.routes) do
+        for _, route in ipairs(conf.routes) do
             if route.soap_action and route.soap_action == soap_action then
-                if type(route.upstream) == "table" then
-                    return register_upstream(route.upstream, ctx, route_index)
-                end
                 if not route.upstream_id then
                     core.log.error("missing upstream for SOAPAction: ", soap_action)
                     return 500, "missing upstream for SOAPAction: " .. soap_action
@@ -204,11 +143,9 @@ function _M.access(conf, ctx)
                     return 500, "failed to fetch upstream info by "
                                 .. "upstream id: " .. route.upstream_id
                 end
-                if found_upstream and found_upstream ~= "plugin#upstream#is#empty" then
-                    ctx.upstream_id = route.upstream_id
-                    core.log.info("upstream_id: ", route.upstream_id)
-                    return
-                end
+                ctx.upstream_id = route.upstream_id
+                core.log.info("upstream_id: ", route.upstream_id)
+                return
             end
         end
         return 500, "No matching route found for SOAPAction: " .. soap_action

@@ -10,13 +10,18 @@ routes:
                     upstream_id: testTwo
                   - soap_action: testOne
                     upstream_id: testOne
-                  - soap_action: testInline
-                    upstream:
-                      type: roundrobin
-                      scheme: http
-                      pass_host: node
-                      nodes:
-                        "httpbun:80": 1
+  - name: content-type-only-service
+    uri: /soap/content-type-only
+    plugins:
+      proxy-rewrite:
+        uri: /anything
+      soap-action-router:
+        soap_action_source: content_type
+        routes:
+          - soap_action: testTwo
+            upstream_id: testTwo
+          - soap_action: testOne
+            upstream_id: testOne
 upstreams:
   - name: httpbun
     scheme: http
