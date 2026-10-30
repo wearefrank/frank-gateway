@@ -1,0 +1,15 @@
+meta {
+  name: Config with multiline env vars is loaded (HTTP)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{httpBaseUrl}}/anything
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

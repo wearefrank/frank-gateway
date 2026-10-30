@@ -234,16 +234,33 @@ The plugin is configured as a map of variable name → JSONPath expression. Each
 - Stored as `ctx.var.extracted` (a JSON-encoded string, usable in `log_format`)
 - Stored individually as `ctx.var.<variable_name>` for direct access in log formats or other plugins
 
+**Configuration change:** Extraction fields must now be nested under `fields`. Configurations that previously passed the field map directly are no longer valid. For example, change:
+```yaml
+response-extractor:
+  ip: "$.headers['X-Real-Ip']"
+```
+to:
+```yaml
+response-extractor:
+  fields:
+    ip: "$.headers['X-Real-Ip']"
+```
+Plugin options such as `max_body_size` and `content_types` remain alongside `fields`.
+
 Example configuration:
 ```yaml
 response-extractor:
-  transaction_id: "$.transactionId"
-  status_code: "$.result.status"
+  fields:
+    transaction_id: "$.transactionId"
+    status_code: "$.result.status"
+  max_body_size: 1048576   # optional, defaults to 1 MB
+  content_types:           # optional, defaults to ["application/json"]
+    - application/json
 ```
 
 This would make `$transaction_id` and `$status_code` available as APISIX variables for logging or further processing.
 
-> **Note:** The plugin only processes JSON responses (`application/json` or `+json`). Responses without a JSON body are silently skipped. The extractor buffers up to 1 MB of response body; larger responses are skipped to protect memory usage.
+> **Note:** The plugin only processes JSON responses (a `Content-Type` matching one of `content_types` or ending in `+json`). Responses without a matching content type are silently skipped. The extractor buffers up to `max_body_size` bytes of response body (1 MB by default); larger responses are skipped to protect memory usage.
 
 ### Cert Auth 
 

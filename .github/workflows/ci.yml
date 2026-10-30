@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Lua and Busted
         run: |
@@ -49,7 +49,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Start root docker compose stack
         run: docker compose up -d --build --wait --wait-timeout 180
@@ -85,7 +85,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Run Bruno test suites (non-blocking)
         shell: bash
@@ -101,7 +101,8 @@ jobs:
           discovered_suites=()
 
           while IFS= read -r compose_file; do
-            suite="$(basename "$(dirname "$compose_file")")"
+            suite_dir="$(dirname "$compose_file")"
+            suite="${suite_dir#"${REPO_ROOT}/tests/"}"
             bruno_collection="${REPO_ROOT}/tests/bruno/${suite}/bruno.json"
 
             if [ -f "$bruno_collection" ]; then
@@ -109,7 +110,7 @@ jobs:
             else
               echo "[INFO] Skipping suite ${suite}: missing Bruno collection ${bruno_collection}."
             fi
-          done < <(find "${REPO_ROOT}/tests" -mindepth 2 -maxdepth 2 -type f -name docker-compose.yaml | sort)
+          done < <(find "${REPO_ROOT}/tests" -mindepth 2 -maxdepth 3 -type f -name docker-compose.yaml | sort)
 
           if [ "${#discovered_suites[@]}" -eq 0 ]; then
             echo "[WARN] No Bruno suites discovered."
@@ -161,6 +162,14 @@ jobs:
             if ! docker compose up -d --build --force-recreate --pull missing; then
               echo "[ERROR] Failed to start containers for ${suite}."
               suite_failed=1
+            fi
+
+            if [ "$suite_failed" -eq 0 ] && [ "$suite" = "regression-tests/multiline-cert-env" ]; then
+              echo "[INFO] Validating APISIX CLI startup with multiline PEM values..."
+              if ! docker compose --profile cli-regression run --rm --no-deps apisix-cli-config-check; then
+                echo "[ERROR] APISIX CLI config validation failed for ${suite}."
+                suite_failed=1
+              fi
             fi
 
             if [ "$suite_failed" -eq 0 ]; then
@@ -221,7 +230,7 @@ jobs:
                 --add-host "host.docker.internal:$apisix_ip" \
                 -v "${REPO_ROOT}:/workspace" \
                 -w "/workspace/tests/bruno/${suite}" \
-                "$BRUNO_CLI_IMAGE" run . -r --env "$BRUNO_ENV" --insecure --reporter-junit "/workspace/tests/bruno/results/${suite}.xml"; then
+                "$BRUNO_CLI_IMAGE" run . -r --env "$BRUNO_ENV" --insecure --reporter-junit "/workspace/tests/bruno/results/${suite////-}.xml"; then
                 echo "[ERROR] Bruno execution failed for ${suite}."
                 suite_failed=1
               fi
@@ -246,7 +255,7 @@ jobs:
 
       - name: Upload Bruno JUnit results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: bruno-junit-results
           path: tests/bruno/results/*.xml

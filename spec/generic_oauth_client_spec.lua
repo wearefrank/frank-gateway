@@ -158,6 +158,66 @@ describe("generic-oauth-client plugin", function()
 		assert.are.equal(plugin.metadata_schema, schema_check_args.schema)
 	end)
 
+	it("allows strings and safe nonnegative integer client IDs in the schema", function()
+		assert.are.same({
+			{ type = "string" },
+			{ type = "integer", minimum = 0, maximum = 9007199254740991 },
+		}, plugin.schema.properties.client_id_value.oneOf)
+		local conf = {
+			client_id_field_name = "client_id",
+			client_id_value = 3000200,
+			token_endpoint = "http://idp/token",
+		}
+		assert.is_true(plugin.check_schema(conf))
+		assert.are.same(conf, schema_check_args.conf)
+	end)
+
+	it("encodes numeric client IDs as decimal strings and caches under the same string key", function()
+		local conf = {
+			client_id_field_name = "client_id",
+			client_id_value = 123456789012345,
+			token_endpoint = "http://idp/token",
+			use_cache = true,
+			default_expiration = 300,
+		}
+
+		plugin.access(conf, {})
+
+		assert.are.equal("123456789012345", escape_uri_calls[1])
+		assert.are.equal("client_id=123456789012345", httpc_request_args.body)
+		assert.are.equal("tok-abc", cache_store["123456789012345"])
+		assert.are.equal(123456789012345, conf.client_id_value)
+	end)
+
+	it("finds cached tokens using the string form of a numeric client ID", function()
+		cache_store["3000200"] = "cached-numeric-client-token"
+		local conf = {
+			client_id_field_name = "client_id",
+			client_id_value = 3000200,
+			token_endpoint = "http://idp/token",
+			use_cache = true,
+		}
+
+		plugin.access(conf, {})
+
+		assert.is_nil(httpc_connect_args)
+		assert.are.equal("Bearer cached-numeric-client-token", add_header_calls[1].value)
+	end)
+
+	it("preserves leading zeros in string client IDs", function()
+		local conf = {
+			client_id_field_name = "client_id",
+			client_id_value = "003000200",
+			token_endpoint = "http://idp/token",
+			default_expiration = 300,
+		}
+
+		plugin.access(conf, {})
+
+		assert.are.equal("003000200", escape_uri_calls[1])
+		assert.are.equal("client_id=003000200", httpc_request_args.body)
+	end)
+
 	it("uses cached token and skips HTTP call when cache hit and use_cache is true", function()
 		cache_store["my-client"] = "cached-token-xyz"
 		local conf = {

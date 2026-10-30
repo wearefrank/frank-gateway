@@ -62,6 +62,7 @@ call :run_suite oidc-client
 call :run_suite opa
 call :run_suite soap-action-router
 call :run_suite stdout-logger
+call :run_suite regression-tests/multiline-cert-env
 
 echo.
 echo ========================================
@@ -110,6 +111,15 @@ if errorlevel 1 (
     echo [ERROR] Failed to start containers for %SUITE%.
     set "SUITE_FAILED=1"
     goto :run_suite_finish
+)
+if /I "%SUITE%"=="regression-tests/multiline-cert-env" (
+    echo [INFO] Validating APISIX CLI startup with multiline PEM values...
+    docker compose --profile cli-regression run --rm --no-deps apisix-cli-config-check
+    if errorlevel 1 (
+        echo [ERROR] APISIX CLI config validation failed for %SUITE%.
+        set "SUITE_FAILED=1"
+        goto :run_suite_finish
+    )
 )
 if defined RUN_ALL_TESTS_TRACE echo [TRACE] Containers started for %SUITE%
 
@@ -174,7 +184,8 @@ set "ACTIVE_BRUNO_NETWORK=%BRUNO_DOCKER_NETWORK%"
 if not defined ACTIVE_BRUNO_NETWORK set "ACTIVE_BRUNO_NETWORK=!SUITE_DOCKER_NETWORK!"
 if not defined ACTIVE_BRUNO_NETWORK exit /b 1
 set "BRUNO_WORKDIR=/workspace/tests/bruno/%BRUNO_SUITE%"
-set "BRUNO_JUNIT=/workspace/tests/bruno/results/%BRUNO_SUITE%.xml"
+set "BRUNO_JUNIT_NAME=%BRUNO_SUITE:/=-%"
+set "BRUNO_JUNIT=/workspace/tests/bruno/results/%BRUNO_JUNIT_NAME%.xml"
 
 setlocal DisableDelayedExpansion
 docker run --rm --network "%ACTIVE_BRUNO_NETWORK%" --add-host "apisix.localhost:%APISIX_CONTAINER_IP%" --add-host "host.docker.internal:%APISIX_CONTAINER_IP%" -v "%REPO_ROOT_DOCKER%:/workspace" -w "%BRUNO_WORKDIR%" "%BRUNO_CLI_IMAGE%" run . -r --env "%BRUNO_ENV%" --insecure --reporter-junit "%BRUNO_JUNIT%"
