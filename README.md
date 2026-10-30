@@ -128,6 +128,13 @@ Custom plugins have been created for the Frank!Gateway, enhancing the functional
 - Implements the OpenID AuthZEN protocol
 - Integrates with policy engines such as OPA/Rego, XACML, Zanzibar, and IDQL
 
+#### Stdout Logger
+- Writes a configurable, structured JSON log line per request to stdout
+- Log fields are a template of APISIX/nginx variables, resolved per request
+- Supports an optional `labels` map to output structured log labels (e.g. for Grafana Alloy / Loki stream processing)
+- Can optionally include the request/response body and headers
+- Classifies each entry with a `log_type` (`Error`/`Warn`/`Info`) based on the response status
+
 ### Merge-config plugin
 Our custom merge-config plugin offers the possibility to merge multiple APISIX configuration files into one functional `apisix.yaml`. This allows for functional separation beyond APISIX's normal possibilities.
 
