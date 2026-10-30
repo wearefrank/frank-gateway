@@ -1,0 +1,26 @@
+meta {
+  name: unquoted mixed-case Content-Type action matches the first route
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: application/soap+xml; charset=utf-8; ACTION=testTwo; version=1
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
+    <s:Body><Value>content-type-only action</Value></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Content-Type without an action parameter falls back to body
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: application/soap+xml; charset=utf-8
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
+    <s:Body><Action>testOne</Action></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

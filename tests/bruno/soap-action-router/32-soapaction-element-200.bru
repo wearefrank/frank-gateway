@@ -1,0 +1,26 @@
+meta {
+  name: complete prefixed SOAPAction element name is extracted
+  type: http
+  seq: 32
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:example">
+    <s:Body><urn:SOAPAction>testOne</urn:SOAPAction></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

@@ -1,0 +1,28 @@
+meta {
+  name: valid SOAP without an action is forbidden
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Header/>
+    <s:Body><Value>no action here</Value></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("missing action returns the structured forbidden response", function() {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody()).to.deep.equal({ message: "Forbidden: Invalid or missing SOAPAction." });
+  });
+}

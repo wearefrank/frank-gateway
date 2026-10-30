@@ -1,0 +1,32 @@
+meta {
+  name: unknown SOAPAction does not fall back to Content-Type or body
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  SOAPAction: WrongAction
+  Content-Type: application/soap+xml; action="testOne"
+}
+
+body:xml {
+  <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+    <soapenv:Header/>
+    <soapenv:Body><Action>testTwo</Action></soapenv:Body>
+  </soapenv:Envelope>
+}
+
+tests {
+  test("status is 500", function() {
+    expect(res.getStatus()).to.equal(500);
+  });
+
+  test("error identifies the unmatched header action", function() {
+    expect(res.getBody()).to.equal("No matching route found for SOAPAction: WrongAction");
+  });
+}

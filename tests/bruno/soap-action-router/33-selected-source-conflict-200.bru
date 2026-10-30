@@ -1,0 +1,31 @@
+meta {
+  name: Selected Content-Type source ignores conflicting SOAPAction and XML
+  type: http
+  seq: 33
+}
+
+post {
+  url: {{baseUrl}}/soap/content-type-only
+  body: xml
+}
+
+headers {
+  SOAPAction: testTwo
+  Content-Type: application/soap+xml; action="testOne"
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
+    <s:Body><Action>testTwo</Action></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("only the Content-Type action selects the testOne upstream", function() {
+    expect(res.getBody().url).to.equal("http://httpbun/anything");
+  });
+}
