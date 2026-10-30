@@ -6,7 +6,7 @@ local plugin_name = "stdout-logger"
 
 local _M = {
     version = 1,
-    priority = 1,
+    priority = 430,
     name = plugin_name,
     schema = {
         type = "object",
