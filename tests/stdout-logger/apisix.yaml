@@ -6,7 +6,6 @@ routes:
     status: 1
     plugins:
       stdout-logger:
-        log_output: json
         labels:
           log_type: "$log_type"
           env: "prod"
