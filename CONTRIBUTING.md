@@ -46,7 +46,7 @@ The final squash merge commit is generated from the PR title and used by `semant
 
 PR titles must follow this format:
 
-<type>(optional-scope): description
+`<type>`(optional-scope): description
 
 Examples:
 
@@ -201,12 +201,12 @@ This script starts each test suite environment, executes the Bruno tests, and wr
 ### FSC 
 The FSC plugin:
 - Can act as a Inway in a FSC NLX group
-- Can combine the FSC NLX Inway with different APISIX plugins 
+- Can combine the FSC NLX Inway with different Frank!Gateway plugins 
 
 Detailed documentation on the FSC plugin and how to run and test the FSC plugin locally can be found [here](tests/fsc/FSC-NLX.md)
 
 ### SOAP action router
-APISIX can create routing rules based on HTTP headers. However, within SOAP the specific operation is determined by the SOAP action, this SOAP action can either be in a HTTP header, Content-Type header or body.
+The Frank!Gateway can create routing rules based on HTTP headers. However, within SOAP the specific operation is determined by the SOAP action, this SOAP action can either be in a HTTP header, Content-Type header or body.
 The plugin can extract the SOAP action and trigger the router enabling the possibility to create routes per SOAP action.
 
 Detailed documentation on the SOAP action router and Postman test collection can be found [here](deployment-examples/docker-compose/README.md)
@@ -227,7 +227,7 @@ Detailed documentation on the Generic OAuth Client plugin can be found here [her
 blocks either requests and or responses if the payload or entire request or response is larger than a pre-configured threshold.
 
 ### Response extractor
-Extracts values from upstream JSON response bodies using [JSONPath](https://goessner.net/articles/JsonPath/) expressions and exposes them as APISIX request context variables for use by downstream plugins or log formats.
+Extracts values from upstream JSON response bodies using [JSONPath](https://goessner.net/articles/JsonPath/) expressions and exposes them as Frank!Gateway request context variables for use by downstream plugins or log formats.
 
 The plugin is configured as a map of variable name → JSONPath expression. Each matched value is:
 - Stored in `ctx.extracted` (a Lua table, accessible by other plugins in the same request)
@@ -258,14 +258,14 @@ response-extractor:
     - application/json
 ```
 
-This would make `$transaction_id` and `$status_code` available as APISIX variables for logging or further processing.
+This would make `$transaction_id` and `$status_code` available as Frank!Gateway variables for logging or further processing.
 
 > **Note:** The plugin only processes JSON responses (a `Content-Type` matching one of `content_types` or ending in `+json`). Responses without a matching content type are silently skipped. The extractor buffers up to `max_body_size` bytes of response body (1 MB by default); larger responses are skipped to protect memory usage.
 
 ### Cert Auth 
 
 APISIX supports TLS, but by default this is mainly used for server-side TLS termination.
-The Cert Auth plugin enables mutual TLS (mTLS) client authentication, allowing APISIX to identify consumers based on certificate attributes such as Common Name (CN) or SAN identifier.
+The Cert Auth plugin enables mutual TLS (mTLS) client authentication, allowing the Frank!Gateway to identify consumers based on certificate attributes such as Common Name (CN) or SAN identifier.
 
 Detailed documentation on the Cert Auth plugin and local setup can be found [here](docs/cert-auth-plugin/README.MD).
 

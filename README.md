@@ -67,19 +67,6 @@ Example:
 v1.2.3
 ```
 
-### Deployment configurations & examples
-The directory `deployment-examples` contains four deployment scenarios for deploying APISIX. Note, this deploys vanilla APISIX without the FSC plugin.
-The goal of these deployment examples is for experimenting with Apache APISIX in different deployment approaches.
-
-Without any prior Apache APISIX experience it is recommended to start with the `docker-compose` deployment-example since this is the easiest one to get started.
-
-The `docker-compose deployment` does contain the `improved SOAP functionality` mentioned above. 
-
-- docker-compose -> deploys APISIX via Docker compose [instructions](deployment-examples/docker-compose/README.md)
-- kind -> deploys APISIX in normal mode on a local Kubernetes cluster using Kind [instructions](deployment-examples/kind/README.md)
-- kind-ingress -> deploys APISIX as a Kubernetes ingress on a local cluster using Kind [instructions](deployment-examples/kind-ingress/README.md)
-- rancher -> deploys APISIX as a Kubernetes ingress on the WAF rancher cluster [instructions](deployment-examples/rancher/README.md)
-
 ### Custom plugins
 Custom plugins have been created for the Frank!Gateway, enhancing the functionality of Apache APISIX for the municipal market.
 
