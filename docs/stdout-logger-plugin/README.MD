@@ -33,7 +33,6 @@ Priority: 430
 
 | Property                    | Type            | Required | Default                   | Description                                 |
 |-----------------------------|-----------------|----------|---------------------------|---------------------------------------------|
-| log_output | en
 | log_format | object | Yes | - | Template for each log line. String leaf values starting with '$' are resolved as APISIX/nginx variables, other leaf values (and nested objects) are copied as-is | 
 | labels | object | No | - |  Key-value map of log labels. String leaf values starting with '$' are resolved as APISIX/nginx variables, other leaf values (and nested objects) are copied as-is|
 | include_req_body | boolean | No | false | Makes the request body available as variable in your log, under $request_body|

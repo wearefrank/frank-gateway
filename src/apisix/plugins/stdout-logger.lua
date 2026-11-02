@@ -11,12 +11,6 @@ local _M = {
     schema = {
         type = "object",
         properties = {
-            log_output = {
-                type = "string",
-                enum = {"json"},
-                default = "json",
-                description = "Serialization format used for each log line."
-            },
             log_format = {
                 type = "object",
                 minProperties = 1,
