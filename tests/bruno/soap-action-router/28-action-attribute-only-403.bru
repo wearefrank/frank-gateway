@@ -1,0 +1,27 @@
+meta {
+  name: XML attributes do not identify a SOAP action
+  type: http
+  seq: 28
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body><Value Action="testOne">no action element</Value></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("attribute-only action returns the structured forbidden response", function() {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody()).to.deep.equal({ message: "Forbidden: Invalid or missing SOAPAction." });
+  });
+}

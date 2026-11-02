@@ -1,5 +1,5 @@
 meta {
-  name: SOAPAction header matching TestAction returns 200
+  name: SOAPAction header matches the second route
   type: http
   seq: 1
 }
@@ -7,11 +7,12 @@ meta {
 post {
   url: {{baseUrl}}/soap/myservice
   body: xml
+  auth: none
 }
 
 headers {
-  SOAPAction: TestAction
   Content-Type: text/xml
+  SOAPAction: testOne
 }
 
 body:xml {
@@ -19,7 +20,7 @@ body:xml {
     <soapenv:Header/>
     <soapenv:Body>
       <urn:MyAction>
-        <Action>value1</Action>
+        <Value>header-only action</Value>
       </urn:MyAction>
     </soapenv:Body>
   </soapenv:Envelope>
@@ -34,6 +35,6 @@ tests {
     const body = res.getBody();
     expect(body).to.have.property("headers");
     const sa = body.headers["Soapaction"] || body.headers["SOAPAction"] || body.headers["soapaction"];
-    expect(sa).to.equal("TestAction");
+    expect(sa).to.equal("testOne");
   });
 }

@@ -1,0 +1,31 @@
+meta {
+  name: SOAPAction takes precedence over Content-Type and body
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  SOAPAction: testOne
+  Content-Type: application/soap+xml; action="testTwo"
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
+    <s:Body><Action>testTwo</Action></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("testOne upstream sets the node Host instead of passing the client Host", function() {
+    expect(res.getBody().url).to.equal("http://httpbun/anything");
+  });
+}

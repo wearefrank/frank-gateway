@@ -1,0 +1,26 @@
+meta {
+  name: arbitrary namespace prefixes are supported
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <envelope:Envelope xmlns:envelope="http://schemas.xmlsoap.org/soap/envelope/" xmlns:operation="urn:example">
+    <envelope:Body><operation:Action>testTwo</operation:Action></envelope:Body>
+  </envelope:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
