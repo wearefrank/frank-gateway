@@ -10,15 +10,15 @@ post {
 }
 
 headers {
-  Content-Type: application/soap+xml; charset=utf-8; action="TestAction"
+  Content-Type: application/soap+xml; charset=utf-8; action="testOne"
 }
 
 body:xml {
-  <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:example">
+  <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:example">
     <soapenv:Header/>
     <soapenv:Body>
       <urn:MyAction>
-        <Action>value1</Action>
+        <Value>content-type-only action</Value>
       </urn:MyAction>
     </soapenv:Body>
   </soapenv:Envelope>
@@ -27,5 +27,11 @@ body:xml {
 tests {
   test("status is 200", function() {
     expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Content-Type action is forwarded unchanged", function() {
+    const headers = res.getBody().headers;
+    const key = Object.keys(headers).find(key => key.toLowerCase() === "content-type");
+    expect(headers[key]).to.equal('application/soap+xml; charset=utf-8; action="testOne"');
   });
 }
