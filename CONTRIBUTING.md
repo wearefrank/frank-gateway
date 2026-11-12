@@ -318,59 +318,6 @@ stdout-logger:
       path: "$uri"
 ```
 
-#### Grafana Alloy Configuration Example
-
-To scrape container stdout with Grafana Alloy and parse the `labels` map into Loki stream labels:
-
-```alloy
-discovery.docker "containers" {
-  host = "unix:///var/run/docker.sock"
-}
-
-discovery.relabel "apisix_logs" {
-  targets = discovery.docker.containers.targets
-
-  rule {
-    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
-    regex         = "apisix"
-    action        = "keep"
-  }
-}
-
-loki.source.docker "apisix" {
-  host       = "unix:///var/run/docker.sock"
-  targets    = discovery.relabel.apisix_logs.output
-  forward_to = [loki.process.apisix_stdout_labels.receiver]
-}
-
-loki.process "apisix_stdout_labels" {
-  // 1. Extract fields from the JSON log line emitted on stdout
-  stage.json {
-    expressions = {
-      "log_type"    = "labels.log_type",
-      "environment" = "labels.env",
-      "route_id"    = "labels.route_id",
-    }
-  }
-
-  // 2. Promote extracted values to Loki stream labels
-  stage.labels {
-    values = {
-      "log_type"    = "log_type",
-      "environment" = "environment",
-      "route_id"    = "route_id",
-    }
-  }
-
-  forward_to = [loki.write.local.receiver]
-}
-
-loki.write "local" {
-  endpoint {
-    url = "http://loki:3100/loki/api/v1/push"
-  }
-}
-```
 
 The `_expr` options accept an APISIX-style condition rule (evaluated via `resty.expr.v1`), so body capture can be made conditional, e.g. only logging the body for failed requests:
 ```yaml
