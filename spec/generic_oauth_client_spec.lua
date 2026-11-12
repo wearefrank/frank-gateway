@@ -16,6 +16,7 @@ describe("generic-oauth-client plugin", function()
 		package.loaded["net.url"] = nil
 		package.loaded["resty.http"] = nil
 		package.loaded["apisix.plugins.generic-oauth-client"] = nil
+		package.loaded["apisix.plugins.token-client-common"] = nil
 
 		schema_check_args = nil
 		info_logs = {}
