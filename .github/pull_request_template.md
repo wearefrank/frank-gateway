@@ -26,7 +26,7 @@ Describe the changes that are made in this pull request.
 - [ ] Documentation is added in docs/`<plugin-name>`
 
 ## Merge method
-<!-- Pick one. Rebase is preferred. -->
+<!-- Pick one. Squash is preferred. -->
 - [ ] Rebase and merge 
 - [ ] Merge commit
 - [ ] Squash and merge (preferred) 
