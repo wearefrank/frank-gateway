@@ -459,6 +459,49 @@ describe("fsc plugin", function()
 		assert.are.same("Fsc-Authorization", verify_opts.auth_accept_token_as_header_name)
 	end)
 
+	it("access derives the token fingerprint from the client certificate", function()
+		local inputs = {}
+		local ssl = require("ngx.ssl")
+		local sha256 = require("resty.sha256")
+		local base64 = require("ngx.base64")
+
+		ngx_mock.var.ssl_client_raw_cert = "REQUEST_CLIENT_CERT"
+		der_result = "REQUEST_DER_CERT"
+		sha_digest = "REQUEST_DIGEST"
+		base64_result = "REQUEST_FINGERPRINT"
+		verify_result.cnf["x5t#S256"] = base64_result
+
+		ssl.cert_pem_to_der = function(pem)
+			inputs.pem = pem
+			return der_result
+		end
+		sha256.new = function(self)
+			return {
+				update = function(self, data)
+					inputs.der = data
+				end,
+				final = function(self)
+					inputs.finalized = true
+					return sha_digest
+				end,
+			}
+		end
+		base64.encode_base64url = function(digest)
+			inputs.digest = digest
+			return base64_result
+		end
+
+		local status = plugin.access(base_conf(), {})
+
+		assert.is_nil(status)
+		assert.are.same({
+			pem = ngx_mock.var.ssl_client_raw_cert,
+			der = der_result,
+			finalized = true,
+			digest = sha_digest,
+		}, inputs)
+	end)
+
 	it("access rejects tokens not bound to the client certificate", function()
 		verify_result = base_token()
 		verify_result.cnf["x5t#S256"] = "OTHER_FINGERPRINT"
