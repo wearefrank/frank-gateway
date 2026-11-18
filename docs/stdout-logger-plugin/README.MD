@@ -83,4 +83,39 @@ routes:
 
 ### Configuration specifics 
 
-## Examples 
+## Examples
+
+The Stdout Logger plugin writes one structured JSON log line per request to the container's stdout. `log_format` is a template: string leaf values starting with `$` are resolved as APISIX/nginx variables or plugin pseudo-variables, while other leaf values and nested objects are copied as-is.
+
+An optional `labels` map is output as a dedicated key-value map under `"labels"` in the serialized JSON log entry. String leaf values starting with `$` inside `labels` are also resolved as variables.
+
+The plugin exposes pseudo-variables that can be referenced from `log_format` or `labels`:
+- `$request_body` / `$response_body`: populated only when `include_req_body`/`include_resp_body`, or the matching `include_req_body_expr`/`include_resp_body_expr`, is set
+- `$request_headers` / `$response_headers`: populated only when `include_req_headers`/`include_resp_headers` is set
+- `$log_type`: always set to `Error` (status >= 500), `Warn` (status >= 400), or `Info` (otherwise)
+
+### Basic configuration
+
+```yaml
+stdout-logger:
+  log_output: json
+  labels:
+    log_type: "$log_type"
+    env: "production"
+    route_id: "$route_id"
+  log_format:
+    timestamp: "$time_iso8601"
+    request:
+      method: "$request_method"
+      path: "$uri"
+```
+
+The `_expr` options accept an APISIX-style condition rule evaluated via `resty.expr.v1`, so body capture can be conditional. For example, capture the response body only for failed requests:
+
+```yaml
+stdout-logger:
+  include_resp_body_expr:
+    - ["status", ">=", 400]
+```
+
+Example configuration and tests can be found [here](../../tests/stdout-logger/apisix.yaml).
