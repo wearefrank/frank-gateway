@@ -1,19 +1,38 @@
 routes:
-  - name: soapaction-test
-    id: 1
+  - name: traffic-split-service
     uri: /soap/myservice
     plugins:
-      soap-action-router:
-        match_action: "TestAction"
+          proxy-rewrite:
+               uri: /anything
+          soap-action-router:
+               routes:
+                  - soap_action: testTwo
+                    upstream_id: testTwo
+                  - soap_action: testOne
+                    upstream_id: testOne
+  - name: content-type-only-service
+    uri: /soap/content-type-only
+    plugins:
       proxy-rewrite:
-        uri: /any
-    upstream_id: 1
-    status: 1 
-
-
+        uri: /anything
+      soap-action-router:
+        soap_action_source: content_type
+        routes:
+          - soap_action: testTwo
+            upstream_id: testTwo
+          - soap_action: testOne
+            upstream_id: testOne
 upstreams:
   - name: httpbun
-    id: 1
+    scheme: http
+    pass_host: node
+    id: testOne
+    nodes:
+      "httpbun:80": 1
+    type: roundrobin
+  - name: httpbun
+    scheme: http
+    id: testTwo
     nodes:
       "httpbun:80": 1
     type: roundrobin

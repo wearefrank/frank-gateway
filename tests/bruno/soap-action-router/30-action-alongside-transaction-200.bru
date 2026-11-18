@@ -1,0 +1,30 @@
+meta {
+  name: actual action is extracted alongside unrelated fields
+  type: http
+  seq: 30
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body>
+      <Transaction>WrongAction</Transaction>
+      <MyAction><Action>testOne</Action></MyAction>
+      <ActionResult>WrongAction</ActionResult>
+    </s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

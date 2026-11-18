@@ -1,0 +1,27 @@
+meta {
+  name: unknown body action has no matching route
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body><Action>WrongAction</Action></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("unknown body action returns the unmatched-action error", function() {
+    expect(res.getStatus()).to.equal(500);
+    expect(res.getBody()).to.equal("No matching route found for SOAPAction: WrongAction");
+  });
+}

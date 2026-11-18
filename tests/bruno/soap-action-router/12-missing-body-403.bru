@@ -1,0 +1,21 @@
+meta {
+  name: no action headers and no body is forbidden
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: none
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+tests {
+  test("missing body returns the structured forbidden response", function() {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody()).to.deep.equal({ message: "Forbidden: Invalid or missing SOAPAction." });
+  });
+}

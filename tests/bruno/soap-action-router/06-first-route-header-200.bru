@@ -1,0 +1,27 @@
+meta {
+  name: SOAPAction header matches the first route
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  SOAPAction: testTwo
+  Content-Type: text/xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body><Value>header-only action</Value></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

@@ -1,0 +1,25 @@
+meta {
+  name: malformed XML without an action header is forbidden
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <Envelope><Action>testOne</Envelope>
+}
+
+tests {
+  test("XML parse failure returns the structured forbidden response", function() {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody()).to.deep.equal({ message: "Forbidden: Invalid or missing SOAPAction." });
+  });
+}
