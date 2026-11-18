@@ -1,0 +1,17 @@
+meta {
+  name: reuse cached token
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/private-key-jwt/cached
+}
+
+tests {
+  test("does not make another token request", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().authorization).to.equal("Bearer test-access-token");
+    expect(res.getBody().token_requests).to.equal(Number(bru.getEnvVar("tokenRequestCount")));
+  });
+}

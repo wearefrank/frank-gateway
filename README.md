@@ -86,6 +86,11 @@ Custom plugins have been created for the Frank!Gateway, enhancing the functional
 - Flexible variant of the OIDC plugin
 - Supports configurable fields
 
+#### Private Key JWT Client and JWKS Publisher
+- Authenticates to an OAuth token endpoint using a signed client assertion
+- Publishes the corresponding public keys from a gateway route
+- See the [configuration guide](docs/private-key-jwt-client-plugin/README.md)
+
 #### Limit Size
 - Blocks requests/responses that exceed a configured size
 - Protects against excessive payload usage

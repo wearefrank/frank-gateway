@@ -243,6 +243,7 @@ nginx_config:                     # Config for render the template to generate n
       openid-connect-client-cache: 1m
       generic-oauth-client-cache: 1m
       jwt-client-cache: 1m
+      private-key-jwt-client-cache: 1m
       merge-config: 1m
 
     proxy_ssl_server_name: true   # Send the server name in the SNI extension when establishing an SSL/TLS
@@ -531,6 +532,8 @@ plugins:                           # plugin list (sorted by priority)
   - frank-sender
   - generic-oauth-client
   - jwt-client                    
+  - private-key-jwt-client
+  - jwks-publisher
   - limit-size                     
   - soap-action-router             
   - openid-connect-client

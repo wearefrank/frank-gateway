@@ -56,6 +56,7 @@ call :run_suite auth-zen
 call :run_suite frank-sender
 call :run_suite generic-oauth
 call :run_suite jwt-client
+call :run_suite private-key-jwt-client
 call :run_suite limit-size
 call :run_suite merge-config
 call :run_suite oidc-client
@@ -219,6 +220,7 @@ if /I "%WARMUP_SUITE%"=="generic-oauth" goto :warm_up_keycloak
 if /I "%WARMUP_SUITE%"=="oidc-client" goto :warm_up_keycloak
 if /I "%WARMUP_SUITE%"=="merge-config" goto :warm_up_merge_config
 if /I "%WARMUP_SUITE%"=="stdout-logger" goto :warm_up_stdout_logger
+if /I "%WARMUP_SUITE%"=="private-key-jwt-client" goto :warm_up_private_key_jwt
 goto :eof
 
 :warm_up_keycloak
@@ -240,6 +242,12 @@ goto :eof
 :warm_up_stdout_logger
 echo [INFO] Waiting for httpbun upstream readiness (%WARMUP_SUITE%)...
 call :wait_http_ok_docker "http://apisix:9080/get" 30
+if errorlevel 1 exit /b 1
+goto :eof
+
+:warm_up_private_key_jwt
+echo [INFO] Waiting for JWKS route readiness (%WARMUP_SUITE%)...
+call :wait_http_ok_docker "http://apisix:9080/private-key-jwt/jwks" 30
 if errorlevel 1 exit /b 1
 goto :eof
 

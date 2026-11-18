@@ -1,0 +1,20 @@
+meta {
+  name: signed assertion obtains an upstream token
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/private-key-jwt/uncached
+}
+
+headers {
+  Authorization: Bearer incoming-token
+}
+
+tests {
+  test("upstream receives the acquired token instead of the incoming token", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().authorization).to.equal("Bearer test-access-token");
+  });
+}
