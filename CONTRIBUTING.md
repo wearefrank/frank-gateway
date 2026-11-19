@@ -198,6 +198,38 @@ run-all-tests.bat
 
 This script starts each test suite environment, executes the Bruno tests, and writes JUnit reports to `tests/bruno/results`.
 
+### Selecting the gateway runtime
+
+Normal builds use the runtime bundled with the pinned Apache APISIX image.
+BuildKit skips the runtime compiler stage when the bundled runtime is selected:
+
+```sh
+docker build --tag frank-gateway:base .
+```
+
+If nginx/OpenResty or OpenSSL needs an update before a new APISIX image is
+available, opt into the separately compiled runtime:
+
+```sh
+docker build --build-arg RUNTIME=custom --tag frank-gateway:custom .
+```
+
+To change the default for Compose and CI in a PR, change `ARG RUNTIME=base`
+to `ARG RUNTIME=custom` in the main [Dockerfile](Dockerfile). BuildKit is
+required; the legacy builder cannot skip unused stages. The resulting image
+has a `runtime-source` label identifying the selected runtime, and custom
+images also include runtime version labels.
+
+Custom runtime versions are maintained manually through the
+`OPENRESTY_VERSION`, `OPENSSL_VERSION`, `APISIX_RUNTIME_VERSION`,
+`APISIX_BUILD_TOOLS_TAG` and `APISIX_BUILD_TOOLS_COMMIT` arguments in the
+main [Dockerfile](Dockerfile).
+Update the build-tools tag and commit together and select a release compatible
+with the requested OpenResty version. OpenResty must be an official release;
+stock nginx sources do not contain the patches required by its Lua modules.
+Keep the builder and APISIX image on compatible Ubuntu/glibc bases.
+
+
 ### FSC 
 The FSC plugin:
 - Can act as a Inway in a FSC NLX group

@@ -25,6 +25,7 @@ updates:
         patterns: [ "*" ]
     allow:
       - dependency-name: "apache/apisix"
+      - dependency-name: "ubuntu"
 
   - package-ecosystem: "docker"
     directories: [ "/mirrors/*" ]
