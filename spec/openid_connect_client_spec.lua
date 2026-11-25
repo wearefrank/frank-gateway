@@ -16,6 +16,7 @@ describe("openid-connect-client plugin", function()
 		package.loaded["net.url"] = nil
 		package.loaded["resty.http"] = nil
 		package.loaded["apisix.plugins.openid-connect-client"] = nil
+		package.loaded["apisix.plugins.token-client-common"] = nil
 
 		schema_check_args = nil
 		info_logs = {}
@@ -146,6 +147,16 @@ describe("openid-connect-client plugin", function()
 		assert.are.equal(plugin.metadata_schema, schema_check_args.schema)
 	end)
 
+	it("defines custom parameters as a non-empty object of strings or numbers", function()
+		local custom_parameters = plugin.schema.properties.custom_parameters
+
+		assert.are.same("object", custom_parameters.type)
+		assert.are.same(1, custom_parameters.minProperties)
+		assert.are.same({
+			oneOf = { { type = "string" }, { type = "number" } },
+		}, custom_parameters.patternProperties["^[^:]+$"])
+	end)
+
 	-- -------------------------------------------------------------------------
 	-- cache hit
 	-- -------------------------------------------------------------------------
@@ -271,6 +282,30 @@ describe("openid-connect-client plugin", function()
 		plugin.access(conf, {})
 
 		assert.is_nil(string.find(httpc_request_args.body, "resourceServer="))
+	end)
+
+	it("appends URL-encoded custom parameters to the token request body", function()
+		local audience = "https://api.example.org/resource"
+		ngx.escape_uri = function(value)
+			if value == audience then
+				return "https%3A%2F%2Fapi.example.org%2Fresource"
+			end
+			return value
+		end
+		local conf = {
+			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
+			client_id = "my-client", client_secret = "sec", scope = "api.read",
+			resource_server = "api", default_expiration = 300,
+			custom_parameters = { audience = audience },
+		}
+
+		plugin.access(conf, {})
+
+		assert.are.same(
+			"client_id=my-client&client_secret=sec&grant_type=client_credentials&scope=api.read&resourceServer=api&audience=https%3A%2F%2Fapi.example.org%2Fresource",
+			httpc_request_args.body
+		)
+		assert.are.same("application/x-www-form-urlencoded", httpc_request_args.headers["Content-Type"])
 	end)
 
 	-- -------------------------------------------------------------------------
