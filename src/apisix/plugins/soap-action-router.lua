@@ -2,88 +2,108 @@ local core          = require("apisix.core")
 local xml2lua 		= require('xml2lua')
 local xmlhandler 	= require('xmlhandler.tree')
 local ngx 			= require("ngx")
-
+local schema_def = require("apisix.schema_def")
+local upstream   = require("apisix.upstream")
 local plugin_name = "soap-action-router"
 
+
+local soap_routes_schema = {
+    type = "array",
+    items = {
+        type = "object",
+        additionalProperties = false,
+        required = {"soap_action", "upstream_id"},
+        properties = {
+            upstream_id = schema_def.id_schema,
+            soap_action = {
+                type = "string",
+                description = "The SOAP action to match against the SOAPAction header or Content-Type header or body."
+            }
+        }
+    }
+}
 local schema = {
 	type = "object",
 	properties = {
-		match_action = {
-			type = "string",
-			description = "The SOAP action to match against the SOAPAction header or Content-Type header or body."
-		},
+		routes = soap_routes_schema,
+        soap_action_source = {
+            type = "string",
+            enum = {"header", "content_type", "body"},
+            description = "Only inspect this source for the SOAP action. Omit to use the fallback order."
+        }
 	},
-	additionalProperties = false,
-	description = "This plugin matches the SOAPAction header or the action in the Content-Type header or body, and adds a header if it matches."
+    required = {"routes"},
+	description = "Matches the SOAPAction header, Content-Type action, or body action and routes accordingly."
 }
 
 local metadata_schema = {}
 
 local _M = {
 	version = 0.1,
-	priority = 1,
+	priority = 967,
 	name = plugin_name,
 	schema = schema,
 	metadata_schema = metadata_schema
 }
 
+function _M.check_schema(conf)
+    return core.schema.check(schema, conf)
+end
+
 -- need to traverse the table since we do not know the xmlns prefixes beforehand
-local function find_action_in_body(element, soap_action_match, target_tbl)
+local function find_action_in_body(body)
 	core.log.info("Finding SOAPAction in body")
-	for k,v in pairs(element) do
-		if type(v) ~= "table" then
-			if type(k) == "string" and k:match('Action') then
-                if v == soap_action_match then
-					target_tbl["SOAPAction"] = v
+	for key, value in pairs(body) do
+
+		if key ~= "_attr" then
+			local local_name = type(key) == "string" and key:match("([^:]+)$")
+			local_name = local_name and local_name:lower()
+			if local_name == "action" or local_name == "soapaction" then
+				if type(value) == "string" then
+					return value
+				elseif type(value) == "table" and type(value[1]) == "string" then
+					-- xml2lua retains text in a table when the element has attributes.
+					return value[1]
 				end
 			end
-		end
-		if type(v) == "table" then
-			find_action_in_body(v, soap_action_match, target_tbl)
+			if type(value) == "table" then
+				local found = find_action_in_body(value)
+				if found then
+					return found
+				end
+			end
 		end
 	end
 end
 
-function _M.access(conf, ctx)
-    local matched = _M:match_soap_action(conf.match_action)
-    if matched then
-        core.log.info("Matched SOAPAction. Header was added.")
-    else
-        core.log.info("No match for SOAPAction.")
-        return 403, { message = "Forbidden: Invalid or missing SOAPAction." }
+local function find_soap_action(source)
+    local headers
+    if source ~= "body" then
+        headers = ngx.req.get_headers()
     end
-end
 
-function _M:match_soap_action(target_action)
-    local headers = ngx.req.get_headers()
-    local soap_action = headers["SOAPAction"]
-
-    if soap_action then
-        soap_action = soap_action:gsub("^%s*[\"']*(.-)[\"']*%s*$", "%1")  -- remove quotes and whitespace
-        if soap_action == target_action then
-            core.log.info("SOAPAction matches target action: ", target_action)
-            return true
+    if not source or source == "header" then
+        local soap_action = headers["SOAPAction"]
+        if soap_action or source == "header" then
+            return soap_action
         end
-        return false
     end
 
-    -- If no match or SOAPAction missing, try to get from Content-Type (SOAP 1.2)
-    local content_type = headers["Content-Type"]
-    if content_type then
-        for k in string.gmatch(content_type, "[^;]+") do
-            local key, value = k:match("^%s*([^=]+)%s*=%s*\"?([^\";]+)\"?")
-            if key and key:lower() == "action" then
-                soap_action = value
-                if soap_action == target_action then
-                    core.request.add_header("SOAPAction", soap_action)
-                    core.log.info("Matched action from Content-Type header: ", soap_action)
-                    return true
+    if not source or source == "content_type" then
+        local content_type = headers["Content-Type"]
+        if content_type then
+            for k in string.gmatch(content_type, "[^;]+") do
+                local key, value = k:match("^%s*([^=]+)%s*=%s*\"?([^\";]+)\"?")
+                if key and key:lower() == "action" then
+                    return value
                 end
             end
         end
+        if source == "content_type" then
+            return false
+        end
     end
 
-    -- Final fallback: parse body for action
     core.log.info("Trying to find SOAPAction in body")
     local body, err = core.request.get_body()
     if not body then
@@ -100,14 +120,42 @@ function _M:match_soap_action(target_action)
         return false
     end
 
-    local found_tbl = {}
-    find_action_in_body(handler.root, target_action, found_tbl)
-    if found_tbl["SOAPAction"] then
-        core.request.add_header("SOAPAction", found_tbl["SOAPAction"])
-        core.log.info("SOAPAction extracted from body and added: ", found_tbl["SOAPAction"])
-        return true
+    local found_action = find_action_in_body(handler.root)
+    if found_action then
+        -- Might be useful as an optional setting?
+        -- core.request.add_header("SOAPAction", found_action)
+        core.log.info("SOAPAction extracted from body and added: ", found_action)
+        return found_action
     end
     return false
 end
+function _M.access(conf, ctx)
+    local soap_action = find_soap_action(conf.soap_action_source)
+    if soap_action then
+        for _, route in ipairs(conf.routes) do
+            if route.soap_action and route.soap_action == soap_action then
+                if not route.upstream_id then
+                    core.log.error("missing upstream for SOAPAction: ", soap_action)
+                    return 500, "missing upstream for SOAPAction: " .. soap_action
+                end
+                local found_upstream = upstream.get_by_id(route.upstream_id)
+                if not found_upstream then
+                    return 500, "failed to fetch upstream info by "
+                                .. "upstream id: " .. route.upstream_id
+                end
+                ctx.upstream_id = route.upstream_id
+                core.log.info("upstream_id: ", route.upstream_id)
+                return
+            end
+        end
+        return 500, "No matching route found for SOAPAction: " .. soap_action
+
+    else
+        core.log.info("No soap action found")
+        return 403, { message = "Forbidden: Invalid or missing SOAPAction." }
+    end
+end
+
+
 
 return _M

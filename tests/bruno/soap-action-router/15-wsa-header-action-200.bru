@@ -1,0 +1,27 @@
+meta {
+  name: WS-Addressing Action in the SOAP header is extracted
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsa="http://www.w3.org/2005/08/addressing">
+    <s:Header><wsa:Action>testOne</wsa:Action></s:Header>
+    <s:Body><Value>no body action</Value></s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

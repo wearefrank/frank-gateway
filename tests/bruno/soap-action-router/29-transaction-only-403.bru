@@ -1,0 +1,33 @@
+meta {
+  name: transaction and action-like names are not SOAP actions
+  type: http
+  seq: 29
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:example">
+    <s:Body>
+      <Transaction>testOne</Transaction>
+      <urn:transaction>testTwo</urn:transaction>
+      <MyAction>testOne</MyAction>
+      <ActionResult>testTwo</ActionResult>
+      <SOAPActionSuffix>testOne</SOAPActionSuffix>
+    </s:Body>
+  </s:Envelope>
+}
+
+tests {
+  test("action-like names return the structured forbidden response", function() {
+    expect(res.getStatus()).to.equal(403);
+    expect(res.getBody()).to.deep.equal({ message: "Forbidden: Invalid or missing SOAPAction." });
+  });
+}

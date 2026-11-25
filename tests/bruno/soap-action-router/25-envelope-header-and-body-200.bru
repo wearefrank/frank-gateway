@@ -1,0 +1,27 @@
+meta {
+  name: matching actions in SOAP envelope header and body are extracted
+  type: http
+  seq: 25
+}
+
+post {
+  url: {{baseUrl}}/soap/myservice
+  body: xml
+}
+
+headers {
+  Content-Type: text/xml
+}
+
+body:xml {
+  <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:example">
+    <soapenv:Header><soapenv:Action>testOne</soapenv:Action></soapenv:Header>
+    <soapenv:Body><urn:MyAction><Action>testOne</Action></urn:MyAction></soapenv:Body>
+  </soapenv:Envelope>
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
