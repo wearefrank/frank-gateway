@@ -34,7 +34,7 @@ local metadata_schema = {
 
 local _M = {
     version = 0.1, 
-    priority = 0, -- Set the plugin priority here, PLEASE DO NOT JUST SET 1, choose an appropriate priority based on your plugin's execution order. https://apisix.apache.org/docs/apisix/plugin-develop/#choose-phase-to-run 
+    priority = 0, -- Set the plugin priority here, PLEASE DO NOT JUST SET 1, (recommend to use priority (0, 100) for custom plugins) choose an appropriate priority based on your plugin's execution order. https://apisix.apache.org/docs/apisix/plugin-develop/#choose-phase-to-run 
     name = plugin_name,
     schema = schema,
     metadata_schema = metadata_schema,
