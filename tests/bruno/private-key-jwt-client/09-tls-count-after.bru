@@ -1,0 +1,16 @@
+meta {
+  name: TLS failure sends no token request
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/private-key-jwt/stats
+}
+
+tests {
+  test("identity provider did not receive another token request", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().token_requests).to.equal(Number(bru.getEnvVar("tlsTokenRequestCount")));
+  });
+}

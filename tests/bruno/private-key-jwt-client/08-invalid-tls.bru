@@ -1,0 +1,16 @@
+meta {
+  name: reject token endpoint with wrong TLS hostname
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/private-key-jwt/invalid-tls
+}
+
+tests {
+  test("does not send credentials to a mismatched TLS endpoint", function() {
+    expect(res.getStatus()).to.equal(502);
+    expect(res.getBody().message).to.equal("Unable to obtain upstream access token");
+  });
+}

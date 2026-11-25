@@ -1,0 +1,20 @@
+meta {
+  name: fetch and remember cached token count
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/private-key-jwt/cached
+}
+
+script:post-response {
+  bru.setEnvVar("tokenRequestCount", res.getBody().token_requests);
+}
+
+tests {
+  test("upstream receives a bearer token", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().authorization).to.equal("Bearer test-access-token");
+  });
+}

@@ -1,0 +1,79 @@
+routes:
+  - name: test-jwks
+    uri: /private-key-jwt/jwks
+    methods: [GET]
+    plugins:
+      jwks-publisher:
+        keys:
+          - kid: test-key
+            public_key: ${{TEST_PUBLIC_KEY}}
+
+  - name: test-uncached-token
+    uri: /private-key-jwt/uncached
+    plugins:
+      private-key-jwt-client:
+        token_endpoint: "https://mock-idp:8443/token?tenant=test"
+        client_id: test-client
+        private_key: ${{TEST_PRIVATE_KEY}}
+        kid: test-key
+        scope: "read test"
+        use_cache: false
+    upstream_id: 1
+
+  - name: test-cached-token
+    uri: /private-key-jwt/cached
+    plugins:
+      private-key-jwt-client:
+        token_endpoint: "https://mock-idp:8443/token?tenant=test"
+        client_id: test-client
+        private_key: ${{TEST_PRIVATE_KEY}}
+        kid: test-key
+        scope: "read test"
+    upstream_id: 1
+
+  - name: test-unknown-key
+    uri: /private-key-jwt/unknown-key
+    plugins:
+      private-key-jwt-client:
+        token_endpoint: "https://mock-idp:8443/token?tenant=test"
+        client_id: test-client
+        private_key: ${{TEST_PRIVATE_KEY}}
+        kid: unknown-key
+        scope: "read test"
+        use_cache: false
+    upstream_id: 1
+
+  - name: test-invalid-tls-host
+    uri: /private-key-jwt/invalid-tls
+    plugins:
+      private-key-jwt-client:
+        token_endpoint: "https://wrong-idp:8443/token?tenant=test"
+        client_id: test-client
+        private_key: ${{TEST_PRIVATE_KEY}}
+        kid: test-key
+        scope: "read test"
+        use_cache: false
+    upstream_id: 1
+
+  - name: test-invalid-signature
+    uri: /private-key-jwt/invalid-signature
+    plugins:
+      private-key-jwt-client:
+        token_endpoint: "https://mock-idp:8443/token?tenant=test"
+        client_id: test-client
+        private_key: ${{TEST_WRONG_PRIVATE_KEY}}
+        kid: test-key
+        scope: "read test"
+        use_cache: false
+    upstream_id: 1
+
+  - name: test-token-request-count
+    uri: /private-key-jwt/stats
+    upstream_id: 1
+
+upstreams:
+  - id: 1
+    type: roundrobin
+    nodes:
+      "mock-idp:8080": 1
+#END

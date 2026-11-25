@@ -1,0 +1,63 @@
+name: frank-gateway-private-key-jwt-test
+
+services:
+  fixtures:
+    image: frank-gateway-private-key-jwt-test:local
+    user: root
+    entrypoint: ["/bin/sh", "/test/setup.sh"]
+    volumes:
+      - gateway-conf:/generated
+      - ../../conf/config.yaml:/test/config.yaml:ro
+      - ./apisix.yaml:/test/apisix.yaml:ro
+      - ./setup.sh:/test/setup.sh:ro
+
+  mock-idp:
+    image: node:22-alpine
+    command: ["node", "/test/mock-idp.js"]
+    depends_on:
+      fixtures:
+        condition: service_completed_successfully
+    volumes:
+      - gateway-conf:/fixtures:ro
+      - ./mock-idp.js:/test/mock-idp.js:ro
+    networks:
+      apisix:
+        aliases:
+          - wrong-idp
+
+  apisix:
+    image: frank-gateway-private-key-jwt-test:local
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    entrypoint: ["/bin/sh", "/test/start.sh"]
+    depends_on:
+      fixtures:
+        condition: service_completed_successfully
+      mock-idp:
+        condition: service_started
+    volumes:
+      - gateway-conf:/usr/local/apisix/conf
+      - ../../src:/usr/local/apisix/custom-plugins:ro
+      - ./start.sh:/test/start.sh:ro
+    ports:
+      - "127.0.0.1:9080:9080"
+    networks:
+      apisix:
+
+  lua-unit-test:
+    build:
+      context: ../../
+      dockerfile: spec/Dockerfile
+    volumes:
+      - ../../:/frank-gateway
+    working_dir: /frank-gateway
+    command: ["busted", "spec"]
+    networks:
+      apisix:
+
+volumes:
+  gateway-conf:
+
+networks:
+  apisix:

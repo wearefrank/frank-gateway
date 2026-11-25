@@ -1,0 +1,16 @@
+meta {
+  name: reject assertion signed with an unknown key id
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/private-key-jwt/unknown-key
+}
+
+tests {
+  test("returns an error without forwarding the request", function() {
+    expect(res.getStatus()).to.equal(502);
+    expect(res.getBody().message).to.equal("Unable to obtain upstream access token");
+  });
+}

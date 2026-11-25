@@ -1,0 +1,16 @@
+meta {
+  name: reject assertion signed with the wrong private key
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/private-key-jwt/invalid-signature
+}
+
+tests {
+  test("identity provider rejects an invalid signature", function() {
+    expect(res.getStatus()).to.equal(502);
+    expect(res.getBody().message).to.equal("Unable to obtain upstream access token");
+  });
+}
