@@ -17,6 +17,7 @@ local schema = token_client.schema {
 		resource_server = {
 			type = "string"
 		},
+		custom_parameters = token_client.custom_parameters_schema("Set your own parameters for token request"),
 		grant_type = {
 			type = "string",
 			default = "client_credentials"
@@ -42,7 +43,7 @@ local function build_request(conf)
 		table.insert(fields, { "resourceServer", conf.resource_server })
 	end
 
-	return token_client.encode_form(fields)
+	return token_client.encode_form(fields, conf.custom_parameters)
 end
 
 return token_client.new {
