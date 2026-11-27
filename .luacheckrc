@@ -5,4 +5,3 @@ max_line_length = 100
 exclude_files = {
     "apisix/cli/ngx_tpl.lua",
 }
--
