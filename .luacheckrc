@@ -1,7 +1,6 @@
-std = "ngx_lua"
 unused_args = false
 redefined = false
-max_line_length = 100
+max_code_line_length = 120
 exclude_files = {
-    "apisix/cli/ngx_tpl.lua",
+    ".luacheckrc",
 }
