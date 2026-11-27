@@ -71,9 +71,15 @@ describe("merge-config plugin", function()
 					end,
 				},
 				log = {
-					error = function(...) table.insert(error_logs, { ... }) end,
-					warn = function(...) table.insert(warn_logs, { ... }) end,
-					info = function(...) table.insert(info_logs, { ... }) end,
+					error = function(...)
+						table.insert(error_logs, { ... })
+					end,
+					warn = function(...)
+						table.insert(warn_logs, { ... })
+					end,
+					info = function(...)
+						table.insert(info_logs, { ... })
+					end,
 					debug = function() end,
 				},
 			}
@@ -155,7 +161,9 @@ describe("merge-config plugin", function()
 				end,
 			},
 			worker = {
-				id = function() return 0 end,
+				id = function()
+					return 0
+				end,
 			},
 		}
 
@@ -188,7 +196,9 @@ describe("merge-config plugin", function()
 				read = function(self, format)
 					return content
 				end,
-				close = function(self) return true end,
+				close = function(self)
+					return true
+				end,
 			}
 		end
 
@@ -225,10 +235,16 @@ describe("merge-config plugin", function()
 	-- -------------------------------------------------------------------------
 
 	it("run_once merges sections from multiple files into the output file", function()
-		add_yaml_file("a.yaml", "routes:\n  - id: 1\n    name: route-a\n",
-			{ routes = { { id = 1, name = "route-a" } } })
-		add_yaml_file("b.yaml", "routes:\n  - id: 2\n    name: route-b\n",
-			{ routes = { { id = 2, name = "route-b" } } })
+		add_yaml_file(
+			"a.yaml",
+			"routes:\n  - id: 1\n    name: route-a\n",
+			{ routes = { { id = 1, name = "route-a" } } }
+		)
+		add_yaml_file(
+			"b.yaml",
+			"routes:\n  - id: 2\n    name: route-b\n",
+			{ routes = { { id = 2, name = "route-b" } } }
+		)
 
 		local result, err = plugin.run_once(base_conf())
 
@@ -248,8 +264,11 @@ describe("merge-config plugin", function()
 	end)
 
 	it("run_once ignores non-yaml files in the input directory", function()
-		add_yaml_file("a.yaml", "routes:\n  - id: 1\n    name: route-a\n",
-			{ routes = { { id = 1, name = "route-a" } } })
+		add_yaml_file(
+			"a.yaml",
+			"routes:\n  - id: 1\n    name: route-a\n",
+			{ routes = { { id = 1, name = "route-a" } } }
+		)
 		vfs_files[INPUT_DIR .. "/notes.txt"] = "not yaml"
 
 		local result, err = plugin.run_once(base_conf())
@@ -260,9 +279,11 @@ describe("merge-config plugin", function()
 	end)
 
 	it("run_once excludes items with duplicate ids and documents them", function()
-		add_yaml_file("dup.yaml",
+		add_yaml_file(
+			"dup.yaml",
 			"routes:\n  - id: 1\n    name: route-a\n  - id: 1\n    name: route-b\n",
-			{ routes = { { id = 1, name = "route-a" }, { id = 1, name = "route-b" } } })
+			{ routes = { { id = 1, name = "route-a" }, { id = 1, name = "route-b" } } }
+		)
 
 		local result, err = plugin.run_once(base_conf())
 
@@ -271,19 +292,21 @@ describe("merge-config plugin", function()
 
 		local output = vfs_written[OUTPUT_FILE]
 		assert.is_truthy(output:find("# --- DUPLICATE IDS ---", 1, true))
-		assert.is_truthy(output:find(
-			"# id=1 | section=routes | first_file=dup.yaml | first_line=2 | duplicate_file=dup.yaml | duplicate_line=4",
-			1, true))
+		assert.is_truthy(
+			output:find(
+				"# id=1 | section=routes | first_file=dup.yaml | first_line=2 | duplicate_file=dup.yaml | duplicate_line=4",
+				1,
+				true
+			)
+		)
 		assert.is_truthy(output:find("name: route-a", 1, true))
 		assert.is_falsy(output:find("name: route-b", 1, true))
 		assert.is_true(#error_logs > 0)
 	end)
 
 	it("run_once excludes items with duplicate names across files", function()
-		add_yaml_file("a.yaml", "routes:\n  - id: 1\n    name: same\n",
-			{ routes = { { id = 1, name = "same" } } })
-		add_yaml_file("b.yaml", "routes:\n  - id: 2\n    name: same\n",
-			{ routes = { { id = 2, name = "same" } } })
+		add_yaml_file("a.yaml", "routes:\n  - id: 1\n    name: same\n", { routes = { { id = 1, name = "same" } } })
+		add_yaml_file("b.yaml", "routes:\n  - id: 2\n    name: same\n", { routes = { { id = 2, name = "same" } } })
 
 		local result, err = plugin.run_once(base_conf())
 
@@ -401,8 +424,11 @@ describe("merge-config plugin", function()
 	end
 
 	it("timer handler builds the merged config and releases the lock", function()
-		add_yaml_file("a.yaml", "routes:\n  - id: 1\n    name: route-a\n",
-			{ routes = { { id = 1, name = "route-a" } } })
+		add_yaml_file(
+			"a.yaml",
+			"routes:\n  - id: 1\n    name: route-a\n",
+			{ routes = { { id = 1, name = "route-a" } } }
+		)
 		local handler, conf = start_timer_and_get_handler()
 
 		handler(false, conf)
@@ -412,8 +438,11 @@ describe("merge-config plugin", function()
 	end)
 
 	it("timer handler exits immediately on premature shutdown", function()
-		add_yaml_file("a.yaml", "routes:\n  - id: 1\n    name: route-a\n",
-			{ routes = { { id = 1, name = "route-a" } } })
+		add_yaml_file(
+			"a.yaml",
+			"routes:\n  - id: 1\n    name: route-a\n",
+			{ routes = { { id = 1, name = "route-a" } } }
+		)
 		local handler, conf = start_timer_and_get_handler()
 
 		handler(true, conf)
@@ -422,8 +451,11 @@ describe("merge-config plugin", function()
 	end)
 
 	it("timer handler skips the run when another worker holds the lock", function()
-		add_yaml_file("a.yaml", "routes:\n  - id: 1\n    name: route-a\n",
-			{ routes = { { id = 1, name = "route-a" } } })
+		add_yaml_file(
+			"a.yaml",
+			"routes:\n  - id: 1\n    name: route-a\n",
+			{ routes = { { id = 1, name = "route-a" } } }
+		)
 		shared_dict_store["merge-config-lock"] = 1
 		local handler, conf = start_timer_and_get_handler()
 
@@ -456,8 +488,11 @@ describe("merge-config plugin", function()
 	end)
 
 	it("init runs the initial build and makes the output writable", function()
-		add_yaml_file("a.yaml", "routes:\n  - id: 1\n    name: route-a\n",
-			{ routes = { { id = 1, name = "route-a" } } })
+		add_yaml_file(
+			"a.yaml",
+			"routes:\n  - id: 1\n    name: route-a\n",
+			{ routes = { { id = 1, name = "route-a" } } }
+		)
 		local_conf_value = {
 			plugin_attr = { ["merge-config"] = base_conf({ enabled = true }) },
 		}

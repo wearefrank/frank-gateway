@@ -45,8 +45,12 @@ describe("openid-connect-client plugin", function()
 					end,
 				},
 				log = {
-					info  = function(...) table.insert(info_logs,  { ... }) end,
-					error = function(...) table.insert(error_logs, { ... }) end,
+					info = function(...)
+						table.insert(info_logs, { ... })
+					end,
+					error = function(...)
+						table.insert(error_logs, { ... })
+					end,
 				},
 				request = {
 					add_header = function(ctx, name, value)
@@ -55,8 +59,8 @@ describe("openid-connect-client plugin", function()
 				},
 				json = {
 					decode = function(body)
-						local token    = string.match(body, '"access_token"%s*:%s*"([^"]+)"')
-						local expires  = tonumber(string.match(body, '"expires_in"%s*:%s*(%d+)'))
+						local token = string.match(body, '"access_token"%s*:%s*"([^"]+)"')
+						local expires = tonumber(string.match(body, '"expires_in"%s*:%s*(%d+)'))
 						if token then
 							return { access_token = token, expires_in = expires }
 						end
@@ -69,13 +73,12 @@ describe("openid-connect-client plugin", function()
 		package.preload["net.url"] = function()
 			return {
 				parse = function(raw)
-					local scheme, host, port_str, path =
-						string.match(raw, "^([%a]+)://([^:/]+):?(%d*)(/?[^?]*)")
+					local scheme, host, port_str, path = string.match(raw, "^([%a]+)://([^:/]+):?(%d*)(/?[^?]*)")
 					return {
 						scheme = scheme or "http",
-						host   = host   or "localhost",
-						port   = tonumber(port_str) or 80,
-						path   = path   or "/",
+						host = host or "localhost",
+						port = tonumber(port_str) or 80,
+						path = path or "/",
 					}
 				end,
 			}
@@ -100,7 +103,8 @@ describe("openid-connect-client plugin", function()
 								read_body = function(self)
 									return httpc_config.response_body, nil
 								end,
-							}, nil
+							},
+								nil
 						end,
 						close = function(self)
 							httpc_close_called = true
@@ -113,8 +117,12 @@ describe("openid-connect-client plugin", function()
 		_G.ngx = {
 			shared = {
 				["openid-connect-client-cache"] = {
-					get = function(self, key)    return cache_store[key] end,
-					set = function(self, key, v) cache_store[key] = v   end,
+					get = function(self, key)
+						return cache_store[key]
+					end,
+					set = function(self, key, v)
+						cache_store[key] = v
+					end,
 				},
 			},
 			escape_uri = function(value)
@@ -131,7 +139,12 @@ describe("openid-connect-client plugin", function()
 	-- -------------------------------------------------------------------------
 
 	it("delegates regular schema checks to plugin schema", function()
-		local conf = { grant_type = "client_credentials", token_endpoint = "http://idp/token", client_id = "id", client_secret = "sec" }
+		local conf = {
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp/token",
+			client_id = "id",
+			client_secret = "sec",
+		}
 
 		local ok = plugin.check_schema(conf)
 
@@ -164,8 +177,11 @@ describe("openid-connect-client plugin", function()
 	it("uses cached token and skips HTTP call when cache hit and use_cache is true", function()
 		cache_store["my-client"] = "cached-token-xyz"
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp/token",
-			client_id = "my-client", client_secret = "sec", use_cache = true,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			use_cache = true,
 		}
 
 		plugin.access(conf, {})
@@ -181,8 +197,12 @@ describe("openid-connect-client plugin", function()
 
 	it("fetches a new token when cache is empty", function()
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", use_cache = true, default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			use_cache = true,
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -195,8 +215,12 @@ describe("openid-connect-client plugin", function()
 	it("fetches a new token even when cache is populated but use_cache is false", function()
 		cache_store["my-client"] = "stale-token"
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", use_cache = false, default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			use_cache = false,
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -211,8 +235,12 @@ describe("openid-connect-client plugin", function()
 
 	it("connects to IDP with parsed URL parts and ssl_verify flag", function()
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", ssl_verify = false, default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			ssl_verify = false,
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -226,8 +254,11 @@ describe("openid-connect-client plugin", function()
 
 	it("sends client_id, client_secret and grant_type as form-encoded body", function()
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "my-secret", default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "my-secret",
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -241,8 +272,12 @@ describe("openid-connect-client plugin", function()
 
 	it("appends scope to request body when configured", function()
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", scope = "api.read", default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			scope = "api.read",
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -252,8 +287,11 @@ describe("openid-connect-client plugin", function()
 
 	it("omits scope from request body when not configured", function()
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -263,9 +301,12 @@ describe("openid-connect-client plugin", function()
 
 	it("appends resourceServer to request body when configured", function()
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec",
-			resource_server = "https://api.example.org", default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			resource_server = "https://api.example.org",
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -275,8 +316,11 @@ describe("openid-connect-client plugin", function()
 
 	it("omits resourceServer from request body when not configured", function()
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -293,9 +337,13 @@ describe("openid-connect-client plugin", function()
 			return value
 		end
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", scope = "api.read",
-			resource_server = "api", default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			scope = "api.read",
+			resource_server = "api",
+			default_expiration = 300,
 			custom_parameters = { audience = audience },
 		}
 
@@ -315,8 +363,12 @@ describe("openid-connect-client plugin", function()
 	it("stores the fetched token in cache using the expires_in TTL from the IDP", function()
 		httpc_config.response_body = '{"access_token":"fresh-tok","expires_in":120}'
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", use_cache = true, default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			use_cache = true,
+			default_expiration = 300,
 		}
 
 		plugin.access(conf, {})
@@ -327,8 +379,12 @@ describe("openid-connect-client plugin", function()
 	it("falls back to default_expiration when IDP response omits expires_in", function()
 		httpc_config.response_body = '{"access_token":"no-expiry-tok"}'
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", use_cache = true, default_expiration = 999,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			use_cache = true,
+			default_expiration = 999,
 		}
 
 		plugin.access(conf, {})
@@ -344,8 +400,11 @@ describe("openid-connect-client plugin", function()
 	it("returns 500 and closes connection when connect fails", function()
 		httpc_config.connect_err = "connection refused"
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			default_expiration = 300,
 		}
 
 		local status, body = plugin.access(conf, {})
@@ -358,10 +417,13 @@ describe("openid-connect-client plugin", function()
 
 	it("returns IDP status and body when IDP responds with non-200", function()
 		httpc_config.response_status = 401
-		httpc_config.response_body   = '{"error":"invalid_client"}'
+		httpc_config.response_body = '{"error":"invalid_client"}'
 		local conf = {
-			grant_type = "client_credentials", token_endpoint = "http://idp:9081/token",
-			client_id = "my-client", client_secret = "sec", default_expiration = 300,
+			grant_type = "client_credentials",
+			token_endpoint = "http://idp:9081/token",
+			client_id = "my-client",
+			client_secret = "sec",
+			default_expiration = 300,
 		}
 
 		local status, body = plugin.access(conf, {})

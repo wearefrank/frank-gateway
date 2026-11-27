@@ -45,8 +45,12 @@ describe("stdout-logger plugin", function()
 					end,
 				},
 				log = {
-					error = function(...) table.insert(error_logs, { ... }) end,
-					warn = function(...) table.insert(warn_logs, { ... }) end,
+					error = function(...)
+						table.insert(error_logs, { ... })
+					end,
+					warn = function(...)
+						table.insert(warn_logs, { ... })
+					end,
 				},
 				json = {
 					encode = function(entry)
@@ -92,8 +96,16 @@ describe("stdout-logger plugin", function()
 
 		_G.ngx = {
 			arg = { nil, false },
-			req = { get_headers = function() return { ["X-Req"] = "req-value" } end },
-			resp = { get_headers = function() return { ["X-Resp"] = "resp-value" } end },
+			req = {
+				get_headers = function()
+					return { ["X-Req"] = "req-value" }
+				end,
+			},
+			resp = {
+				get_headers = function()
+					return { ["X-Resp"] = "resp-value" }
+				end,
+			},
 		}
 
 		plugin = require("apisix.plugins.stdout-logger")

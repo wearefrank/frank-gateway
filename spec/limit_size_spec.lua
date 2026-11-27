@@ -28,8 +28,12 @@ describe("limit-size plugin", function()
 					end,
 				},
 				log = {
-					debug = function(...) table.insert(debug_logs, { ... }) end,
-					error = function(...) table.insert(error_logs, { ... }) end,
+					debug = function(...)
+						table.insert(debug_logs, { ... })
+					end,
+					error = function(...)
+						table.insert(error_logs, { ... })
+					end,
 				},
 				request = {
 					get_body = function(limit, ctx)
@@ -96,7 +100,13 @@ describe("limit-size plugin", function()
 
 	it("access allows request when body check passes", function()
 		get_body_err = nil
-		local conf = { request_limit = 1024, request_limit_unit = "bytes", full_request = false, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			request_limit = 1024,
+			request_limit_unit = "bytes",
+			full_request = false,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		local status, body = plugin.access(conf, ctx)
@@ -108,7 +118,13 @@ describe("limit-size plugin", function()
 
 	it("access rejects request when body check exceeds limit", function()
 		get_body_err = "request body exceeded limit"
-		local conf = { request_limit = 512, request_limit_unit = "bytes", full_request = false, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			request_limit = 512,
+			request_limit_unit = "bytes",
+			full_request = false,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		local status, body = plugin.access(conf, ctx)
@@ -124,7 +140,13 @@ describe("limit-size plugin", function()
 
 	it("access allows request when full_request size is within limit", function()
 		ngx.var.request_length = "500"
-		local conf = { request_limit = 1024, request_limit_unit = "bytes", full_request = true, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			request_limit = 1024,
+			request_limit_unit = "bytes",
+			full_request = true,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		local status = plugin.access(conf, ctx)
@@ -135,7 +157,13 @@ describe("limit-size plugin", function()
 
 	it("access rejects request when full_request size exceeds limit", function()
 		ngx.var.request_length = "2000"
-		local conf = { request_limit = 1024, request_limit_unit = "bytes", full_request = true, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			request_limit = 1024,
+			request_limit_unit = "bytes",
+			full_request = true,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		local status, body = plugin.access(conf, ctx)
@@ -146,7 +174,13 @@ describe("limit-size plugin", function()
 
 	it("access rejects when request_length is nil (cannot determine size)", function()
 		ngx.var.request_length = nil
-		local conf = { request_limit = 1024, request_limit_unit = "bytes", full_request = true, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			request_limit = 1024,
+			request_limit_unit = "bytes",
+			full_request = true,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		local status, body = plugin.access(conf, ctx)
@@ -161,7 +195,13 @@ describe("limit-size plugin", function()
 
 	it("access converts kilobytes to bytes before comparing", function()
 		ngx.var.request_length = "1025"
-		local conf = { request_limit = 1, request_limit_unit = "kilobytes", full_request = true, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			request_limit = 1,
+			request_limit_unit = "kilobytes",
+			full_request = true,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		local status, body = plugin.access(conf, ctx)
@@ -172,7 +212,13 @@ describe("limit-size plugin", function()
 
 	it("access converts megabytes to bytes before comparing", function()
 		ngx.var.request_length = "1048575"
-		local conf = { request_limit = 1, request_limit_unit = "megabytes", full_request = true, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			request_limit = 1,
+			request_limit_unit = "megabytes",
+			full_request = true,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		local status = plugin.access(conf, ctx)
@@ -200,7 +246,8 @@ describe("limit-size plugin", function()
 
 	it("header_filter allows response when content-length is within limit", function()
 		ngx.var.upstream_http_content_length = "500"
-		local conf = { response_limit = 1024, response_limit_unit = "bytes", rejected_code = 413, rejected_msg = "too large" }
+		local conf =
+			{ response_limit = 1024, response_limit_unit = "bytes", rejected_code = 413, rejected_msg = "too large" }
 		local ctx = {}
 
 		plugin.header_filter(conf, ctx)
@@ -211,7 +258,8 @@ describe("limit-size plugin", function()
 
 	it("header_filter rejects response when content-length exceeds limit", function()
 		ngx.var.upstream_http_content_length = "2000"
-		local conf = { response_limit = 1024, response_limit_unit = "bytes", rejected_code = 413, rejected_msg = "too large" }
+		local conf =
+			{ response_limit = 1024, response_limit_unit = "bytes", rejected_code = 413, rejected_msg = "too large" }
 		local ctx = {}
 
 		plugin.header_filter(conf, ctx)
@@ -227,7 +275,13 @@ describe("limit-size plugin", function()
 
 	it("header_filter allows response when upstream_bytes_received is within limit", function()
 		ngx.var.upstream_bytes_received = "500"
-		local conf = { response_limit = 1024, response_limit_unit = "bytes", full_response = true, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			response_limit = 1024,
+			response_limit_unit = "bytes",
+			full_response = true,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		plugin.header_filter(conf, ctx)
@@ -237,7 +291,13 @@ describe("limit-size plugin", function()
 
 	it("header_filter rejects response when upstream_bytes_received exceeds limit", function()
 		ngx.var.upstream_bytes_received = "2000"
-		local conf = { response_limit = 1024, response_limit_unit = "bytes", full_response = true, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			response_limit = 1024,
+			response_limit_unit = "bytes",
+			full_response = true,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		plugin.header_filter(conf, ctx)
@@ -248,7 +308,13 @@ describe("limit-size plugin", function()
 
 	it("header_filter rejects when upstream_bytes_received is nil", function()
 		ngx.var.upstream_bytes_received = nil
-		local conf = { response_limit = 1024, response_limit_unit = "bytes", full_response = true, rejected_code = 413, rejected_msg = "too large" }
+		local conf = {
+			response_limit = 1024,
+			response_limit_unit = "bytes",
+			full_response = true,
+			rejected_code = 413,
+			rejected_msg = "too large",
+		}
 		local ctx = {}
 
 		plugin.header_filter(conf, ctx)

@@ -86,7 +86,9 @@ describe("auth-zen plugin", function()
 					end,
 				},
 				log = {
-					error = function(...) table.insert(error_logs, { ... }) end,
+					error = function(...)
+						table.insert(error_logs, { ... })
+					end,
 					warn = function() end,
 					info = function() end,
 					debug = function() end,
@@ -200,7 +202,8 @@ describe("auth-zen plugin", function()
 		assert.is_false(ok)
 		assert.are.same(
 			"pdp_auth.mtls.client_cert and pdp_auth.mtls.client_key are required when pdp_auth.mtls.enabled is true",
-			err)
+			err
+		)
 	end)
 
 	-- -------------------------------------------------------------------------
