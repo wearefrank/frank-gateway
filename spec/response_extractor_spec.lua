@@ -22,7 +22,7 @@ describe("response-extractor plugin", function()
 
 		package.preload["cjson.safe"] = function()
 			return {
-				array_mt = array_mt
+				array_mt = array_mt,
 			}
 		end
 
@@ -32,7 +32,7 @@ describe("response-extractor plugin", function()
 					check = function(schema, conf)
 						schema_check_args = { schema = schema, conf = conf }
 						return true
-					end
+					end,
 				},
 				json = {
 					decode = function(body)
@@ -41,8 +41,8 @@ describe("response-extractor plugin", function()
 							return {
 								headers = {
 									["X-Real-Ip"] = "127.0.0.1",
-									["X-Request-Id"] = "req-1"
-								}
+									["X-Request-Id"] = "req-1",
+								},
 							}
 						end
 						return nil, "invalid json"
@@ -56,13 +56,13 @@ describe("response-extractor plugin", function()
 							return "[]"
 						end
 						return "encoded_object"
-					end
+					end,
 				},
 				log = {
 					warn = function(...)
 						table.insert(warn_logs, { ... })
-					end
-				}
+					end,
+				},
 			}
 		end
 
@@ -77,7 +77,7 @@ describe("response-extractor plugin", function()
 						return { data.headers["X-Request-Id"] }
 					end
 					return nil, "unsupported path"
-				end
+				end,
 			}
 		end
 
@@ -115,8 +115,8 @@ describe("response-extractor plugin", function()
 		local conf = {
 			fields = {
 				ip = "$.headers['X-Real-Ip']",
-				requestId = "$.headers['X-Request-Id']"
-			}
+				requestId = "$.headers['X-Request-Id']",
+			},
 		}
 		local ctx = { var = {} }
 
@@ -133,7 +133,7 @@ describe("response-extractor plugin", function()
 		assert.are.same("127.0.0.1", ctx.extracted.ip[1])
 		assert.are.same("req-1", ctx.extracted.requestId[1])
 		assert.are.same("127.0.0.1", ctx.var.ip[1])
-		assert.are.same("req-1", ctx.var.requestId[1]) 
+		assert.are.same("req-1", ctx.var.requestId[1])
 		assert.are.same('["127.0.0.1"]', ctx.var.ip_json)
 		assert.are.same('["req-1"]', ctx.var.requestId_json)
 		assert.are.same("encoded_object", ctx.var.extracted)
@@ -144,12 +144,12 @@ describe("response-extractor plugin", function()
 		local conf = {
 			fields = {
 				ip = "$.headers['X-Real-Ip']",
-				requestId = "$.headers['X-Request-Id']"
-			}
+				requestId = "$.headers['X-Request-Id']",
+			},
 		}
 		local ctx = { var = {} }
 
-		ngx.arg = { 'not-json', true }
+		ngx.arg = { "not-json", true }
 		plugin.body_filter(conf, ctx)
 
 		assert.are.same(1, #warn_logs)
@@ -171,8 +171,8 @@ describe("response-extractor plugin", function()
 		local conf = {
 			fields = {
 				ip = "$.headers['X-Real-Ip']",
-				missing = "$.headers['Missing']"
-			}
+				missing = "$.headers['Missing']",
+			},
 		}
 		local ctx = { var = {} }
 
@@ -220,7 +220,7 @@ describe("response-extractor plugin", function()
 	it("accepts additional configured content types", function()
 		local conf = {
 			fields = { ip = "$.headers['X-Real-Ip']" },
-			content_types = { "application/vnd.api+json", "text/x-json" }
+			content_types = { "application/vnd.api+json", "text/x-json" },
 		}
 		local ctx = { var = {} }
 
@@ -235,7 +235,7 @@ describe("response-extractor plugin", function()
 	it("skips extraction once the buffered body exceeds max_body_size", function()
 		local conf = {
 			fields = { ip = "$.headers['X-Real-Ip']" },
-			max_body_size = 10
+			max_body_size = 10,
 		}
 		local ctx = { var = {} }
 
@@ -270,7 +270,7 @@ describe("response-extractor plugin", function()
 	it("skips extraction when the cumulative size of several chunks exceeds max_body_size", function()
 		local conf = {
 			fields = { ip = "$.headers['X-Real-Ip']" },
-			max_body_size = 10
+			max_body_size = 10,
 		}
 		local ctx = { var = {} }
 

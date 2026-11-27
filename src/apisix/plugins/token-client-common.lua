@@ -4,7 +4,7 @@
 -- schema boilerplate, body encoding and flow: cache lookup -> connect to IDP
 -- -> POST token request -> cache token -> add Authorization header.
 local core = require("apisix.core")
-local url  = require("net.url")
+local url = require("net.url")
 
 local _M = {}
 
@@ -17,7 +17,7 @@ local _M = {}
 function _M.schema(opts)
 	local properties = {
 		token_endpoint = {
-			type = "string"
+			type = "string",
 		},
 		ssl_verify = {
 			description = "Verify SSL certificate of the IDP host (must be set to false if the IDP is using a self-signed certificate)",
@@ -34,7 +34,7 @@ function _M.schema(opts)
 			minimum = 1,
 			maximum = 100000,
 			default = opts.default_expiration,
-			description = "Default expiration time of cached tokens in seconds. Used when expiration is not provided by IDP in response"
+			description = "Default expiration time of cached tokens in seconds. Used when expiration is not provided by IDP in response",
 		},
 	}
 	for name, prop in pairs(opts.properties) do
@@ -58,10 +58,10 @@ function _M.custom_parameters_schema(description)
 			["^[^:]+$"] = {
 				oneOf = {
 					{ type = "string" },
-					{ type = "number" }
-				}
-			}
-		}
+					{ type = "number" },
+				},
+			},
+		},
 	}
 end
 
@@ -86,11 +86,11 @@ end
 function _M.encode_json(fields, custom_parameters)
 	local parts = {}
 	for _, field in ipairs(fields) do
-		table.insert(parts, "\"" .. field[1] .. "\":\"" .. field[2] .. "\"")
+		table.insert(parts, '"' .. field[1] .. '":"' .. field[2] .. '"')
 	end
 	if custom_parameters ~= nil then
 		for param, value in pairs(custom_parameters) do
-			table.insert(parts, "\"" .. param .. "\":\"" .. value .. "\"")
+			table.insert(parts, '"' .. param .. '":"' .. value .. '"')
 		end
 	end
 
@@ -118,7 +118,7 @@ function _M.new(opts)
 		priority = 1,
 		name = plugin_name,
 		schema = schema,
-		metadata_schema = metadata_schema
+		metadata_schema = metadata_schema,
 	}
 
 	function plugin.check_schema(conf, schema_type)
@@ -140,12 +140,12 @@ function _M.new(opts)
 
 		local parsed_url = url.parse(conf.token_endpoint)
 
-		local httpc = assert(require('resty.http').new())
+		local httpc = assert(require("resty.http").new())
 		local connect_opts = {
-			host 	   = parsed_url.host,
-			port 	   = parsed_url.port,
-			scheme 	   = parsed_url.scheme,
-			ssl_verify = conf.ssl_verify
+			host = parsed_url.host,
+			port = parsed_url.port,
+			scheme = parsed_url.scheme,
+			ssl_verify = conf.ssl_verify,
 		}
 		if set_ssl_server_name then
 			connect_opts.ssl_server_name = parsed_url.host
@@ -161,14 +161,14 @@ function _M.new(opts)
 		local request_body, content_type = build_request(conf)
 		core.log.info("Built request body: " .. request_body)
 
-		local res, call_err = assert(httpc:request {
-			path    = parsed_url.path,
-			body    = request_body,
-			method  = 'POST',
+		local res, call_err = assert(httpc:request({
+			path = parsed_url.path,
+			body = request_body,
+			method = "POST",
 			headers = {
 				["Content-Type"] = content_type,
 			},
-		})
+		}))
 
 		local body, _ = res:read_body()
 		core.log.info("IDP response status: ", res.status)
@@ -177,7 +177,8 @@ function _M.new(opts)
 			core.log.error("Call error: ", call_err)
 			httpc:close()
 			if body == nil then
-				return res.status, { message = "Failed to make request to IDP. No error message was given. Error code: " .. res.status }
+				return res.status,
+				{ message = "Failed to make request to IDP. No error message was given. Error code: " .. res.status }
 			else
 				return res.status, { message = body }
 			end

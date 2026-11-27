@@ -5,12 +5,20 @@ local ngx = ngx
 
 local plugin_name = "merge-config"
 local LOCK_KEY = "merge-config-lock"
-local LOCK_TTL = 60  -- seconds; safety release if the worker dies mid-run
+local LOCK_TTL = 60 -- seconds; safety release if the worker dies mid-run
 
 local DEFAULT_SECTION_ORDER = {
-	"ssls", "consumers", "consumer_groups", "services", "routes",
-	"stream_routes", "upstreams", "global_rules", "plugin_configs",
-	"plugin_metadata", "secrets"
+	"ssls",
+	"consumers",
+	"consumer_groups",
+	"services",
+	"routes",
+	"stream_routes",
+	"upstreams",
+	"global_rules",
+	"plugin_configs",
+	"plugin_metadata",
+	"secrets",
 }
 
 local plugin_conf_schema = {
@@ -19,39 +27,39 @@ local plugin_conf_schema = {
 		input_directory = {
 			type = "string",
 			minLength = 1,
-			default = "/usr/local/apisix/conf/mergeconfigs"
+			default = "/usr/local/apisix/conf/mergeconfigs",
 		},
 		output_file = {
 			type = "string",
 			minLength = 1,
-			default = "/usr/local/apisix/conf/apisix.yaml"
+			default = "/usr/local/apisix/conf/apisix.yaml",
 		},
 		section_order = {
 			type = "array",
 			minItems = 1,
 			items = { type = "string" },
-			default = DEFAULT_SECTION_ORDER
+			default = DEFAULT_SECTION_ORDER,
 		},
 		interval = {
 			type = "integer",
 			minimum = 1,
 			default = 2,
-			description = "How often (in seconds) to check for changes and rebuild"
+			description = "How often (in seconds) to check for changes and rebuild",
 		},
 		enabled = {
 			type = "boolean",
 			default = false,
-			description = "Set to true to activate the background merge timer"
-		}
+			description = "Set to true to activate the background merge timer",
+		},
 	},
-	additionalProperties = false
+	additionalProperties = false,
 }
 
 local _M = {
 	version = 1,
 	priority = 1,
 	name = plugin_name,
-	schema = plugin_conf_schema
+	schema = plugin_conf_schema,
 }
 
 local timer_started = false
@@ -180,7 +188,7 @@ local function collect_section_items(parsed_yaml, raw_content, section_name, sou
 			configuration_item = item,
 			source_file_name = source_file,
 			source_line_number = item_line_numbers[i] or "n/a",
-			section_index = i
+			section_index = i,
 		})
 	end
 
@@ -238,12 +246,18 @@ local function detect_duplicates(section_name, items, log)
 			if first_entry then
 				is_duplicate = true
 				core.log.error(
-					"duplicate id=", id,
-					" section=", section_name,
-					" first_file=", first_entry.source_file_name,
-					" first_line=", first_entry.source_line_number,
-					" duplicate_file=", entry.source_file_name,
-					" duplicate_line=", entry.source_line_number
+					"duplicate id=",
+					id,
+					" section=",
+					section_name,
+					" first_file=",
+					first_entry.source_file_name,
+					" first_line=",
+					first_entry.source_line_number,
+					" duplicate_file=",
+					entry.source_file_name,
+					" duplicate_line=",
+					entry.source_line_number
 				)
 
 				table.insert(log.duplicate_ids, {
@@ -252,7 +266,7 @@ local function detect_duplicates(section_name, items, log)
 					first_file_name = first_entry.source_file_name,
 					first_line_number = first_entry.source_line_number,
 					duplicate_file_name = entry.source_file_name,
-					duplicate_line_number = entry.source_line_number
+					duplicate_line_number = entry.source_line_number,
 				})
 			else
 				seen_ids[id] = entry
@@ -265,12 +279,18 @@ local function detect_duplicates(section_name, items, log)
 			if first_entry then
 				is_duplicate = true
 				core.log.error(
-					"duplicate name=", name,
-					" section=", section_name,
-					" first_file=", first_entry.source_file_name,
-					" first_line=", first_entry.source_line_number,
-					" duplicate_file=", entry.source_file_name,
-					" duplicate_line=", entry.source_line_number
+					"duplicate name=",
+					name,
+					" section=",
+					section_name,
+					" first_file=",
+					first_entry.source_file_name,
+					" first_line=",
+					first_entry.source_line_number,
+					" duplicate_file=",
+					entry.source_file_name,
+					" duplicate_line=",
+					entry.source_line_number
 				)
 
 				table.insert(log.duplicate_names, {
@@ -279,7 +299,7 @@ local function detect_duplicates(section_name, items, log)
 					first_file_name = first_entry.source_file_name,
 					first_line_number = first_entry.source_line_number,
 					duplicate_file_name = entry.source_file_name,
-					duplicate_line_number = entry.source_line_number
+					duplicate_line_number = entry.source_line_number,
 				})
 			else
 				seen_names[name] = entry
@@ -368,15 +388,17 @@ local function write_output(output_file, merged_sections, section_order, log)
 		if #log.duplicate_ids > 0 then
 			output_handle:write("# --- DUPLICATE IDS ---\n")
 			for _, entry in ipairs(log.duplicate_ids) do
-				output_handle:write(string.format(
-					"# id=%s | section=%s | first_file=%s | first_line=%s | duplicate_file=%s | duplicate_line=%s\n",
-					entry.id,
-					entry.section_name,
-					entry.first_file_name,
-					entry.first_line_number,
-					entry.duplicate_file_name,
-					entry.duplicate_line_number
-				))
+				output_handle:write(
+					string.format(
+						"# id=%s | section=%s | first_file=%s | first_line=%s | duplicate_file=%s | duplicate_line=%s\n",
+						entry.id,
+						entry.section_name,
+						entry.first_file_name,
+						entry.first_line_number,
+						entry.duplicate_file_name,
+						entry.duplicate_line_number
+					)
+				)
 			end
 			output_handle:write("\n")
 		end
@@ -384,15 +406,17 @@ local function write_output(output_file, merged_sections, section_order, log)
 		if #log.duplicate_names > 0 then
 			output_handle:write("# --- DUPLICATE NAMES ---\n")
 			for _, entry in ipairs(log.duplicate_names) do
-				output_handle:write(string.format(
-					"# name=%s | section=%s | first_file=%s | first_line=%s | duplicate_file=%s | duplicate_line=%s\n",
-					entry.name,
-					entry.section_name,
-					entry.first_file_name,
-					entry.first_line_number,
-					entry.duplicate_file_name,
-					entry.duplicate_line_number
-				))
+				output_handle:write(
+					string.format(
+						"# name=%s | section=%s | first_file=%s | first_line=%s | duplicate_file=%s | duplicate_line=%s\n",
+						entry.name,
+						entry.section_name,
+						entry.first_file_name,
+						entry.first_line_number,
+						entry.duplicate_file_name,
+						entry.duplicate_line_number
+					)
+				)
 			end
 			output_handle:write("\n")
 		end
@@ -450,7 +474,7 @@ local function build(conf)
 
 	local log = {
 		duplicate_ids = {},
-		duplicate_names = {}
+		duplicate_names = {},
 	}
 
 	local merged_sections = {}
@@ -495,7 +519,7 @@ local function build(conf)
 		output_file = output_file,
 		duplicate_ids = #log.duplicate_ids,
 		duplicate_names = #log.duplicate_names,
-		generated_at = get_timestamp()
+		generated_at = get_timestamp(),
 	}
 end
 
@@ -507,10 +531,14 @@ function _M.run_once(conf)
 	end
 
 	core.log.info(
-		"merge-config written: ", result.output_file,
-		" duplicate_ids=", result.duplicate_ids,
-		" duplicate_names=", result.duplicate_names,
-		" generated_at=", result.generated_at
+		"merge-config written: ",
+		result.output_file,
+		" duplicate_ids=",
+		result.duplicate_ids,
+		" duplicate_names=",
+		result.duplicate_names,
+		" generated_at=",
+		result.generated_at
 	)
 
 	return result
@@ -531,8 +559,10 @@ local function timer_handler(premature, conf)
 	-- not yet exist, making it an atomic test-and-set.
 	local dict = ngx.shared["merge-config"]
 	if not dict then
-		core.log.error("merge-config: shared dict 'merge-config' not found; "
-			.. "add it to nginx_config.http.custom_lua_shared_dict in config.yaml")
+		core.log.error(
+			"merge-config: shared dict 'merge-config' not found; "
+				.. "add it to nginx_config.http.custom_lua_shared_dict in config.yaml"
+		)
 		return
 	end
 
@@ -604,8 +634,11 @@ function _M.workflow_handler()
 	local interval = conf.interval or 2
 
 	core.log.warn(
-		"merge-config: starting background merge timer (interval=", interval,
-		"s, worker_id=", tostring(ngx.worker.id()), ")"
+		"merge-config: starting background merge timer (interval=",
+		interval,
+		"s, worker_id=",
+		tostring(ngx.worker.id()),
+		")"
 	)
 
 	-- Run immediately on startup, then every `interval` seconds.

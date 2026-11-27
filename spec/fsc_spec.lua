@@ -116,8 +116,12 @@ describe("fsc plugin", function()
 					end,
 				},
 				log = {
-					error = function(...) table.insert(error_logs, { ... }) end,
-					warn = function(...) table.insert(warn_logs, { ... }) end,
+					error = function(...)
+						table.insert(error_logs, { ... })
+					end,
+					warn = function(...)
+						table.insert(warn_logs, { ... })
+					end,
 					info = function() end,
 					debug = function() end,
 				},
@@ -144,7 +148,11 @@ describe("fsc plugin", function()
 		end
 
 		package.preload["apisix.router"] = function()
-			return { router_http = { routes = function() return {} end } }
+			return { router_http = {
+				routes = function()
+					return {}
+				end,
+			} }
 		end
 
 		package.preload["apisix.utils.batch-processor"] = function()
@@ -200,7 +208,9 @@ describe("fsc plugin", function()
 				new = function(self)
 					return {
 						update = function(self, data) end,
-						final = function(self) return sha_digest end,
+						final = function(self)
+							return sha_digest
+						end,
 					}
 				end,
 			}
@@ -224,19 +234,22 @@ describe("fsc plugin", function()
 
 		package.preload["ngx.errlog"] = function()
 			return {
-				get_sys_filter_level = function() return 4 end,
+				get_sys_filter_level = function()
+					return 4
+				end,
 			}
 		end
 
 		package.preload["table.new"] = function()
-			return function(narr, nrec) return {} end
+			return function(narr, nrec)
+				return {}
+			end
 		end
 
 		package.preload["net.url"] = function()
 			return {
 				parse = function(raw)
-					local scheme, host, port_str, path =
-						string.match(raw, "^([%a]+)://([^:/]+):?(%d*)(/?[^?]*)")
+					local scheme, host, port_str, path = string.match(raw, "^([%a]+)://([^:/]+):?(%d*)(/?[^?]*)")
 					return {
 						scheme = scheme,
 						host = host,

@@ -8,12 +8,12 @@ local schema = {}
 local consumer_schema = {
 	type = "object",
 	properties = {
-		cn = {type = "string"},
-		identifier = {type = "string"},
+		cn = { type = "string" },
+		identifier = { type = "string" },
 	},
 	oneOf = {
-		{ required = {"cn"} }, -- cn is kept around so existing consumer configs don't break, but identifier is the preferred field going forward.
-		{ required = {"identifier"} },
+		{ required = { "cn" } }, -- cn is kept around so existing consumer configs don't break, but identifier is the preferred field going forward.
+		{ required = { "identifier" } },
 	},
 }
 
@@ -23,7 +23,7 @@ local _M = {
 	name = plugin_name,
 	type = "auth", -- marks this as an authentication plugin, so APISIX knows it must pick a consumer
 	schema = schema,
-	consumer_schema = consumer_schema
+	consumer_schema = consumer_schema,
 }
 
 -- Authentication plugins are responsible for picking a consumer at the end of their run.
@@ -131,7 +131,9 @@ local function extract_dns_sans(client_cert_pem)
 
 	-- Picks DNS names out of a plain-text SAN representation, e.g. "DNS:foo.com, IP:1.2.3.4".
 	local function collect_dns_from_text(text)
-		if type(text) ~= "string" then return end
+		if type(text) ~= "string" then
+			return
+		end
 		for name in string.gmatch(text, "[Dd][Nn][Ss]%s*:%s*([^,%s\n]+)") do
 			append_dns_name(dns_names, seen, name)
 		end
@@ -144,7 +146,7 @@ local function extract_dns_sans(client_cert_pem)
 		return dns_names
 	end
 
-	local dns_fields = {"DNS", "dNSName"}
+	local dns_fields = { "DNS", "dNSName" }
 
 	local function append_dns_value(value)
 		if type(value) == "table" then
@@ -226,14 +228,16 @@ local function find_consumer_by_field(field, value)
 end
 
 function _M.access(conf, ctx)
-    -- Read the client's certificate and subject information that NGINX extracted during the TLS handshake.
-    local full_dn = ngx.var.ssl_client_s_dn
+	-- Read the client's certificate and subject information that NGINX extracted during the TLS handshake.
+	local full_dn = ngx.var.ssl_client_s_dn
 	local client_cert = normalize_client_cert_pem(ngx.var.ssl_client_raw_cert or ngx.var.ssl_client_cert)
 
 	if not client_cert then
 		-- No certificate means we cannot identify the caller.
-		core.log.debug("[cert-auth] guard triggered: missing client certificate (ssl_client_raw_cert and ssl_client_cert empty)")
-		return 401, {message = "Client certificate required"}
+		core.log.debug(
+			"[cert-auth] guard triggered: missing client certificate (ssl_client_raw_cert and ssl_client_cert empty)"
+		)
+		return 401, { message = "Client certificate required" }
 	end
 
 	local dns_sans, san_err = extract_dns_sans(client_cert)
@@ -299,12 +303,19 @@ function _M.access(conf, ctx)
 	end
 
 	core.log.debug("[cert-auth] consumer matched=", consumer and "yes" or "no")
-    if not consumer then
-		core.log.debug("[cert-auth] guard triggered: no consumer matched; identifiers=", #identifier_candidates, ", has_cn=", cn and "yes" or "no", ", err=", err or "invalid identity")
-	    	return 403, {message = "No matching consumer for identifier or CN"}
-    end
+	if not consumer then
+		core.log.debug(
+			"[cert-auth] guard triggered: no consumer matched; identifiers=",
+			#identifier_candidates,
+			", has_cn=",
+			cn and "yes" or "no",
+			", err=",
+			err or "invalid identity"
+		)
+		return 403, { message = "No matching consumer for identifier or CN" }
+	end
 
-    consumer_mod.attach_consumer(ctx, consumer, consumer_conf)
+	consumer_mod.attach_consumer(ctx, consumer, consumer_conf)
 	-- Make the consumer name available to downstream plugins and log entries.
 	ctx.consumer_name = consumer.username or consumer.consumer_name
 

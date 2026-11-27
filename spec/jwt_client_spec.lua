@@ -78,8 +78,7 @@ describe("jwt-client plugin", function()
 		package.preload["net.url"] = function()
 			return {
 				parse = function(raw)
-					local scheme, host, port_str, path =
-						string.match(raw, "^([%a]+)://([^:/]+):?(%d*)(/?[^?]*)")
+					local scheme, host, port_str, path = string.match(raw, "^([%a]+)://([^:/]+):?(%d*)(/?[^?]*)")
 					return {
 						scheme = scheme or "http",
 						host = host or "localhost",
@@ -109,7 +108,8 @@ describe("jwt-client plugin", function()
 								read_body = function(self)
 									return httpc_config.response_body, nil
 								end,
-							}, nil
+							},
+								nil
 						end,
 						close = function(self)
 							httpc_close_called = true
@@ -136,7 +136,8 @@ describe("jwt-client plugin", function()
 	end)
 
 	it("delegates regular schema checks to plugin schema", function()
-		local conf = { client_id_field_name = "client_id", client_id_value = "my-client", token_endpoint = "http://idp/token" }
+		local conf =
+			{ client_id_field_name = "client_id", client_id_value = "my-client", token_endpoint = "http://idp/token" }
 
 		local ok = plugin.check_schema(conf)
 

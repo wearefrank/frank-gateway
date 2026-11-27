@@ -2,29 +2,29 @@ local token_client = require("apisix.plugins.token-client-common")
 
 local plugin_name = "openid-connect-client"
 
-local schema = token_client.schema {
+local schema = token_client.schema({
 	default_expiration = 300,
 	properties = {
 		client_id = {
-			type = "string"
+			type = "string",
 		},
 		client_secret = {
-			type = "string"
+			type = "string",
 		},
 		scope = {
-			type = "string"
+			type = "string",
 		},
 		resource_server = {
-			type = "string"
+			type = "string",
 		},
 		custom_parameters = token_client.custom_parameters_schema("Set your own parameters for token request"),
 		grant_type = {
 			type = "string",
-			default = "client_credentials"
+			default = "client_credentials",
 		},
 	},
-	required = {"grant_type", "token_endpoint", "client_id", "client_secret"}
-}
+	required = { "grant_type", "token_endpoint", "client_id", "client_secret" },
+})
 
 local function get_cache_key(conf)
 	return conf.client_id
@@ -46,9 +46,9 @@ local function build_request(conf)
 	return token_client.encode_form(fields, conf.custom_parameters)
 end
 
-return token_client.new {
+return token_client.new({
 	name = plugin_name,
 	schema = schema,
 	get_cache_key = get_cache_key,
 	build_request = build_request,
-}
+})
