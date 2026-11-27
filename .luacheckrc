@@ -1,4 +1,4 @@
-std = "ngx"
+std = "ngx_lua"
 unused_args = false
 redefined = false
 max_code_line_length = 120
