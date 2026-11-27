@@ -311,7 +311,7 @@ function _M.access(conf, ctx)
 	end
 
 	if data.decision == nil then
-		core.log.error("invalid AuthZEN decision format: ", res.body(" err: `decision` field does not exist"))
+		core.log.error("invalid AuthZEN decision format: ", res.body, " err: `decision` field does not exist")
 		return 503
 	end
 
