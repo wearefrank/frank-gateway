@@ -109,7 +109,7 @@ describe("limit-size plugin", function()
 		}
 		local ctx = {}
 
-		local status, body = plugin.access(conf, ctx)
+		local status = plugin.access(conf, ctx)
 
 		assert.is_nil(status)
 		assert.are.same(1, #get_body_calls)
@@ -204,7 +204,7 @@ describe("limit-size plugin", function()
 		}
 		local ctx = {}
 
-		local status, body = plugin.access(conf, ctx)
+		local status = plugin.access(conf, ctx)
 
 		-- 1025 bytes > 1 * 1024 bytes → reject
 		assert.are.same(413, status)

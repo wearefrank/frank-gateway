@@ -168,6 +168,7 @@ describe("merge-config plugin", function()
 		}
 
 		-- Virtual file system: intercept io.open for /vfs paths only
+		-- luacheck: ignore io open os
 		real_io_open = io.open
 		io.open = function(path, mode)
 			mode = mode or "r"
@@ -210,12 +211,10 @@ describe("merge-config plugin", function()
 
 		plugin = require("apisix.plugins.merge-config")
 	end)
-
 	after_each(function()
 		io.open = real_io_open
 		os.execute = real_os_execute
 	end)
-
 	-- -------------------------------------------------------------------------
 	-- check_schema
 	-- -------------------------------------------------------------------------
