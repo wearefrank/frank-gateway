@@ -52,7 +52,13 @@ local schema              = {
         },
         registration = registration_schema,
     },
-    required = { "manager_public_key", "fsc_group_id", "internal_cert_chain", "internal_key", "registration" }
+    required = {
+        "manager_public_key",
+        "fsc_group_id",
+        "internal_cert_chain",
+        "internal_key",
+        "registration"
+     }
 }
 
 local metadata_schema     = {}

@@ -124,7 +124,7 @@ local schema = {
             },
             description = "list of headers to pass to upstream in request"
         },
-        x_request_id = { type = "string" }, -- optional header to pass to authZen, put in the config so the generation of it can be outsourced to another plugin if needed
+        x_request_id = { type = "string" }, -- optional header to pass to authZen; configure it here to outsource its generation to another plugin
     },
     required = { "host", "body" }
 }
@@ -137,9 +137,9 @@ local consumer_schema = {}
 
 local _M = {
     version = 0.1,
-    priority = 1999, 
+    priority = 1999,
     name = plugin_name,
-    type = "auth",   
+    type = "auth",
     schema = schema,
     consumer_schema = consumer_schema
 }
